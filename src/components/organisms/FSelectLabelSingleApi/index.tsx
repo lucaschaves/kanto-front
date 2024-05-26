@@ -1,29 +1,22 @@
-import { cn } from "@/lib";
 import { getApi } from "@/services";
 import { capitalize } from "@/utils";
 import { useCallback, useEffect, useState } from "react";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 import {
-    FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
     InputProps,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "../../";
+    SingleSelect,
+} from "../..";
 
 interface IItem {
     id: string;
     name: string;
 }
 
-interface IFSelectLabelApiProps extends InputProps {
+interface IFSelectLabelSingleApiProps extends InputProps {
     label: string;
     name: string;
     url: string;
@@ -32,7 +25,7 @@ interface IFSelectLabelApiProps extends InputProps {
     dependencies?: string[];
 }
 
-const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
+const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
     const {
         label,
         name,
@@ -40,7 +33,7 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
         description,
         rules,
         className,
-        dependencies,
+        dependencies = [],
         ...rest
     } = props;
 
@@ -90,33 +83,19 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
         <FormField
             control={control}
             name={name}
-            rules={rules}
             disabled={disabledDependencies()}
             render={({ field }) => (
-                <FormItem className={cn("w-full", className)}>
+                <FormItem>
                     <FormLabel>{label}</FormLabel>
-                    <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                    <SingleSelect
+                        selected={field.value}
+                        options={items}
+                        {...rest}
+                        {...field}
                         open={stateOpen}
-                        onOpenChange={setOpen}
+                        toggle={setOpen}
                         disabled={disabledDependencies()}
-                        value={field.value}
-                    >
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue {...rest} />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {items.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                    {item.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <FormDescription>{description}</FormDescription>
+                    />
                     <FormMessage />
                 </FormItem>
             )}
@@ -124,4 +103,4 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
     );
 };
 
-export { FSelectLabelApi };
+export { FSelectLabelSingleApi };

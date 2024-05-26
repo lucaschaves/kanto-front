@@ -79,7 +79,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                         )}
                         onClick={() => navigate(v.link)}
                         variant={
-                            v.link === location.pathname ? "outline" : "default"
+                            v.link == location.pathname ? "outline" : "default"
                         }
                     >
                         {v.Icon}
@@ -133,7 +133,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                                     )}
                                     onClick={() => navigate(s.link)}
                                     variant={
-                                        s.link === location.pathname
+                                        s.link == location.pathname
                                             ? "outline"
                                             : "default"
                                     }
@@ -158,8 +158,10 @@ const Sidebar = (props: { sheet?: boolean }) => {
             className={cn(
                 "hidden",
                 "sm:flex",
+                "sm:min-w-14",
                 "sm:w-14",
-                "md:w-80",
+                "md:min-w-72",
+                "md:w-72",
                 "h-full",
                 "bg-primary",
                 "dark:bg-slate-800",
@@ -190,7 +192,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                     )}
                     onClick={() => navigate(v.link)}
                     variant={
-                        v.link === location.pathname ? "outline" : "default"
+                        v.link == location.pathname ? "outline" : "default"
                     }
                     data-rule-component="rule"
                     data-rule-component-id={v.name}
@@ -221,20 +223,20 @@ const Sidebar = (props: { sheet?: boolean }) => {
                             className={cn(
                                 "p-0",
                                 "sm:w-9",
-                                "md:w-auto",
+                                "md:w-full",
                                 "md:px-4",
                                 "md:py-2",
                                 "gap-2",
                                 "justify-center",
                                 "md:justify-between"
                             )}
-                            variant={
-                                ["/settings"].includes(
-                                    getParamByPath(location.pathname, 0)
-                                )
-                                    ? "outline"
-                                    : "default"
-                            }
+                            // variant={
+                            //     ["settings"].includes(
+                            //         getParamByPath(location.pathname, 1)
+                            //     )
+                            //         ? "outline"
+                            //         : "default"
+                            // }
                         >
                             <HomeIcon />
                             <span
@@ -272,7 +274,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                                 )}
                                 onClick={() => navigate(s.link)}
                                 variant={
-                                    s.link === location.pathname
+                                    s.link == location.pathname
                                         ? "outline"
                                         : "default"
                                 }
@@ -323,7 +325,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                         )}
                         onClick={() => navigate("/settings/colors")}
                         variant={
-                            "/settings/colors" === location.pathname
+                            "/settings/colors" == location.pathname
                                 ? "outline"
                                 : "default"
                         }
@@ -343,7 +345,7 @@ const Sidebar = (props: { sheet?: boolean }) => {
                         )}
                         onClick={() => navigate("/settings/regions")}
                         variant={
-                            "/settings/regions" === location.pathname
+                            "/settings/regions" == location.pathname
                                 ? "outline"
                                 : "default"
                         }
@@ -374,7 +376,7 @@ const Layout = () => {
     );
 
     // const toggleTheme = useCallback(() => {
-    //     setTheme(theme === "dark" ? "light" : "dark");
+    //     setTheme(theme == "dark" ? "light" : "dark");
     // }, [theme]);
 
     useEffect(() => {
@@ -555,7 +557,7 @@ const Layout = () => {
                             </Popover>
                         </div>
                     </div>
-                    <div className={cn("w-full", "h-[calc(100%-60px)]")}>
+                    <div className={cn("w-full", "h-[calc(100%-55px)]")}>
                         <Outlet />
                     </div>
                 </div>

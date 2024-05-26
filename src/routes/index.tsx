@@ -8,6 +8,8 @@ import {
     PageFallback,
     PageGameCreateOrEdit,
     PageGames,
+    PageInterpreter,
+    PageInterpreterCreateOrEdit,
     PageLogin,
     PageProductCreateOrEdit,
     PageProducts,
@@ -77,23 +79,39 @@ const appRoutes = () => {
                 {
                     path: "/settings",
                     errorElement: <PageError />,
-                    children: modulesSettings.map((r) => ({
-                        path: r.link,
-                        errorElement: <PageError />,
-                        element: <PageSettings />,
-                        children: [
-                            {
-                                path: `${r.link}/new`,
+                    children: [
+                        ...modulesSettings
+                            .filter((r) => r.name !== "interpreter")
+                            .map((r) => ({
+                                path: r.link,
                                 errorElement: <PageError />,
-                                element: <PageSettingCreateOrEdit />,
-                            },
-                            {
-                                path: `${r.link}/edit`,
-                                errorElement: <PageError />,
-                                element: <PageSettingCreateOrEdit />,
-                            },
-                        ],
-                    })),
+                                element: <PageSettings />,
+                                children: [
+                                    {
+                                        path: `${r.link}/new`,
+                                        errorElement: <PageError />,
+                                        element: <PageSettingCreateOrEdit />,
+                                    },
+                                    {
+                                        path: `${r.link}/edit`,
+                                        errorElement: <PageError />,
+                                        element: <PageSettingCreateOrEdit />,
+                                    },
+                                ],
+                            })),
+                        {
+                            path: "/settings/interpreter",
+                            errorElement: <PageError />,
+                            element: <PageInterpreter />,
+                            children: [
+                                {
+                                    path: "/settings/interpreter/import",
+                                    errorElement: <PageError />,
+                                    element: <PageInterpreterCreateOrEdit />,
+                                },
+                            ],
+                        },
+                    ],
                 },
             ],
         },

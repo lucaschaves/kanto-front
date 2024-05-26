@@ -274,8 +274,8 @@ const PrimeiraEtapa = ({ onValid }: { onValid: (data: any) => void }) => {
                     label="Como nos conheceu?"
                     name="comoConheceu"
                     items={[
-                        { id: "google", label: "Google" },
-                        { id: "mercadoLivre", label: "Mercado Livre" },
+                        { id: "google", name: "Google" },
+                        { id: "mercadoLivre", name: "Mercado Livre" },
                     ]}
                     className="max-w-full"
                 />
@@ -357,7 +357,7 @@ const SegundaEtapa = ({ onValid }: { onValid: (data: any) => void }) => {
 
     const getQuestions = useCallback(
         async (id: string) => {
-            setQuestions(id === "xbox-007" ? questions.xbox : questions.play);
+            setQuestions(id == "xbox-007" ? questions.xbox : questions.play);
         },
         [questions]
     );

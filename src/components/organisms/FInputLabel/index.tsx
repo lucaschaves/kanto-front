@@ -11,11 +11,12 @@ import {
 import { cn } from "@/lib";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 
-interface IFInputLabelProps extends InputProps {
+interface IFInputLabelProps extends Omit<InputProps, "type"> {
     label: string;
     name: string;
     description?: string;
     rules?: RegisterOptions;
+    type?: "currency" | "text" | "number" | "password" | "email" | "search";
 }
 
 const FInputLabel = (props: IFInputLabelProps) => {
@@ -23,16 +24,47 @@ const FInputLabel = (props: IFInputLabelProps) => {
 
     const { control } = useFormContext();
 
+    if (rest.type === "currency") {
+        return (
+            <FormField
+                control={control}
+                name={name}
+                rules={rules}
+                render={({ field }) => (
+                    <FormItem className={cn("w-full", className)}>
+                        <FormLabel>{label}</FormLabel>
+                        <FormControl>
+                            <div className="relative w-full">
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                    <span className="font-medium">R$</span>
+                                </div>
+                                <Input
+                                    {...rest}
+                                    {...field}
+                                    autoComplete="off"
+                                    type="number"
+                                    className="pl-9"
+                                />
+                            </div>
+                        </FormControl>
+                        <FormDescription>{description}</FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        );
+    }
+
     return (
         <FormField
             control={control}
             name={name}
             rules={rules}
             render={({ field }) => (
-                <FormItem className={cn("w-full", "max-w-sm", className)}>
+                <FormItem className={cn("w-full", className)}>
                     <FormLabel>{label}</FormLabel>
                     <FormControl>
-                        <Input {...rest} {...field} />
+                        <Input {...rest} {...field} autoComplete="off" />
                     </FormControl>
                     <FormDescription>{description}</FormDescription>
                     <FormMessage />

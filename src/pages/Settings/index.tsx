@@ -15,16 +15,18 @@ type ISetting = {
 const columnId: ColumnDef<ISetting> = {
     id: "select",
     header: ({ table }) => (
-        <Checkbox
-            checked={
-                table.getIsAllPageRowsSelected() ||
-                (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-                table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Selecionar todos"
-        />
+        <div className="flex items-center">
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) =>
+                    table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Selecionar todos"
+            />
+        </div>
     ),
     cell: ({ row }) => (
         <Checkbox
@@ -34,7 +36,6 @@ const columnId: ColumnDef<ISetting> = {
         />
     ),
     enableSorting: false,
-    enableHiding: false,
 };
 
 const PageSettings = () => {
@@ -53,10 +54,12 @@ const PageSettings = () => {
         });
         if (success) {
             const columns: ColumnDef<ISetting>[] = [];
-            Object.keys(data[0]).forEach((key) => {
-                const column = createColumn(key, t(key)) as any;
-                columns.push(column);
-            });
+            if (data.length) {
+                Object.keys(data[0]).forEach((key) => {
+                    const column = createColumn(key, t(key)) as any;
+                    columns.push(column);
+                });
+            }
             setColumns([columnId, ...columns]);
             setData(data);
         }

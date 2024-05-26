@@ -126,6 +126,7 @@ const PageLogin = () => {
                             required: "É necessário preencher a email",
                         }}
                         disabled={loading}
+                        className="max-w-sm"
                     />
                     <FInputLabel
                         name="password"
@@ -136,6 +137,7 @@ const PageLogin = () => {
                             required: "É necessário preencher a senha",
                         }}
                         disabled={loading}
+                        className="max-w-sm"
                     />
                     <FButtonSubmit
                         label={t("signIn")}

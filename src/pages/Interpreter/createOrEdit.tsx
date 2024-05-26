@@ -6,41 +6,22 @@ import {
     DialogHeader,
     DialogTitle,
     FButtonSubmit,
-    FInputLabel,
+    FSelectLabel,
     IBaseFormRef,
 } from "@/components";
 import { cn } from "@/lib";
-import { getApi, postApi, putApi } from "@/services";
-import { getParamByPath } from "@/utils";
+import { postApi } from "@/services";
 import { useCallback, useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const PageSettingCreateOrEdit = () => {
+const PageInterpreterCreateOrEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const formActual = getParamByPath(location.pathname, 2);
-    const isEdit = location.pathname.includes("edit");
-
     const refForm = useRef<IBaseFormRef>(null);
-
-    const getData = useCallback(async () => {
-        const { success, data } = await getApi({
-            url: `${formActual.substring(
-                0,
-                formActual.length - 1
-            )}/${searchParams.get("id")}`,
-        });
-        if (success) {
-            refForm.current?.reset({
-                name: data?.name,
-            });
-        }
-    }, [formActual, searchParams]);
 
     const onClose = useCallback(() => {
         navigate(-1);
@@ -48,35 +29,30 @@ const PageSettingCreateOrEdit = () => {
 
     const onSubmit = useCallback(
         async (data: FieldValues) => {
-            if (isEdit) {
-                const { success } = await putApi({
-                    url: `${formActual.substring(
-                        0,
-                        formActual.length - 1
-                    )}/${searchParams.get("id")}`,
-                    body: data,
-                });
-                if (success) onClose();
-            } else {
-                const { success } = await postApi({
-                    url: formActual,
-                    body: data,
-                });
-                if (success) onClose();
-            }
+            const { ids, table } = data;
+            const dataIds = ids?.map((id: any) => ({ name: id }));
+            const { success } = await postApi({
+                url: table,
+                body: {
+                    data: dataIds,
+                },
+            });
+            if (success) onClose();
         },
-        [onClose, formActual, searchParams, isEdit]
+        [onClose]
     );
 
     useEffect(() => {
-        if (isEdit) getData();
-    }, []);
+        refForm.current?.reset({
+            ...location.state,
+        });
+    }, [location.pathname]);
 
     return (
         <Dialog modal open onOpenChange={onClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>{isEdit ? t("edit") : t("add")}</DialogTitle>
+                    <DialogTitle>{t("import")}</DialogTitle>
                 </DialogHeader>
                 <div
                     className={cn(
@@ -85,15 +61,28 @@ const PageSettingCreateOrEdit = () => {
                         "w-full",
                         "justify-center",
                         "items-center",
-                        "gap-0",
-                        "md:gap-2",
-                        "md:flex-row",
-                        "md:flex-wrap",
-                        "md:justify-start"
+                        "gap-0"
                     )}
                 >
                     <BaseForm ref={refForm} onSubmit={onSubmit}>
-                        <FInputLabel label="Nome" name="name" />
+                        <span>
+                            {location.state?.ids?.length} Items a serem
+                            importados para
+                        </span>
+                        <FSelectLabel
+                            label={t("table")}
+                            name="table"
+                            items={[
+                                {
+                                    id: "parentalratings",
+                                    name: "Classificação Indicativa",
+                                },
+                                {
+                                    id: "numberofplayers",
+                                    name: "Número de jogadores",
+                                },
+                            ]}
+                        />
                         <div
                             className={cn(
                                 "flex",
@@ -109,9 +98,9 @@ const PageSettingCreateOrEdit = () => {
                                 onClick={onClose}
                                 variant="outline"
                             >
-                                Cancelar
+                                {t("cancel")}
                             </Button>
-                            <FButtonSubmit label="Salvar" />
+                            <FButtonSubmit label={t("save")} />
                         </div>
                     </BaseForm>
                 </div>
@@ -120,4 +109,4 @@ const PageSettingCreateOrEdit = () => {
     );
 };
 
-export { PageSettingCreateOrEdit };
+export { PageInterpreterCreateOrEdit };

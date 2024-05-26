@@ -16,7 +16,7 @@ import { RegisterOptions, useFormContext } from "react-hook-form";
 
 interface IItem {
     id: string;
-    label: string;
+    name: string;
 }
 
 interface IFSelectLabelProps extends InputProps {
@@ -25,10 +25,19 @@ interface IFSelectLabelProps extends InputProps {
     items: IItem[];
     description?: string;
     rules?: RegisterOptions;
+    onEffect?: (value: string) => void;
 }
 
 const FSelectLabel = (props: IFSelectLabelProps) => {
-    const { label, name, description, items, rules, ...rest } = props;
+    const {
+        label,
+        name,
+        description,
+        items,
+        rules,
+        onEffect = () => ({}),
+        ...rest
+    } = props;
 
     const { control } = useFormContext();
 
@@ -38,11 +47,16 @@ const FSelectLabel = (props: IFSelectLabelProps) => {
             name={name}
             rules={rules}
             render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Como conheceu?</FormLabel>
+                <FormItem className="w-full">
+                    <FormLabel>{label}</FormLabel>
                     <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(e) => {
+                            field.onChange(e);
+                            onEffect(e);
+                        }}
                         defaultValue={field.value}
+                        value={field.value}
+                        {...rest}
                     >
                         <FormControl>
                             <SelectTrigger>
@@ -52,7 +66,7 @@ const FSelectLabel = (props: IFSelectLabelProps) => {
                         <SelectContent>
                             {items.map((item) => (
                                 <SelectItem key={item.id} value={item.id}>
-                                    {item.label}
+                                    {item.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>

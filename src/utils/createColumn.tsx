@@ -11,7 +11,7 @@ const createColumn = (name: string, title: string): ColumnDef<any> => {
                 <Button
                     variant="ghost"
                     onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === "asc")
+                        column.toggleSorting(column.getIsSorted() == "asc")
                     }
                 >
                     {title}
@@ -30,7 +30,7 @@ const createColumn = (name: string, title: string): ColumnDef<any> => {
                     </div>
                 );
             }
-            if (typeof row.getValue(name) === "boolean") {
+            if (typeof row.getValue(name) == "boolean") {
                 return (
                     <div className="capitalize">
                         {row.getValue(name) ? "Ativo" : "Inativo"}

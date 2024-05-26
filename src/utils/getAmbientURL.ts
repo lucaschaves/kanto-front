@@ -7,5 +7,5 @@ export const getAmbientURL = () => {
         return import.meta.env.VITE_BASE_URL;
     }
 
-    return `${window.origin}/api`;
+    return `${window.origin}/api/v1`;
 };

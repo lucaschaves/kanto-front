@@ -19,6 +19,8 @@ interface IUserAuth {
     user: string;
     email?: string;
     name?: string;
+    permissionsId?: number;
+    permission?: "admin" | string;
 }
 
 interface IUserForgot {
@@ -183,16 +185,18 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const applyRules = useCallback(() => {
-        const rulesElements = document.querySelectorAll(
-            '[data-rule-component="rule"]'
-        );
-        rulesElements.forEach((element) => {
-            const datasetElement = (element as any)?.dataset;
-            if (!rules.includes(datasetElement?.ruleComponentId)) {
-                element.classList.add("hidden");
-            }
-        });
-    }, [rules]);
+        if (user?.permission !== "admin" && user?.permissionsId !== 1) {
+            const rulesElements = document.querySelectorAll(
+                '[data-rule-component="rule"]'
+            );
+            rulesElements.forEach((element) => {
+                const datasetElement = (element as any)?.dataset;
+                if (!rules.includes(datasetElement?.ruleComponentId)) {
+                    element.classList.add("hidden");
+                }
+            });
+        }
+    }, [rules, user]);
 
     const value = {
         user,

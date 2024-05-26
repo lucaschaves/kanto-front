@@ -2,9 +2,14 @@ import { Button, Card, CardContent } from "@/components";
 import { cn } from "@/lib";
 import { UploadIcon } from "@radix-ui/react-icons";
 import React, { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+interface IOnChange {
+    url: string;
+    file: any;
+}
 interface DropzoneProps {
-    onChange: React.Dispatch<React.SetStateAction<string[]>>;
+    onChange: (props: IOnChange) => void; //React.Dispatch<React.SetStateAction<string[]>>;
     className?: string;
     fileExtension?: string;
 }
@@ -18,6 +23,7 @@ const Dropzone = ({
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [fileInfo, setFileInfo] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -40,19 +46,19 @@ const Dropzone = ({
 
     const handleFiles = (files: FileList) => {
         const uploadedFile = files[0];
-
         if (fileExtension && !uploadedFile.name.endsWith(`.${fileExtension}`)) {
             setError(`Invalid file type. Expected: .${fileExtension}`);
             return;
         }
-
         const fileSizeInKB = Math.round(uploadedFile.size / 1024);
-
         const fileList = Array.from(files).map((file) =>
             URL.createObjectURL(file)
         );
-        onChange((prevFiles) => [...prevFiles, ...fileList]);
-
+        // onChange((prevFiles) => [...prevFiles, ...fileList]);
+        onChange({
+            url: fileList[0],
+            file: uploadedFile,
+        });
         setFileInfo(`Uploaded file: ${uploadedFile.name} (${fileSizeInKB} KB)`);
         setError(null);
     };
@@ -67,6 +73,9 @@ const Dropzone = ({
         <Card
             className={cn(
                 "border",
+                "flex",
+                "items-center",
+                "justify-center",
                 "border-dashed",
                 "bg-white",
                 "hover:cursor-pointer",
@@ -103,7 +112,7 @@ const Dropzone = ({
                         )}
                     >
                         <span className="font-medium text-center">
-                            Arraste os arquivos para fazer upload ou
+                            {t("dragFilesToUploadOr")}
                         </span>
                         <Button
                             variant="ghost"
@@ -111,12 +120,12 @@ const Dropzone = ({
                             onClick={handleButtonClick}
                             type="button"
                         >
-                            Clique aqui
+                            {t("clickHere")}
                         </Button>
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept={`.${fileExtension}`}
+                            accept={fileExtension ? `.${fileExtension}` : "*"}
                             onChange={handleFileInputChange}
                             className="hidden"
                             multiple
