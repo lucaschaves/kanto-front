@@ -32,11 +32,11 @@ const messageError = ({ message, elapsed = "0ms" }: IMessage) => {
 
 const messageWarn = ({
     message,
-    status,
-    hash,
-    component,
-    tagId,
-    elapsed,
+    // status,
+    // hash,
+    // component,
+    // tagId,
+    // elapsed,
     data,
 }: IMessage) => {
     try {
@@ -54,11 +54,11 @@ const messageWarn = ({
 
 const messageSuccess = ({
     message,
-    status,
-    hash,
-    component,
-    tagId,
-    elapsed,
+    // status,
+    // hash,
+    // component,
+    // tagId,
+    // elapsed,
     data,
 }: IMessage) => {
     try {
@@ -76,11 +76,11 @@ const messageSuccess = ({
 
 const messageInfo = ({
     message,
-    status,
-    hash,
-    component,
-    tagId,
-    elapsed,
+    // status,
+    // hash,
+    // component,
+    // tagId,
+    // elapsed,
     data,
 }: IMessage) => {
     try {

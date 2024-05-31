@@ -57,6 +57,7 @@ const FSelectLabel = (props: IFSelectLabelProps) => {
                         defaultValue={field.value}
                         value={field.value}
                         {...rest}
+                        dir="ltr"
                     >
                         <FormControl>
                             <SelectTrigger>
