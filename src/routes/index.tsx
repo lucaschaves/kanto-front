@@ -31,11 +31,6 @@ const elementsRoute = (name: string) => {
                 element: <PageProducts />,
                 createEdit: <PageProductCreateOrEdit />,
             };
-        case "interpreter":
-            return {
-                element: <PageInterpreter />,
-                createEdit: <PageInterpreterCreateOrEdit />,
-            };
         default:
             return {
                 element: <PageDashboard />,
@@ -81,6 +76,18 @@ const appRoutes = () => {
             ),
             children: [
                 ...routesDefault,
+                {
+                    path: "interpreter",
+                    errorElement: <PageError />,
+                    element: <PageInterpreter />,
+                    children: [
+                        {
+                            path: `/interpreter/import`,
+                            errorElement: <PageError />,
+                            element: <PageInterpreterCreateOrEdit />,
+                        },
+                    ],
+                },
                 {
                     path: "/settings",
                     errorElement: <PageError />,
