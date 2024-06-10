@@ -4,16 +4,17 @@ import {
     Command,
     CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
+    Input,
     Popover,
     PopoverContent,
     PopoverTrigger,
+    Skeleton,
 } from "@/components";
 import { cn } from "@/lib";
 import { capitalize } from "@/utils";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useCallback } from "react";
+import { KeyboardEvent, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface IItem {
@@ -27,6 +28,12 @@ interface MultiSelectProps {
     onChange: React.Dispatch<React.SetStateAction<IItem[]>>;
     className?: string;
     open: boolean;
+    disabled?: boolean;
+    loading?: boolean;
+    disabledMore?: boolean;
+    total?: number;
+    moreOptions?: () => void;
+    onRefresh?: (props: any) => void;
     toggle: (open: boolean) => void;
 }
 
@@ -37,15 +44,41 @@ function MultiSelect({
     className,
     open,
     toggle,
+    disabled,
+    loading,
+    moreOptions = () => ({}),
+    onRefresh = () => ({}),
+    disabledMore = true,
+    total,
     ...props
 }: MultiSelectProps) {
     const { t } = useTranslation();
+
+    const [stateFilter, setFilter] = useState("");
 
     const handleUnselect = useCallback(
         (itemId: string) => {
             onChange(selected?.filter((i) => i?.id != itemId));
         },
         [onChange, selected]
+    );
+
+    const handleFilter = useCallback(
+        (e: KeyboardEvent<HTMLInputElement>) => {
+            switch (e.keyCode) {
+                case 13:
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onRefresh({
+                        page: 0,
+                        filter: { field: "name", filter: stateFilter },
+                    });
+                    break;
+                default:
+                    break;
+            }
+        },
+        [stateFilter]
     );
 
     return (
@@ -62,6 +95,7 @@ function MultiSelect({
                         "min-h-9",
                         selected?.length > 2 ? "h-auto" : "h-9"
                     )}
+                    disabled={disabled}
                     onClick={() => toggle(!open)}
                 >
                     <div
@@ -73,68 +107,130 @@ function MultiSelect({
                             selected?.length > 2 ? "flex-wrap" : ""
                         )}
                     >
-                        {selected?.map((item) => (
-                            <Badge
-                                variant="secondary"
-                                key={item?.id}
-                                className="mr-1 mb-1"
-                                onClick={() => handleUnselect(item?.id)}
-                            >
-                                {capitalize(item?.name)}
-                                <button
-                                    className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                    onKeyDown={(e) => {
-                                        if (e.key == "Enter") {
-                                            handleUnselect(item?.id);
-                                        }
-                                    }}
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
+                        {selected
+                            ?.filter((_, i) => i < 6)
+                            .map((item) => (
+                                <Badge
+                                    variant="secondary"
+                                    key={item?.id}
+                                    className="mr-1 mb-1"
                                     onClick={() => handleUnselect(item?.id)}
                                 >
-                                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                                </button>
-                            </Badge>
-                        ))}
+                                    {capitalize(item?.name)}
+                                    <button
+                                        className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                        onKeyDown={(e) => {
+                                            if (e.key == "Enter") {
+                                                handleUnselect(item?.id);
+                                            }
+                                        }}
+                                        onMouseDown={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }}
+                                        onClick={() => handleUnselect(item?.id)}
+                                    >
+                                        <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        {selected.length > 6 ? "..." : ""}
                     </div>
                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
+                <div className={cn("flex", "w-full", "p-0.5")}>
+                    <Input
+                        placeholder={`Filtrar...`}
+                        value={stateFilter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        onKeyDown={handleFilter}
+                        autoComplete="off"
+                    />
+                </div>
                 <Command className={className}>
-                    <CommandInput placeholder={`${t("search")}...`} />
                     <CommandEmpty>{t("noItemFound")}.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
-                        {options.map((option) => (
-                            <CommandItem
-                                key={option.id}
-                                onSelect={() => {
-                                    const stateChange = selected?.find(
-                                        (s) => s.id == option.id
-                                    )
-                                        ? selected?.filter(
-                                              (item) => item?.id != option.id
-                                          )
-                                        : [...selected, option];
-                                    onChange(stateChange);
-                                    toggle(true);
-                                }}
-                            >
-                                <Check
-                                    className={cn(
-                                        "mr-2 h-4 w-4",
-                                        selected?.find((s) => s.id == option.id)
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                    )}
-                                />
-                                {option.name}
-                            </CommandItem>
-                        ))}
+                        {loading && options.length === 0 ? (
+                            <>
+                                <CommandItem>
+                                    <Skeleton className="h-4 w-full" />
+                                </CommandItem>
+                                <CommandItem>
+                                    <Skeleton className="h-4 w-full" />
+                                </CommandItem>
+                                <CommandItem>
+                                    <Skeleton className="h-4 w-full" />
+                                </CommandItem>
+                            </>
+                        ) : options.length > 0 ? (
+                            <>
+                                {options.map((option) => (
+                                    <CommandItem
+                                        key={option.id}
+                                        onSelect={() => {
+                                            const stateChange = selected?.find(
+                                                (s) => s.id == option.id
+                                            )
+                                                ? selected?.filter(
+                                                      (item) =>
+                                                          item?.id != option.id
+                                                  )
+                                                : [...selected, option];
+                                            onChange(stateChange);
+                                            toggle(true);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                selected?.find(
+                                                    (s) => s.id == option.id
+                                                )
+                                                    ? "opacity-100"
+                                                    : "opacity-0"
+                                            )}
+                                        />
+                                        {option.name}
+                                    </CommandItem>
+                                ))}
+                                {disabledMore ? (
+                                    <></>
+                                ) : (
+                                    <Button
+                                        type="button"
+                                        onClick={moreOptions}
+                                        variant="secondary"
+                                        className={cn(
+                                            "w-full",
+                                            loading ? "animate-pulse" : ""
+                                        )}
+                                    >
+                                        {loading ? "buscando..." : "mais..."}
+                                    </Button>
+                                )}
+                            </>
+                        ) : (
+                            <CommandItem>{t("noItemFound")}</CommandItem>
+                        )}
                     </CommandGroup>
                 </Command>
+                <div
+                    className={cn(
+                        "flex",
+                        "w-full",
+                        "px-1",
+                        "py-2",
+                        "items-center",
+                        "justify-between"
+                    )}
+                >
+                    <span className={cn("text-xs")}>
+                        {t("selected")} {selected.length}
+                    </span>
+                    <span className={cn("text-xs")}>Total {total}</span>
+                </div>
             </PopoverContent>
         </Popover>
     );

@@ -1,5 +1,9 @@
 import { Button } from "@/components";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import {
+    CaretDownIcon,
+    CaretSortIcon,
+    CaretUpIcon,
+} from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
@@ -15,7 +19,13 @@ const createColumn = (name: string, title: string): ColumnDef<any> => {
                     }
                 >
                     {title}
-                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                    {column.getIsSorted() === "desc" ? (
+                        <CaretDownIcon className="ml-2 h-4 w-4" />
+                    ) : column.getIsSorted() === "asc" ? (
+                        <CaretUpIcon className="ml-2 h-4 w-4" />
+                    ) : (
+                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                    )}
                 </Button>
             );
         },
@@ -30,9 +40,12 @@ const createColumn = (name: string, title: string): ColumnDef<any> => {
                     </div>
                 );
             }
+            if (["email"].includes(name)) {
+                return <div>{row.getValue(name)}</div>;
+            }
             if (typeof row.getValue(name) == "boolean") {
                 return (
-                    <div className="capitalize">
+                    <div className="capitalize text-center">
                         {row.getValue(name) ? "Ativo" : "Inativo"}
                     </div>
                 );

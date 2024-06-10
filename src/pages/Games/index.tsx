@@ -1,12 +1,14 @@
-import { Button, Checkbox, DataTable } from "@/components";
-import { deleteApi, getApi } from "@/services";
-import { getParamByPath } from "@/utils";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { Button, Checkbox, Listing } from "@/components";
+import {
+    CaretDownIcon,
+    CaretSortIcon,
+    CaretUpIcon,
+} from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { PageGameCreateOrEdit } from "./createOrEdit";
 
 type IGame = {
@@ -25,11 +27,8 @@ type IGame = {
 };
 
 const PageGames = () => {
-    const location = useLocation();
-    const formActual = getParamByPath(location.pathname, 1);
     const { t } = useTranslation();
 
-    const [stateData, setData] = useState<IGame[]>([]);
     const [stateColumns] = useState<ColumnDef<IGame>[]>(() => {
         return [
             {
@@ -58,6 +57,8 @@ const PageGames = () => {
                 ),
                 enableSorting: false,
                 enableHiding: false,
+                size: 50,
+                minSize: 50,
             },
             {
                 accessorKey: "id",
@@ -73,7 +74,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("id")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -96,7 +103,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("name")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                             {/* <Button
                                 variant="ghost"
@@ -136,7 +149,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("ean")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -159,7 +178,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("console")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -185,7 +210,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("developer")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -211,7 +242,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("publisher")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -237,7 +274,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("releaseYear")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -263,7 +306,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("gender")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -289,7 +338,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("parentalRating")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -315,7 +370,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("numberOfPlayer")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -341,7 +402,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("createdAt")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -371,7 +438,13 @@ const PageGames = () => {
                                 }
                             >
                                 {t("updatedAt")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -390,58 +463,9 @@ const PageGames = () => {
         ];
     });
 
-    const getData = useCallback(async () => {
-        const { success, data } = await getApi({
-            url: formActual,
-        });
-        if (success) {
-            setData(data);
-        }
-    }, [formActual]);
-
-    const handleDelete = useCallback(
-        async (ids: string[]) => {
-            const promisesDelete = ids.map(async (id) => {
-                const responsePromise = new Promise((resolve, reject) => {
-                    deleteApi({
-                        url: `${formActual.substring(
-                            0,
-                            formActual.length - 1
-                        )}/${id}`,
-                    })
-                        .then((value) => {
-                            resolve(value);
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        });
-                });
-                return responsePromise;
-            });
-            await Promise.all(promisesDelete);
-            getData();
-        },
-        [formActual, getData]
-    );
-
-    useEffect(() => {
-        if (
-            !location.pathname.includes("edit") &&
-            !location.pathname.includes("new")
-        ) {
-            getData();
-        }
-    }, [location.pathname]);
-
     return (
         <>
-            <DataTable
-                columns={stateColumns}
-                data={stateData}
-                nameRule={formActual}
-                onDelete={handleDelete}
-                onRefresh={getData}
-            />
+            <Listing columns={stateColumns} index={1} />
             <Outlet />
         </>
     );

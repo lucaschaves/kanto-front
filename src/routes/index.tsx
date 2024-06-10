@@ -31,6 +31,11 @@ const elementsRoute = (name: string) => {
                 element: <PageProducts />,
                 createEdit: <PageProductCreateOrEdit />,
             };
+        case "interpreter":
+            return {
+                element: <PageInterpreter />,
+                createEdit: <PageInterpreterCreateOrEdit />,
+            };
         default:
             return {
                 element: <PageDashboard />,
@@ -80,37 +85,23 @@ const appRoutes = () => {
                     path: "/settings",
                     errorElement: <PageError />,
                     children: [
-                        ...modulesSettings
-                            .filter((r) => r.name !== "interpreter")
-                            .map((r) => ({
-                                path: r.link,
-                                errorElement: <PageError />,
-                                element: <PageSettings />,
-                                children: [
-                                    {
-                                        path: `${r.link}/new`,
-                                        errorElement: <PageError />,
-                                        element: <PageSettingCreateOrEdit />,
-                                    },
-                                    {
-                                        path: `${r.link}/edit`,
-                                        errorElement: <PageError />,
-                                        element: <PageSettingCreateOrEdit />,
-                                    },
-                                ],
-                            })),
-                        {
-                            path: "/settings/interpreter",
+                        ...modulesSettings.map((r) => ({
+                            path: r.link,
                             errorElement: <PageError />,
-                            element: <PageInterpreter />,
+                            element: <PageSettings />,
                             children: [
                                 {
-                                    path: "/settings/interpreter/import",
+                                    path: `${r.link}/new`,
                                     errorElement: <PageError />,
-                                    element: <PageInterpreterCreateOrEdit />,
+                                    element: <PageSettingCreateOrEdit />,
+                                },
+                                {
+                                    path: `${r.link}/edit`,
+                                    errorElement: <PageError />,
+                                    element: <PageSettingCreateOrEdit />,
                                 },
                             ],
-                        },
+                        })),
                     ],
                 },
             ],

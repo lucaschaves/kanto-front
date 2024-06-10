@@ -1,12 +1,16 @@
-import { Button, Checkbox, DataTable } from "@/components";
-import { deleteApi, getApi } from "@/services";
-import { getParamByPath } from "@/utils";
-import { CaretSortIcon, CheckboxIcon, StopIcon } from "@radix-ui/react-icons";
+import { Button, Checkbox, Listing } from "@/components";
+import {
+    CaretDownIcon,
+    CaretSortIcon,
+    CaretUpIcon,
+    CheckboxIcon,
+    StopIcon,
+} from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { PageProductCreateOrEdit } from "./createOrEdit";
 
 type IProduct = {
@@ -15,12 +19,8 @@ type IProduct = {
 };
 
 const PageProducts = () => {
-    const location = useLocation();
-    const formActual = getParamByPath(location.pathname, 1);
-
     const { t } = useTranslation();
 
-    const [stateData, setData] = useState<IProduct[]>([]);
     const [stateColumns] = useState<ColumnDef<IProduct>[]>([
         {
             id: "select",
@@ -48,6 +48,8 @@ const PageProducts = () => {
             ),
             enableSorting: false,
             enableHiding: false,
+            size: 50,
+            minSize: 50,
         },
         {
             accessorKey: "id",
@@ -63,7 +65,13 @@ const PageProducts = () => {
                             }
                         >
                             {t("id")}
-                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                            {column.getIsSorted() === "desc" ? (
+                                <CaretDownIcon className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "asc" ? (
+                                <CaretUpIcon className="ml-2 h-4 w-4" />
+                            ) : (
+                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                            )}
                         </Button>
                     </div>
                 );
@@ -83,7 +91,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("type")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -102,7 +116,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("factoryConsoleGame")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -122,7 +142,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("region")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -142,7 +168,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("priceMoney")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -168,7 +200,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("priceInStoreCredit")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -194,7 +232,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("pvSite")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -220,7 +264,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("pvMercadoLivre")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -246,7 +296,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("pvAmazon")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -272,7 +328,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gameConversation")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -293,7 +355,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gameManual")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -318,7 +386,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gamePackaging")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -343,7 +417,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gamePackagingRental")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -368,7 +448,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gameSealed")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -393,7 +479,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("gameWorking")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -418,7 +510,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consoleComplete")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -443,7 +541,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consolePackaging")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -468,7 +572,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consoleSealed")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -493,7 +603,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consoleTypeUnlocked")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -518,7 +634,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consoleUnlocked")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -543,7 +665,13 @@ const PageProducts = () => {
                         }
                     >
                         {t("consoleWorking")}
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === "desc" ? (
+                            <CaretDownIcon className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === "asc" ? (
+                            <CaretUpIcon className="ml-2 h-4 w-4" />
+                        ) : (
+                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 );
             },
@@ -571,7 +699,13 @@ const PageProducts = () => {
                             }
                         >
                             {t("createdAt")}
-                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                            {column.getIsSorted() === "desc" ? (
+                                <CaretDownIcon className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "asc" ? (
+                                <CaretUpIcon className="ml-2 h-4 w-4" />
+                            ) : (
+                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                            )}
                         </Button>
                     </div>
                 );
@@ -601,7 +735,13 @@ const PageProducts = () => {
                             }
                         >
                             {t("updatedAt")}
-                            <CaretSortIcon className="ml-2 h-4 w-4" />
+                            {column.getIsSorted() === "desc" ? (
+                                <CaretDownIcon className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "asc" ? (
+                                <CaretUpIcon className="ml-2 h-4 w-4" />
+                            ) : (
+                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                            )}
                         </Button>
                     </div>
                 );
@@ -619,58 +759,9 @@ const PageProducts = () => {
         },
     ]);
 
-    const getData = useCallback(async () => {
-        const { success, data } = await getApi({
-            url: formActual,
-        });
-        if (success) {
-            setData(data);
-        }
-    }, [formActual]);
-
-    const handleDelete = useCallback(
-        async (ids: string[]) => {
-            const promisesDelete = ids.map(async (id) => {
-                const responsePromise = new Promise((resolve, reject) => {
-                    deleteApi({
-                        url: `${formActual.substring(
-                            0,
-                            formActual.length - 1
-                        )}/${id}`,
-                    })
-                        .then((value) => {
-                            resolve(value);
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        });
-                });
-                return responsePromise;
-            });
-            await Promise.all(promisesDelete);
-            getData();
-        },
-        [formActual, getData]
-    );
-
-    useEffect(() => {
-        if (
-            !location.pathname.includes("edit") &&
-            !location.pathname.includes("new")
-        ) {
-            getData();
-        }
-    }, [location.pathname]);
-
     return (
         <>
-            <DataTable
-                columns={stateColumns}
-                data={stateData}
-                onDelete={handleDelete}
-                onRefresh={getData}
-                nameRule="products"
-            />
+            <Listing columns={stateColumns} index={1} />
             <Outlet />
         </>
     );

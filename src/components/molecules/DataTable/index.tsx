@@ -17,6 +17,7 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
     Input,
+    Skeleton,
     Table,
     TableBody,
     TableCell,
@@ -28,10 +29,12 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components";
+import { usePagination, useSorting } from "@/hooks";
 import { cn } from "@/lib";
 import { messageError } from "@/utils";
 import {
     ChevronDownIcon,
+    Cross1Icon,
     Pencil1Icon,
     PlusIcon,
     ReloadIcon,
@@ -55,25 +58,57 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import { CSSProperties, useCallback, useState } from "react";
+import {
+    CSSProperties,
+    KeyboardEvent,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
+
+interface IPagination {
+    skip: number;
+    limit: number;
+}
+interface ISort {
+    field: string;
+    order: string;
+}
+
+interface IFilter {
+    field: string;
+    filter: string;
+}
+
+export interface IOnRefresh {
+    pagination: IPagination;
+    sort: ISort;
+    filter?: IFilter;
+}
 
 interface IPropsDataTable<T> {
     nameRule: string;
     columns: ColumnDef<T>[];
     data: T[];
+    total: number;
+    limit?: number;
+    loading?: boolean;
     onAction?: (ids: string[]) => void;
     onDelete?: (ids: string[]) => void;
-    onRefresh?: () => void;
-    onNextPage?: (page: number) => void;
-    onPrevPage?: (page: number) => void;
+    onRefresh?: (props: IOnRefresh) => void;
     onSort?: OnChangeFn<ColumnOrderState>;
     canRefresh?: boolean;
     canAdd?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
     canColumns?: boolean;
+    canFilter?: boolean;
+    className?: string;
+    classNameTable?: string;
 }
 
 const getCommonPinningStyles = (column: Column<any>): CSSProperties => {
@@ -104,32 +139,45 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         nameRule,
         columns,
         data,
+        total,
+        loading = false,
         onAction,
         onDelete = () => ({}),
         onRefresh = () => ({}),
-        // onNextPage = () => ({}),
-        // onPrevPage = () => ({}),
         // onSort = () => ({}),
         canRefresh = true,
         canAdd = true,
         canEdit = true,
         canDelete = true,
         canColumns = true,
+        canFilter = true,
+        className = "",
+        classNameTable = "",
+        limit,
     } = props;
 
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
 
+    const refInit = useRef(true);
+
+    const {
+        limit: limitPage,
+        onPaginationChange,
+        skip,
+        pagination,
+    } = usePagination({ limit });
+    const { sorting, onSortingChange, field, order } = useSorting();
+
+    const [stateFilter, setFilter] = useState("");
     const [isDelete, setDelete] = useState(false);
-    const [sorting, setSorting] = useState<SortingState>([]);
     const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
         left: [],
         right: [],
     });
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-        id: false,
         createdAt: false,
         updatedAt: false,
     });
@@ -139,11 +187,29 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const keyFilter =
         columns.length > 2 ? (columns[2] as any)?.accessorKey : "name";
 
+    const handleSort = useCallback(
+        (propsV: SetStateAction<SortingState>) => {
+            onSortingChange(propsV);
+            const defPagination = {
+                pagination: { skip: 0, limit: limitPage },
+                sort: { field, order },
+                filter: { field: "name", filter: stateFilter },
+            };
+            onPaginationChange({
+                pageSize: defPagination.pagination.limit,
+                pageIndex: defPagination.pagination.skip,
+            });
+            onRefresh(defPagination);
+        },
+        [field, order, sorting, skip, limitPage, pagination, stateFilter]
+    );
+
     const table = useReactTable({
         data,
         columns,
-        onSortingChange: setSorting,
+        onSortingChange: handleSort,
         onColumnFiltersChange: setColumnFilters,
+        onPaginationChange,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -151,12 +217,17 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         onColumnPinningChange: setColumnPinning,
+        manualFiltering: !!limit ? false : true,
+        manualPagination: !!limit ? false : true,
+        manualSorting: !!limit ? false : true,
+        rowCount: total,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
             rowSelection,
             columnPinning,
+            pagination,
         },
     });
 
@@ -200,8 +271,50 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     }, [stateRowFocus, rowSelection]);
 
     const handleRefresh = useCallback(() => {
-        onRefresh();
-    }, []);
+        onRefresh({
+            pagination: { skip, limit: limitPage },
+            sort: { field, order },
+            filter: { field: "name", filter: stateFilter },
+        });
+    }, [limitPage, skip, pagination, sorting, field, order, stateFilter]);
+
+    const handleFilter = useCallback(
+        (e: KeyboardEvent<HTMLInputElement>) => {
+            switch (e.keyCode) {
+                case 13:
+                    onRefresh({
+                        pagination: { skip: 0, limit: limitPage },
+                        sort: { field, order },
+                        filter: { field: "name", filter: stateFilter },
+                    });
+                    break;
+                default:
+                    break;
+            }
+        },
+        [stateFilter, limitPage, field, order]
+    );
+
+    const handleCleanFilter = useCallback(() => {
+        setFilter("");
+        onRefresh({
+            pagination: { skip: 0, limit: limitPage },
+            sort: { field, order },
+            filter: { field: "name", filter: "" },
+        });
+    }, [limitPage, field, order]);
+
+    useEffect(() => {
+        if (refInit.current) {
+            refInit.current = false;
+            return;
+        }
+        onRefresh({
+            pagination: { skip, limit: limitPage },
+            sort: { field, order },
+            filter: { field: "name", filter: stateFilter },
+        });
+    }, [skip]);
 
     return (
         <>
@@ -212,7 +325,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                     "max-w-[calc(100svw-50px)]",
                     "sm:max-w-[calc(100svw-140px)]",
                     "md:max-w-[calc(100svw-370px)]",
-                    "px-1"
+                    "px-1",
+                    className
                 )}
             >
                 <div
@@ -226,32 +340,43 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         "justify-between"
                     )}
                 >
-                    <div
-                        className={cn(
-                            "flex",
-                            "items-center",
-                            "justify-start",
-                            "w-full",
-                            "lg:max-w-md"
-                        )}
-                    >
-                        <Input
-                            data-rule-component="rule"
-                            data-rule-component-id={`${nameRule}.filter`}
-                            placeholder={`Filtrar por ${keyFilter}...`}
-                            value={
-                                (table
-                                    .getColumn(keyFilter)
-                                    ?.getFilterValue() as string) ?? ""
-                            }
-                            onChange={(event) =>
-                                table
-                                    .getColumn(keyFilter)
-                                    ?.setFilterValue(event.target.value)
-                            }
-                            autoComplete="off"
-                        />
-                    </div>
+                    {canFilter ? (
+                        <div
+                            className={cn(
+                                "relative",
+                                "flex",
+                                "items-center",
+                                "justify-start",
+                                "w-full",
+                                "lg:max-w-md"
+                            )}
+                        >
+                            <Input
+                                data-rule-component="rule"
+                                data-rule-component-id={`${nameRule}.filter`}
+                                placeholder={`${t("filterBy")} ${t(
+                                    keyFilter
+                                )?.toLocaleLowerCase()}...`}
+                                value={stateFilter}
+                                onChange={(e) => setFilter(e.target.value)}
+                                onKeyDown={handleFilter}
+                                autoComplete="off"
+                                className="pr-10"
+                            />
+                            <Button
+                                className="top-0 right-0 absolute"
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleCleanFilter}
+                                data-rule-component="rule"
+                                data-rule-component-id={`${nameRule}.filter`}
+                            >
+                                <Cross1Icon />
+                            </Button>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
                     <div
                         className={cn(
                             "flex",
@@ -431,7 +556,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         </div>
                     </div>
                 </div>
-                <div className="rounded-md border">
+                <div className={cn("rounded-md", "border", classNameTable)}>
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -461,7 +586,21 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {loading ? (
+                                Array.from({ length: 10 }).map((_, i) => (
+                                    <TableRow key={`loading-${i}`}>
+                                        {table.getAllColumns().map((col) => {
+                                            return (
+                                                <TableHead
+                                                    key={`loading-${col.id}`}
+                                                >
+                                                    <Skeleton className="h-4 w-full" />
+                                                </TableHead>
+                                            );
+                                        })}
+                                    </TableRow>
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row: any) => (
                                     <TableRow
                                         key={row.id}
@@ -533,10 +672,16 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 <div className="flex items-center justify-between sm:justify-end space-x-2 py-2">
                     <div className="hidden sm:flex flex-1 text-sm text-muted-foreground">
                         {table.getFilteredSelectedRowModel().rows.length} de{" "}
-                        {table.getFilteredRowModel().rows.length} linhas
-                        selecionadas.
+                        {table.getFilteredRowModel().rows.length}{" "}
+                        {t("selectedLines")}
                     </div>
                     <div className="space-x-2 w-full flex items-center sm:w-auto justify-between sm:justify-end">
+                        <span className="text-sm text-muted-foreground">
+                            {t("total")} {total} -
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                            {t("page")} {skip / limitPage}
+                        </span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -545,7 +690,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             }}
                             disabled={!table.getCanPreviousPage()}
                         >
-                            Voltar
+                            {t("back")}
                         </Button>
                         <Button
                             variant="outline"
@@ -553,7 +698,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
                         >
-                            Avançar
+                            {t("next")}
                         </Button>
                     </div>
                 </div>

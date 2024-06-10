@@ -10,6 +10,7 @@ import {
     IBaseFormRef,
 } from "@/components";
 import { cn } from "@/lib";
+import { modulesSettings } from "@/routes/modules";
 import { postApi } from "@/services";
 import { useCallback, useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
@@ -72,16 +73,10 @@ const PageInterpreterCreateOrEdit = () => {
                         <FSelectLabel
                             label={t("table")}
                             name="table"
-                            items={[
-                                {
-                                    id: "parentalratings",
-                                    name: "Classificação Indicativa",
-                                },
-                                {
-                                    id: "numberofplayers",
-                                    name: "Número de jogadores",
-                                },
-                            ]}
+                            items={modulesSettings.map((key) => ({
+                                id: key.name,
+                                name: t(key.name),
+                            }))}
                         />
                         <div
                             className={cn(

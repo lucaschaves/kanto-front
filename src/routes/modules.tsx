@@ -1,5 +1,6 @@
 import {
     ArrowBottomRightIcon,
+    CardStackIcon,
     DashboardIcon,
     HomeIcon,
     PersonIcon,
@@ -22,6 +23,11 @@ export const modulesDef = [
         link: "/games",
         Icon: <RocketIcon />,
     },
+    {
+        name: "interpreter",
+        link: "/interpreter",
+        Icon: <CardStackIcon />,
+    },
 ];
 
 export const modulesSettings = [
@@ -36,28 +42,8 @@ export const modulesSettings = [
         Icon: <HomeIcon />,
     },
     {
-        name: "categories",
-        link: "/settings/categories",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "colors",
-        link: "/settings/colors",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "components",
-        link: "/settings/components",
-        Icon: <HomeIcon />,
-    },
-    {
         name: "generous",
         link: "/settings/generous",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "models",
-        link: "/settings/models",
         Icon: <HomeIcon />,
     },
     {
@@ -68,21 +54,6 @@ export const modulesSettings = [
     {
         name: "parentalratings",
         link: "/settings/parentalratings",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "paymentmethods",
-        link: "/settings/paymentmethods",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "permissiongroups",
-        link: "/settings/permissiongroups",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "permissions",
-        link: "/settings/permissions",
         Icon: <HomeIcon />,
     },
     {
@@ -101,13 +72,53 @@ export const modulesSettings = [
         Icon: <HomeIcon />,
     },
     {
+        name: "developers",
+        link: "/settings/developers",
+        Icon: <HomeIcon />,
+    },
+    {
+        name: "consoles",
+        link: "/settings/consoles",
+        Icon: <HomeIcon />,
+    },
+    {
         name: "typesofconsoles",
         link: "/settings/typesofconsoles",
         Icon: <HomeIcon />,
     },
-    {
-        name: "interpreter",
-        link: "/settings/interpreter",
-        Icon: <HomeIcon />,
-    },
+    // {
+    //     name: "paymentmethods",
+    //     link: "/settings/paymentmethods",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "permissiongroups",
+    //     link: "/settings/permissiongroups",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "permissions",
+    //     link: "/settings/permissions",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "models",
+    //     link: "/settings/models",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "categories",
+    //     link: "/settings/categories",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "colors",
+    //     link: "/settings/colors",
+    //     Icon: <HomeIcon />,
+    // },
+    // {
+    //     name: "components",
+    //     link: "/settings/components",
+    //     Icon: <HomeIcon />,
+    // },
 ];

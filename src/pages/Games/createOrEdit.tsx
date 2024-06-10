@@ -9,7 +9,12 @@ import {
     FButtonSubmit,
     FInputLabel,
     FSelectLabelMultiApi,
+    GroupForm,
     IBaseFormRef,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/components";
 import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
@@ -31,6 +36,8 @@ const PageGameCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
+    const [stateLoading, setLoading] = useState(false);
+    const [modeView, setModeView] = useState<"groups" | "tabs">("groups");
     const [file, setFile] = useState<{ url: string; file?: any }>({
         url: "",
         file: null,
@@ -77,7 +84,7 @@ const PageGameCreateOrEdit = () => {
                 }
             } else {
                 const { success, data: dataResp } = await postApi({
-                    url: formActual,
+                    url: formActual.substring(0, formActual.length - 1),
                     body: data,
                 });
                 if (success) {
@@ -90,6 +97,7 @@ const PageGameCreateOrEdit = () => {
     );
 
     const getData = useCallback(async () => {
+        setLoading(true);
         const { success, data } = await getApi({
             url: `${formActual.substring(
                 0,
@@ -107,6 +115,7 @@ const PageGameCreateOrEdit = () => {
             delete data.images;
             refForm.current?.reset(data);
         }
+        setLoading(false);
     }, [formActual, searchParams]);
 
     useEffect(() => {
@@ -119,101 +128,326 @@ const PageGameCreateOrEdit = () => {
                 <DialogHeader>
                     <DialogTitle>{isEdit ? t("edit") : t("add")}</DialogTitle>
                 </DialogHeader>
-                <div
-                    className={cn(
-                        "w-full",
-                        "grid",
-                        "grid-cols-2",
-                        "sm:grid-cols-2",
-                        "md:grid-cols-3",
-                        "gap-1",
-                        "sm:gap-2"
-                    )}
-                >
-                    <BaseForm onSubmit={onSubmit} ref={refForm}>
-                        {/* <FInputLabel label={t("id")} name="id" disabled /> */}
-                        <FInputLabel label={t("name")} name="name" />
-                        <FInputLabel label={t("ean")} name="ean" />
-                        <FSelectLabelMultiApi
-                            label={t("console")}
-                            name="consoleId"
-                            url="/consoles"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("developer")}
-                            name="developerId"
-                            url="/developers"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("publisher")}
-                            name="publisherId"
-                            url="/publishers"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("releaseYear")}
-                            name="releaseYearId"
-                            url="/releaseyears"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("gender")}
-                            name="genderId"
-                            url="/generous"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("parentalRating")}
-                            name="parentalRatingId"
-                            url="/parentalratings"
-                        />
-                        <FSelectLabelMultiApi
-                            label={t("numberOfPlayer")}
-                            name="numberOfPlayerId"
-                            url="/numberofplayers"
-                        />
-                        <div
-                            className={cn(
-                                "flex",
-                                "flex-col",
-                                "space-y-2",
-                                file?.url ? "col-span-2" : "col-span-3"
-                            )}
-                        >
-                            <label
+                <BaseForm onSubmit={onSubmit} ref={refForm}>
+                    <div
+                        className={cn(
+                            "w-full",
+                            "flex",
+                            "flex-col",
+                            "max-h-[90vh]",
+                            "overflow-hidden"
+                        )}
+                    >
+                        <div className="w-full flex items-center justify-end p-1 gap-1">
+                            <Button
+                                type="button"
+                                onClick={() => setModeView("groups")}
+                                variant={
+                                    modeView === "groups"
+                                        ? "secondary"
+                                        : "ghost"
+                                }
+                                size="sm"
+                            >
+                                Visualizar por Grupo
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() => setModeView("tabs")}
+                                variant={
+                                    modeView === "tabs" ? "secondary" : "ghost"
+                                }
+                                size="sm"
+                            >
+                                Visualizar por abas
+                            </Button>
+                        </div>
+                        {modeView === "groups" ? (
+                            <div
                                 className={cn(
-                                    "text-sm",
-                                    "font-medium",
-                                    "leading-none",
-                                    "peer-disabled:cursor-not-allowed",
-                                    "peer-disabled:opacity-70"
+                                    "w-full",
+                                    "flex",
+                                    "flex-col",
+                                    "gap-2",
+                                    "max-h-[70vh]",
+                                    "overflow-auto",
+                                    "pb-5"
                                 )}
                             >
-                                {t("image")}
-                            </label>
-                            <Dropzone onChange={setFile} />
-                        </div>
-                        {file?.url ? (
-                            <div className="flex flex-col space-y-2">
-                                <label
+                                <GroupForm
+                                    title={t("general")}
                                     className={cn(
-                                        "text-sm",
-                                        "font-medium",
-                                        "leading-none",
-                                        "peer-disabled:cursor-not-allowed",
-                                        "peer-disabled:opacity-70"
+                                        "w-full",
+                                        "grid",
+                                        "grid-cols-2",
+                                        "sm:grid-cols-2",
+                                        "md:grid-cols-3",
+                                        "gap-1",
+                                        "sm:gap-2",
+                                        "px-3"
                                     )}
                                 >
-                                    {t("preview")}
-                                </label>
-                                <img
-                                    src={file?.url}
+                                    <FInputLabel
+                                        label={t("name")}
+                                        name="name"
+                                        disabled={stateLoading}
+                                        className="col-span-2"
+                                    />
+                                    <FInputLabel
+                                        label={t("ean")}
+                                        name="ean"
+                                        disabled={stateLoading}
+                                    />
+                                </GroupForm>
+                                <GroupForm
+                                    title={t("dados")}
                                     className={cn(
-                                        "rounded-lg",
-                                        "h-32",
-                                        "object-contain"
+                                        "w-full",
+                                        "grid",
+                                        "grid-cols-2",
+                                        "sm:grid-cols-2",
+                                        "md:grid-cols-3",
+                                        "gap-1",
+                                        "sm:gap-2",
+                                        "px-3"
                                     )}
-                                />
+                                >
+                                    <FSelectLabelMultiApi
+                                        label={t("console")}
+                                        name="consoleId"
+                                        url="/consoles"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("developer")}
+                                        name="developerId"
+                                        url="/developers"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("publisher")}
+                                        name="publisherId"
+                                        url="/publishers"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("releaseYear")}
+                                        name="releaseYearId"
+                                        url="/releaseyears"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("gender")}
+                                        name="genderId"
+                                        url="/generous"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("parentalRating")}
+                                        name="parentalRatingId"
+                                        url="/parentalratings"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("numberOfPlayer")}
+                                        name="numberOfPlayerId"
+                                        url="/numberofplayers"
+                                        disabled={stateLoading}
+                                    />
+                                </GroupForm>
+                                <GroupForm
+                                    title={t("images")}
+                                    className={cn(
+                                        "w-full",
+                                        "grid",
+                                        "grid-cols-2",
+                                        "sm:grid-cols-2",
+                                        "md:grid-cols-3",
+                                        "gap-1",
+                                        "sm:gap-2",
+                                        "px-3"
+                                    )}
+                                >
+                                    <div
+                                        className={cn(
+                                            "flex",
+                                            "flex-col",
+                                            "space-y-2",
+                                            file?.url
+                                                ? "col-span-2"
+                                                : "col-span-3"
+                                        )}
+                                    >
+                                        <label
+                                            className={cn(
+                                                "text-sm",
+                                                "font-medium",
+                                                "leading-none",
+                                                "peer-disabled:cursor-not-allowed",
+                                                "peer-disabled:opacity-70"
+                                            )}
+                                        >
+                                            {t("image")}
+                                        </label>
+                                        <Dropzone
+                                            onChange={setFile}
+                                            disabled={stateLoading}
+                                        />
+                                    </div>
+                                    {file?.url ? (
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                className={cn(
+                                                    "text-sm",
+                                                    "font-medium",
+                                                    "leading-none",
+                                                    "peer-disabled:cursor-not-allowed",
+                                                    "peer-disabled:opacity-70"
+                                                )}
+                                            >
+                                                {t("preview")}
+                                            </label>
+                                            <img
+                                                src={file?.url}
+                                                className={cn(
+                                                    "rounded-lg",
+                                                    "h-32",
+                                                    "object-contain"
+                                                )}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </GroupForm>
                             </div>
                         ) : (
-                            <></>
+                            <Tabs
+                                defaultValue="general"
+                                className="w-full min-h-[50vh]"
+                            >
+                                <TabsList className="w-full grid grid-cols-5">
+                                    <TabsTrigger value="general">
+                                        {t("general")}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="dados">
+                                        {t("dados")}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="images">
+                                        {t("images")}
+                                    </TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="general">
+                                    <FInputLabel
+                                        label={t("name")}
+                                        name="name"
+                                        disabled={stateLoading}
+                                        className="col-span-2"
+                                    />
+                                    <FInputLabel
+                                        label={t("ean")}
+                                        name="ean"
+                                        disabled={stateLoading}
+                                    />
+                                </TabsContent>
+                                <TabsContent value="dados">
+                                    <FSelectLabelMultiApi
+                                        label={t("console")}
+                                        name="consoleId"
+                                        url="/consoles"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("developer")}
+                                        name="developerId"
+                                        url="/developers"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("publisher")}
+                                        name="publisherId"
+                                        url="/publishers"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("releaseYear")}
+                                        name="releaseYearId"
+                                        url="/releaseyears"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("gender")}
+                                        name="genderId"
+                                        url="/generous"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("parentalRating")}
+                                        name="parentalRatingId"
+                                        url="/parentalratings"
+                                        disabled={stateLoading}
+                                    />
+                                    <FSelectLabelMultiApi
+                                        label={t("numberOfPlayer")}
+                                        name="numberOfPlayerId"
+                                        url="/numberofplayers"
+                                        disabled={stateLoading}
+                                    />
+                                </TabsContent>
+                                <TabsContent value="images">
+                                    <div
+                                        className={cn(
+                                            "flex",
+                                            "flex-col",
+                                            "space-y-2",
+                                            file?.url
+                                                ? "col-span-2"
+                                                : "col-span-3"
+                                        )}
+                                    >
+                                        <label
+                                            className={cn(
+                                                "text-sm",
+                                                "font-medium",
+                                                "leading-none",
+                                                "peer-disabled:cursor-not-allowed",
+                                                "peer-disabled:opacity-70"
+                                            )}
+                                        >
+                                            {t("image")}
+                                        </label>
+                                        <Dropzone
+                                            onChange={setFile}
+                                            disabled={stateLoading}
+                                        />
+                                    </div>
+                                    {file?.url ? (
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                className={cn(
+                                                    "text-sm",
+                                                    "font-medium",
+                                                    "leading-none",
+                                                    "peer-disabled:cursor-not-allowed",
+                                                    "peer-disabled:opacity-70"
+                                                )}
+                                            >
+                                                {t("preview")}
+                                            </label>
+                                            <img
+                                                src={file?.url}
+                                                className={cn(
+                                                    "rounded-lg",
+                                                    "h-32",
+                                                    "object-contain"
+                                                )}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </TabsContent>
+                            </Tabs>
                         )}
                         <div className="col-span-2"></div>
                         <div
@@ -230,13 +464,17 @@ const PageGameCreateOrEdit = () => {
                                 type="button"
                                 onClick={onClose}
                                 variant="outline"
+                                disabled={stateLoading}
                             >
                                 {t("cancel")}
                             </Button>
-                            <FButtonSubmit label={t("save")} />
+                            <FButtonSubmit
+                                label={t("save")}
+                                disabled={stateLoading}
+                            />
                         </div>
-                    </BaseForm>
-                </div>
+                    </div>
+                </BaseForm>
             </DialogContent>
         </Dialog>
     );

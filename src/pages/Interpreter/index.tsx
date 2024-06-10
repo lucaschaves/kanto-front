@@ -11,7 +11,11 @@ import {
     Spinner,
 } from "@/components";
 import { cn } from "@/lib";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import {
+    CaretDownIcon,
+    CaretSortIcon,
+    CaretUpIcon,
+} from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -82,7 +86,13 @@ const PageInterpreter = () => {
                                 }
                             >
                                 {t("id")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -105,7 +115,13 @@ const PageInterpreter = () => {
                                 }
                             >
                                 {t("name")}
-                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                                {column.getIsSorted() === "desc" ? (
+                                    <CaretDownIcon className="ml-2 h-4 w-4" />
+                                ) : column.getIsSorted() === "asc" ? (
+                                    <CaretUpIcon className="ml-2 h-4 w-4" />
+                                ) : (
+                                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                                )}
                             </Button>
                         </div>
                     );
@@ -116,7 +132,10 @@ const PageInterpreter = () => {
             },
         ];
     });
-    const [stateData, setData] = useState<{ id: string; name: string }[]>([]);
+    const [stateData, setData] = useState<{ total: number; rows: any[] }>({
+        total: 0,
+        rows: [],
+    });
     const [stateWorkbook, setWoorkbook] = useState<{
         [sheet: string]: XLSX.WorkSheet;
     } | null>(null);
@@ -135,7 +154,7 @@ const PageInterpreter = () => {
                     .filter((d) => !!d)
                     .sort()
                     .map((d) => ({ id: d, name: d }));
-                setData(dataByColumn);
+                setData({ total: dataByColumn.length, rows: dataByColumn });
             }
         },
         [file, stateWorkbook]
@@ -243,13 +262,16 @@ const PageInterpreter = () => {
                 <Separator />
                 <DataTable
                     columns={stateColumns}
-                    data={stateData}
+                    data={stateData.rows}
+                    total={stateData.total}
+                    limit={8}
                     nameRule="interpreter"
                     canRefresh={false}
                     canAdd={false}
                     canDelete={false}
                     canEdit={false}
                     canColumns={false}
+                    canFilter={false}
                     onAction={onImport}
                 />
                 {stateLoading ? (

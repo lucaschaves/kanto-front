@@ -185,17 +185,14 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const applyRules = useCallback(() => {
-        if (user?.permission !== "admin" && user?.permissionsId !== 1) {
-            const rulesElements = document.querySelectorAll(
-                '[data-rule-component="rule"]'
-            );
-            rulesElements.forEach((element) => {
-                const datasetElement = (element as any)?.dataset;
-                if (!rules.includes(datasetElement?.ruleComponentId)) {
-                    element.classList.add("hidden");
-                }
-            });
-        }
+        const rulesElements = document.querySelectorAll(
+            '[data-rule-component="rule"]'
+        );
+        rulesElements.forEach((element) => {
+            const datasetElement = (element as any)?.dataset;
+            if (!rules.includes(datasetElement?.ruleComponentId))
+                element.classList.add("hidden");
+        });
     }, [rules, user]);
 
     const value = {

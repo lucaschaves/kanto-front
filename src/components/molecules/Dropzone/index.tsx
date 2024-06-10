@@ -12,12 +12,14 @@ interface DropzoneProps {
     onChange: (props: IOnChange) => void; //React.Dispatch<React.SetStateAction<string[]>>;
     className?: string;
     fileExtension?: string;
+    disabled?: boolean;
 }
 
 const Dropzone = ({
     onChange,
     className,
     fileExtension,
+    disabled,
     ...props
 }: DropzoneProps) => {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -119,6 +121,7 @@ const Dropzone = ({
                             size="sm"
                             onClick={handleButtonClick}
                             type="button"
+                            disabled={disabled}
                         >
                             {t("clickHere")}
                         </Button>
@@ -129,6 +132,7 @@ const Dropzone = ({
                             onChange={handleFileInputChange}
                             className="hidden"
                             multiple
+                            disabled={disabled}
                         />
                     </div>
                 )}

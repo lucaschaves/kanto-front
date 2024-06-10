@@ -6,6 +6,7 @@ import {
     Avatar,
     AvatarFallback,
     AvatarImage,
+    BaseForm,
     Breadcrumb,
     BreadcrumbItem,
     BreadcrumbLink,
@@ -13,6 +14,13 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
     Button,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    FButtonSubmit,
+    FInputLabel,
+    IBaseFormRef,
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -27,6 +35,7 @@ import {
 import { useAuth } from "@/context";
 import { cn } from "@/lib";
 import { modulesDef, modulesSettings } from "@/routes/modules";
+import { getApi, putApi } from "@/services";
 import { getParamByPath } from "@/utils";
 import {
     ExitIcon,
@@ -35,7 +44,7 @@ import {
     PersonIcon,
     StarIcon,
 } from "@radix-ui/react-icons";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -230,13 +239,6 @@ const Sidebar = (props: { sheet?: boolean }) => {
                                 "justify-center",
                                 "md:justify-between"
                             )}
-                            // variant={
-                            //     ["settings"].includes(
-                            //         getParamByPath(location.pathname, 1)
-                            //     )
-                            //         ? "outline"
-                            //         : "default"
-                            // }
                         >
                             <HomeIcon />
                             <span
@@ -256,7 +258,9 @@ const Sidebar = (props: { sheet?: boolean }) => {
                             "flex",
                             "flex-col",
                             "ml-5",
-                            "border-none"
+                            "border-none",
+                            "overflow-auto",
+                            "max-h-[calc(100vh-310px)]"
                         )}
                     >
                         {modulesSettings.map((s) => (
@@ -370,14 +374,43 @@ const Layout = () => {
     const { t, i18n } = useTranslation();
     const { applyRules, signout, user } = useAuth();
 
+    const refForm = useRef<IBaseFormRef>(null);
+
+    const [stateUser, setUser] = useState<string | null>(null);
+    const [stateLoading, setLoading] = useState(false);
+
     const toggleSidebar = useCallback(
         () => setOpenSidebar(!openSidebar),
         [openSidebar]
     );
 
-    // const toggleTheme = useCallback(() => {
-    //     setTheme(theme == "dark" ? "light" : "dark");
-    // }, [theme]);
+    const onSubmit = useCallback(
+        async (data: any) => {
+            const { success } = await putApi({
+                url: `user/${stateUser}`,
+                body: data,
+            });
+            if (success) {
+                setUser(null);
+            }
+        },
+        [stateUser]
+    );
+
+    const getDataUser = useCallback(async () => {
+        setLoading(true);
+        const { success, data } = await getApi({
+            url: `/user/${stateUser}`,
+        });
+        if (success) {
+            refForm.current?.reset(data);
+        }
+        setLoading(false);
+    }, [stateUser]);
+
+    useEffect(() => {
+        if (!!stateUser) getDataUser();
+    }, [stateUser]);
 
     useEffect(() => {
         applyRules();
@@ -502,6 +535,7 @@ const Layout = () => {
                                     <Button
                                         variant="ghost"
                                         className="flex items-center justify-start gap-2"
+                                        onClick={() => setUser("1")}
                                     >
                                         <PersonIcon />
                                         {user?.name}
@@ -581,6 +615,80 @@ const Layout = () => {
                     <Sidebar sheet />
                 </SheetContent>
             </Sheet>
+
+            <Dialog modal onOpenChange={() => setUser(null)} open={!!stateUser}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Usuário</DialogTitle>
+                    </DialogHeader>
+                    <div
+                        className={cn(
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "gap-1",
+                            "sm:gap-2"
+                        )}
+                    >
+                        <BaseForm onSubmit={onSubmit} ref={refForm}>
+                            <FInputLabel
+                                label="Name"
+                                name="name"
+                                disabled={stateLoading}
+                                rules={{
+                                    required: true,
+                                }}
+                            />
+                            <FInputLabel
+                                label="Email"
+                                name="email"
+                                disabled={stateLoading}
+                                rules={{
+                                    required: true,
+                                }}
+                            />
+                            <FInputLabel
+                                label="Senha atual"
+                                name="password"
+                                disabled={stateLoading}
+                                className="col-span-2"
+                            />
+                            <FInputLabel
+                                label="Nova senha"
+                                name="newpassword"
+                                disabled={stateLoading}
+                                description="A senha deve conter no mínimo 8 caracteres, incluindo Letras, Números e Simbolos (@,#,$,...)"
+                                className="col-span-2"
+                            />
+                            <div
+                                className={cn(
+                                    "flex",
+                                    "w-full",
+                                    "items-center",
+                                    "justify-end",
+                                    "gap-2",
+                                    "mt-4",
+                                    "col-span-2"
+                                )}
+                            >
+                                <Button
+                                    type="button"
+                                    onClick={() => setUser(null)}
+                                    variant="outline"
+                                    disabled={stateLoading}
+                                >
+                                    {t("cancel")}
+                                </Button>
+                                <FButtonSubmit
+                                    label={t("save")}
+                                    disabled={stateLoading}
+                                />
+                            </div>
+                        </BaseForm>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };
