@@ -75,7 +75,6 @@ const appRoutes = () => {
                 </RequireAuth>
             ),
             children: [
-                ...routesDefault,
                 {
                     path: "/interpreter",
                     errorElement: <PageError />,
@@ -88,6 +87,7 @@ const appRoutes = () => {
                         },
                     ],
                 },
+                ...routesDefault,
                 {
                     path: "/settings",
                     errorElement: <PageError />,
