@@ -77,7 +77,7 @@ const appRoutes = () => {
             children: [
                 ...routesDefault,
                 {
-                    path: "interpreter",
+                    path: "/interpreter",
                     errorElement: <PageError />,
                     element: <PageInterpreter />,
                     children: [
