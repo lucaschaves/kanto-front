@@ -19,7 +19,7 @@ import {
 import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { getParamByPath } from "@/utils";
+import { getAmbientURL, getParamByPath } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -107,7 +107,7 @@ const PageGameCreateOrEdit = () => {
         if (success) {
             if (data.images?.image) {
                 setFile({
-                    url: `http://localhost:4000${
+                    url: `${getAmbientURL()}${
                         data.images?.image
                     }?token=${window.sessionStorage.getItem(CONSTANT_TOKEN)}`,
                 });

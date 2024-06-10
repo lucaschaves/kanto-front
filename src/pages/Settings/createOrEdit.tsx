@@ -59,7 +59,7 @@ const PageSettingCreateOrEdit = () => {
                 if (success) onClose();
             } else {
                 const { success } = await postApi({
-                    url: formActual,
+                    url: formActual.substring(0, formActual.length - 1),
                     body: data,
                 });
                 if (success) onClose();
