@@ -23,7 +23,7 @@ type IGame = {
     numberOfPlayerId: any[];
     parentalRatingId: any[];
     publisherId: any[];
-    releaseYearId: any[];
+    releaseYear: number[];
 };
 
 const PageGames = () => {
@@ -261,7 +261,7 @@ const PageGames = () => {
                 },
             },
             {
-                accessorKey: "releaseYearId",
+                accessorKey: "releaseYear",
                 header: ({ column }) => {
                     return (
                         <div className="flex items-center">
@@ -286,8 +286,8 @@ const PageGames = () => {
                     );
                 },
                 cell: ({ row }) => {
-                    const rowValue = (row.getValue("releaseYearId") as any[])
-                        ?.map((r) => r?.name)
+                    const rowValue = (row.getValue("releaseYear") as any[])
+                        ?.map((r) => r)
                         ?.join(", ");
                     return <div className="capitalize">{rowValue}</div>;
                 },
@@ -414,12 +414,12 @@ const PageGames = () => {
                     );
                 },
                 cell: ({ row }) => {
+                    const value = row.getValue("createdAt") as any;
                     return (
                         <div>
-                            {format(
-                                new Date(row.getValue("createdAt")),
-                                "dd/MM/yyyy HH:mm:ss"
-                            )}
+                            {value
+                                ? format(new Date(value), "dd/MM/yyyy HH:mm:ss")
+                                : "-"}
                         </div>
                     );
                 },
@@ -450,12 +450,12 @@ const PageGames = () => {
                     );
                 },
                 cell: ({ row }) => {
+                    const value = row.getValue("updatedAt") as any;
                     return (
                         <div>
-                            {format(
-                                new Date(row.getValue("updatedAt")),
-                                "dd/MM/yyyy HH:mm:ss"
-                            )}
+                            {value
+                                ? format(new Date(value), "dd/MM/yyyy HH:mm:ss")
+                                : "-"}
                         </div>
                     );
                 },
@@ -465,7 +465,7 @@ const PageGames = () => {
 
     return (
         <>
-            <Listing columns={stateColumns} index={1} />
+            <Listing columns={stateColumns} index={2} />
             <Outlet />
         </>
     );

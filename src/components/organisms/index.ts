@@ -1,5 +1,7 @@
 export * from "./FButtonSubmit";
 export * from "./FCheckboxLabel";
+export * from "./FInputDatePicker";
+export * from "./FInputDatePickerRange";
 export * from "./FInputLabel";
 export * from "./FSelectLabel";
 export * from "./FSelectLabelApi";

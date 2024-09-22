@@ -1,6 +1,7 @@
 import { Listing } from "@/components";
 import { Outlet } from "react-router-dom";
 import { PageSettingCreateOrEdit } from "./createOrEdit";
+import { FilterSettings } from "./filter";
 
 const PageSettings = () => {
     return (
@@ -11,4 +12,4 @@ const PageSettings = () => {
     );
 };
 
-export { PageSettingCreateOrEdit, PageSettings };
+export { FilterSettings, PageSettingCreateOrEdit, PageSettings };

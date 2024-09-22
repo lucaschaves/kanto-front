@@ -7,6 +7,8 @@ import api from "./client";
 interface IGetProps {
     url: string;
     config?: AxiosRequestConfig;
+    disableMessage?: boolean;
+    clean?: boolean;
 }
 
 interface IDeleteProps {
@@ -39,13 +41,16 @@ const headersDefault = {
     },
 };
 
-export const getApi = async <T>(props: IGetProps): Promise<IResponse> => {
-    const { url, config = {} } = props;
+export const getApi = async <T>(props: IGetProps): Promise<IResponse | any> => {
+    const { url, config = {}, disableMessage, clean } = props;
     try {
         const response = await api.get<IResponse>(url, {
             ...headersDefault,
             ...config,
         });
+        if (clean) {
+            return response.data;
+        }
 
         const {
             data: { data, success, elapsed },
@@ -58,25 +63,31 @@ export const getApi = async <T>(props: IGetProps): Promise<IResponse> => {
         };
     } catch (err) {
         if (axios.isAxiosError(err)) {
-            const messageErr = messageError({
-                message: err.response?.data?.error,
-                status: err.response?.status,
-                elapsed: err.response?.data?.elapsed,
-            });
+            let messageErr: any = {};
+            if (!disableMessage) {
+                messageErr = messageError({
+                    message: err.response?.data?.error,
+                    status: err.response?.status,
+                    elapsed: err.response?.data?.elapsed,
+                });
+            }
             return {
                 success: false,
-                error: messageErr.message,
+                error: messageErr?.message,
                 data: null,
-                elapsed: messageErr.elapsed,
+                elapsed: messageErr?.elapsed,
             };
         }
         const message = JSON.stringify(err);
-        const messageErr = messageError({ message });
+        let messageErr: any = {};
+        if (!disableMessage) {
+            messageErr = messageError({ message });
+        }
         return {
             success: false,
-            error: messageErr.message,
+            error: messageErr?.message,
             data: null,
-            elapsed: messageErr.elapsed,
+            elapsed: messageErr?.elapsed,
         };
     }
 };

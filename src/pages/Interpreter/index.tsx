@@ -17,6 +17,7 @@ import {
     CaretUpIcon,
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
+import { saveAs } from "file-saver";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -136,6 +137,7 @@ const PageInterpreter = () => {
         total: 0,
         rows: [],
     });
+    const [stateXLSX, setXLSX] = useState<any>(null);
     const [stateWorkbook, setWoorkbook] = useState<{
         [sheet: string]: XLSX.WorkSheet;
     } | null>(null);
@@ -152,9 +154,13 @@ const PageInterpreter = () => {
                     .filter((d, i, s) => s.indexOf(d) === i)
                     .filter((d) => d != "undefined")
                     .filter((d) => !!d)
-                    .sort()
-                    .map((d) => ({ id: d, name: d }));
-                setData({ total: dataByColumn.length, rows: dataByColumn });
+                    .sort();
+
+                setXLSX(dataByColumn.map((d) => ({ name: d })));
+                setData({
+                    total: dataByColumn.length,
+                    rows: dataByColumn.map((d) => ({ id: d, name: d })),
+                });
             }
         },
         [file, stateWorkbook]
@@ -201,6 +207,25 @@ const PageInterpreter = () => {
         },
         [location.pathname]
     );
+
+    const handleDownload = useCallback(async () => {
+        const worksheet = XLSX.utils.json_to_sheet(stateXLSX);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
+        const blob = new Blob([excelBuffer], {
+            type: "application/octet-stream",
+        });
+        saveAs(
+            blob,
+            `${refForm.current?.watch("sheetName")}-${refForm.current?.watch(
+                "column"
+            )}.xlsx`
+        );
+    }, [stateXLSX, refForm]);
 
     return (
         <>
@@ -255,6 +280,9 @@ const PageInterpreter = () => {
                                     label={t("convert")}
                                     disabled={stateLoading || !file.file}
                                 />
+                                {/* <Button type="button" onClick={handleDownload}>
+                                    Download
+                                </Button> */}
                             </div>
                         </div>
                     </BaseForm>
@@ -264,14 +292,13 @@ const PageInterpreter = () => {
                     columns={stateColumns}
                     data={stateData.rows}
                     total={stateData.total}
-                    limit={8}
-                    nameRule="interpreter"
+                    limit={10}
+                    name="interpreter"
                     canRefresh={false}
                     canAdd={false}
                     canDelete={false}
                     canEdit={false}
                     canColumns={false}
-                    canFilter={false}
                     onAction={onImport}
                 />
                 {stateLoading ? (

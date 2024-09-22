@@ -17,6 +17,7 @@ interface IFSelectLabelMultiApiProps extends InputProps {
     url: string;
     description?: string;
     rules?: RegisterOptions;
+    dependencies?: string[];
 }
 
 interface IData {
@@ -27,9 +28,18 @@ interface IData {
 const LIMIT = 50;
 
 const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
-    const { label, name, url, description, rules, className, ...rest } = props;
+    const {
+        label,
+        name,
+        url,
+        description,
+        rules,
+        className,
+        dependencies = [],
+        ...rest
+    } = props;
 
-    const { control } = useFormContext();
+    const { control, watch } = useFormContext();
 
     const [stateOpen, setOpen] = useState(false);
     const [stateLoading, setLoading] = useState(false);
@@ -50,19 +60,35 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
             filter?: any;
         }) => {
             setLoading(true);
+
+            let params = {};
+            dependencies?.forEach((key) => {
+                params = {
+                    ...params,
+                    [key]: watch(key),
+                };
+            });
+
             const actualPage = page
                 ? page
                 : more
                 ? statePage + LIMIT
                 : statePage;
+
+            if (filter?.field) {
+                params = {
+                    ...params,
+                    [`filter_${filter.field}`]: filter?.filter,
+                };
+            }
+
             const { success, data } = await getApi({
                 url,
                 config: {
                     params: {
+                        ...params,
                         skip: actualPage,
                         limit: LIMIT,
-                        field: filter?.field,
-                        filter: filter?.filter,
                     },
                 },
             });
@@ -84,6 +110,15 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
         },
         [url, stateData]
     );
+
+    const disabledDependencies = useCallback(() => {
+        let objDisabled = false;
+        dependencies?.forEach((key) => {
+            const watchValue = watch(key);
+            if (!watchValue) objDisabled = true;
+        });
+        return objDisabled;
+    }, [watch, dependencies]);
 
     useEffect(() => {
         if (stateOpen) {
@@ -110,6 +145,7 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
                         disabledMore={stateData.total <= statePage + LIMIT}
                         total={stateData.total}
                         loading={stateLoading}
+                        disabled={disabledDependencies()}
                     />
                     <FormMessage />
                 </FormItem>

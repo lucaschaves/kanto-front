@@ -1,5 +1,5 @@
 import { getApi } from "@/services";
-import { capitalize } from "@/utils";
+import { capitalize, resolveKeyObj } from "@/utils";
 import { useCallback, useEffect, useState } from "react";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 import {
@@ -11,7 +11,7 @@ import {
     SingleSelect,
 } from "../..";
 
-interface IItem {
+interface IData {
     id: string;
     name: string;
 }
@@ -20,10 +20,14 @@ interface IFSelectLabelSingleApiProps extends InputProps {
     label: string;
     name: string;
     url: string;
+    keyValue?: string;
     description?: string;
     rules?: RegisterOptions;
     dependencies?: string[];
+    onEffect?: (value: any) => void;
 }
+
+const LIMIT = 50;
 
 const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
     const {
@@ -33,38 +37,87 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
         description,
         rules,
         className,
+        keyValue,
         dependencies = [],
+        onEffect = () => ({}),
         ...rest
     } = props;
 
     const { control, watch } = useFormContext();
 
-    const [items, setItems] = useState<IItem[]>([]);
     const [stateOpen, setOpen] = useState(false);
+    const [stateLoading, setLoading] = useState(false);
+    const [stateData, setData] = useState<{ total: number; rows: IData[] }>({
+        total: 0,
+        rows: [],
+    });
+    const [statePage, setPage] = useState(0);
 
-    const getItems = useCallback(async () => {
-        let params = {};
-        dependencies?.forEach((key) => {
-            params = {
-                ...params,
-                [key]: watch(key),
-            };
-        });
-        const { success, data } = await getApi({
-            url,
-            config: {
-                params,
-            },
-        });
-        if (success) {
-            setItems(
-                data?.map((d: any) => ({
-                    id: d.id?.toString(),
-                    name: capitalize(d.name),
-                }))
-            );
-        }
-    }, [url, dependencies, watch]);
+    const getItems = useCallback(
+        async ({
+            more,
+            page,
+            filter,
+        }: {
+            more?: boolean;
+            page?: number;
+            filter?: any;
+        }) => {
+            setLoading(true);
+
+            let params = {};
+            dependencies?.forEach((key) => {
+                params = {
+                    ...params,
+                    [key]: watch(key),
+                };
+            });
+
+            const actualPage = page
+                ? page
+                : more
+                ? statePage + LIMIT
+                : statePage;
+            const { success, data } = await getApi({
+                url,
+                config: {
+                    params: {
+                        ...params,
+                        skip: actualPage,
+                        limit: LIMIT,
+                        field: filter?.field,
+                        filter: filter?.filter,
+                    },
+                },
+            });
+            if (success) {
+                setPage(actualPage);
+                const newData = actualPage === 0 ? [] : stateData.rows;
+                data?.rows?.map((d: any) => {
+                    let valueName = d?.name;
+                    if (keyValue) {
+                        if (keyValue?.includes(".")) {
+                            valueName = resolveKeyObj(keyValue, d);
+                        } else {
+                            valueName = d[keyValue];
+                        }
+                    }
+                    let objData = {
+                        ...d,
+                        id: d.id?.toString(),
+                        name: capitalize(valueName),
+                    };
+                    newData.push(objData);
+                });
+                setData({
+                    rows: newData,
+                    total: data?.total,
+                });
+            }
+            setLoading(false);
+        },
+        [url, stateData, dependencies, watch]
+    );
 
     const disabledDependencies = useCallback(() => {
         let objDisabled = false;
@@ -76,7 +129,9 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
     }, [watch, dependencies]);
 
     useEffect(() => {
-        if (stateOpen) getItems();
+        if (stateOpen) {
+            getItems({ page: 0 });
+        }
     }, [stateOpen]);
 
     return (
@@ -89,12 +144,18 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
                     <FormLabel>{label}</FormLabel>
                     <SingleSelect
                         selected={field.value}
-                        options={items}
+                        options={stateData.rows}
                         {...rest}
                         {...field}
                         open={stateOpen}
                         toggle={setOpen}
+                        // total={stateData.total}
+                        // loading={stateLoading}
                         disabled={disabledDependencies()}
+                        onChange={(e) => {
+                            field.onChange(e);
+                            onEffect(e);
+                        }}
                     />
                     <FormMessage />
                 </FormItem>

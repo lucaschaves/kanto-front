@@ -4,14 +4,11 @@ import {
     FButtonSubmit,
     FInputLabel,
     IBaseFormRef,
-    ToggleGroup,
-    ToggleGroupItem,
 } from "@/components";
 import { useAuth } from "@/context";
 import { cn } from "@/lib";
 import { messageSuccess, sleep } from "@/utils";
 import { useCallback, useRef, useState } from "react";
-import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -95,7 +92,7 @@ const PageLogin = () => {
                         "pl-4"
                     )}
                 >
-                    <ToggleGroup
+                    {/* <ToggleGroup
                         type="single"
                         value={i18n.language?.toLowerCase()}
                         onValueChange={i18n.changeLanguage}
@@ -114,7 +111,7 @@ const PageLogin = () => {
                                 title="EN-US"
                             />
                         </ToggleGroupItem>
-                    </ToggleGroup>
+                    </ToggleGroup> */}
                 </div>
                 <BaseForm ref={refForm} onSubmit={onSubmit}>
                     <FInputLabel

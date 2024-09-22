@@ -190,8 +190,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         rulesElements.forEach((element) => {
             const datasetElement = (element as any)?.dataset;
-            if (!rules.includes(datasetElement?.ruleComponentId))
-                element.classList.add("hidden");
+            // if (!rules.includes(datasetElement?.ruleComponentId))
+            // element.classList.add("hidden");
         });
     }, [rules, user]);
 

@@ -1,16 +1,6 @@
-import {
-    BaseForm,
-    Button,
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    FButtonSubmit,
-    FSelectLabel,
-    IBaseFormRef,
-} from "@/components";
-import { cn } from "@/lib";
-import { modulesSettings } from "@/routes/modules";
+import { Modal } from "@/Layout/Modal";
+import { FSelectLabel, IBaseFormRef } from "@/components";
+import { modulesFactory } from "@/routes/modules";
 import { postApi } from "@/services";
 import { useCallback, useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
@@ -50,57 +40,25 @@ const PageInterpreterCreateOrEdit = () => {
     }, [location.pathname]);
 
     return (
-        <Dialog modal open onOpenChange={onClose}>
-            <DialogContent className="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{t("import")}</DialogTitle>
-                </DialogHeader>
-                <div
-                    className={cn(
-                        "flex",
-                        "flex-col",
-                        "w-full",
-                        "justify-center",
-                        "items-center",
-                        "gap-0"
-                    )}
-                >
-                    <BaseForm ref={refForm} onSubmit={onSubmit}>
-                        <span>
-                            {location.state?.ids?.length} Items a serem
-                            importados para
-                        </span>
-                        <FSelectLabel
-                            label={t("table")}
-                            name="table"
-                            items={modulesSettings.map((key) => ({
-                                id: key.name,
-                                name: t(key.name),
-                            }))}
-                        />
-                        <div
-                            className={cn(
-                                "flex",
-                                "w-full",
-                                "items-center",
-                                "justify-end",
-                                "gap-2",
-                                "mt-4"
-                            )}
-                        >
-                            <Button
-                                type="button"
-                                onClick={onClose}
-                                variant="outline"
-                            >
-                                {t("cancel")}
-                            </Button>
-                            <FButtonSubmit label={t("save")} />
-                        </div>
-                    </BaseForm>
-                </div>
-            </DialogContent>
-        </Dialog>
+        <Modal
+            ref={refForm}
+            onClose={onClose}
+            onSubmit={onSubmit}
+            title={t("import")}
+            className="max-w-sm"
+        >
+            <span>
+                {location.state?.ids?.length} Items a serem importados para
+            </span>
+            <FSelectLabel
+                label={t("table")}
+                name="table"
+                items={modulesFactory.map((key) => ({
+                    id: key.name,
+                    name: t(key.name),
+                }))}
+            />
+        </Modal>
     );
 };
 

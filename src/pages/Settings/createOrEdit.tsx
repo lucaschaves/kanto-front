@@ -1,15 +1,5 @@
-import {
-    BaseForm,
-    Button,
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    FButtonSubmit,
-    FInputLabel,
-    IBaseFormRef,
-} from "@/components";
-import { cn } from "@/lib";
+import { Modal } from "@/Layout/Modal";
+import { FInputLabel, IBaseFormRef } from "@/components";
 import { getApi, postApi, putApi } from "@/services";
 import { getParamByPath } from "@/utils";
 import { useCallback, useEffect, useRef } from "react";
@@ -73,50 +63,16 @@ const PageSettingCreateOrEdit = () => {
     }, []);
 
     return (
-        <Dialog modal open onOpenChange={onClose}>
-            <DialogContent className="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{isEdit ? t("edit") : t("add")}</DialogTitle>
-                </DialogHeader>
-                <div
-                    className={cn(
-                        "flex",
-                        "flex-col",
-                        "w-full",
-                        "justify-center",
-                        "items-center",
-                        "gap-0",
-                        "md:gap-2",
-                        "md:flex-row",
-                        "md:flex-wrap",
-                        "md:justify-start"
-                    )}
-                >
-                    <BaseForm ref={refForm} onSubmit={onSubmit}>
-                        <FInputLabel label="Nome" name="name" />
-                        <div
-                            className={cn(
-                                "flex",
-                                "w-full",
-                                "items-center",
-                                "justify-end",
-                                "gap-2",
-                                "mt-4"
-                            )}
-                        >
-                            <Button
-                                type="button"
-                                onClick={onClose}
-                                variant="outline"
-                            >
-                                Cancelar
-                            </Button>
-                            <FButtonSubmit label="Salvar" />
-                        </div>
-                    </BaseForm>
-                </div>
-            </DialogContent>
-        </Dialog>
+        <Modal
+            onClose={onClose}
+            onSubmit={onSubmit}
+            title={isEdit ? t("edit") : t("add")}
+            className="max-w-sm"
+            classNameContent="px-1"
+            ref={refForm}
+        >
+            <FInputLabel label="Nome" name="name" />
+        </Modal>
     );
 };
 

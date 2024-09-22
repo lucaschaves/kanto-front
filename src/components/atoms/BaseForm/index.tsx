@@ -24,7 +24,9 @@ interface IBaseFormProps {
     onError?(e: FieldValues): void;
 }
 
-interface IBaseFormRef extends UseFormReturn<any, any> {}
+interface IBaseFormRef extends UseFormReturn<any, any> {
+    submit: () => void;
+}
 
 const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
     const {
@@ -69,7 +71,7 @@ const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
     );
 
     const handleSubmit = useCallback(
-        async (data: any) => {
+        async (data?: any) => {
             methods.handleSubmit(onValid, onInvalid)(data);
         },
         [methods, onInvalid, onValid]
@@ -79,6 +81,9 @@ const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
         ref,
         () => ({
             ...methods,
+            submit() {
+                handleSubmit();
+            },
         }),
         [methods]
     );

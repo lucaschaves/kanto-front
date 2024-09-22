@@ -1,10 +1,12 @@
 import {
     ArrowBottomRightIcon,
     CardStackIcon,
+    CubeIcon,
     DashboardIcon,
     HomeIcon,
     PersonIcon,
     RocketIcon,
+    TableIcon,
 } from "@radix-ui/react-icons";
 
 export const modulesDef = [
@@ -14,19 +16,81 @@ export const modulesDef = [
         Icon: <DashboardIcon />,
     },
     {
-        name: "products",
-        link: "/products",
-        Icon: <ArrowBottomRightIcon />,
+        name: "productsregistration",
+        link: "/productsregistration",
+        Icon: <TableIcon />,
     },
     {
-        name: "games",
-        link: "/games",
-        Icon: <RocketIcon />,
+        name: "productsreceiving",
+        link: "/productsreceiving",
+        Icon: <CubeIcon />,
     },
     {
-        name: "interpreter",
-        link: "/interpreter",
-        Icon: <CardStackIcon />,
+        name: "productsprocessing",
+        link: "/productsprocessing",
+        Icon: <CubeIcon />,
+    },
+];
+
+export const modulesPayments = [
+    {
+        name: "paymentspvs",
+        link: "/payments/paymentspvs",
+        Icon: <CubeIcon />,
+    },
+];
+
+export const modulesProducts = [
+    {
+        name: "productslist",
+        link: "/products/productslist",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productsrepair",
+        link: "/products/productsrepair",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productsdisposal",
+        link: "/products/productsdisposal",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productsloan",
+        link: "/products/productsloan",
+        Icon: <CubeIcon />,
+    },
+
+    {
+        name: "productslost",
+        link: "/products/productslost",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productspart",
+        link: "/products/productspart",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productsexchange",
+        link: "/products/productsexchange",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productsgift",
+        link: "/products/productsgift",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productstest",
+        link: "/products/productstest",
+        Icon: <CubeIcon />,
+    },
+    {
+        name: "productssold",
+        link: "/products/productssold",
+        Icon: <CubeIcon />,
     },
 ];
 
@@ -37,88 +101,99 @@ export const modulesSettings = [
         Icon: <PersonIcon />,
     },
     {
+        name: "interpreter",
+        link: "/settings/interpreter",
+        Icon: <CardStackIcon />,
+    },
+];
+
+export const modulesFactory = [
+    {
+        name: "games",
+        link: "/factory/games",
+        Icon: <RocketIcon />,
+    },
+    {
+        name: "consoles",
+        link: "/factory/consoles",
+        Icon: <HomeIcon />,
+    },
+    {
+        name: "extras",
+        link: "/factory/extras",
+        Icon: <HomeIcon />,
+    },
+    {
+        name: "accessories",
+        link: "/factory/accessories",
+        Icon: <HomeIcon />,
+    },
+    {
         name: "brands",
-        link: "/settings/brands",
+        link: "/factory/brands",
         Icon: <HomeIcon />,
     },
     {
         name: "generous",
-        link: "/settings/generous",
+        link: "/factory/generous",
         Icon: <HomeIcon />,
     },
     {
         name: "numberofplayers",
-        link: "/settings/numberofplayers",
+        link: "/factory/numberofplayers",
         Icon: <HomeIcon />,
     },
     {
         name: "parentalratings",
-        link: "/settings/parentalratings",
+        link: "/factory/parentalratings",
         Icon: <HomeIcon />,
     },
     {
         name: "publishers",
-        link: "/settings/publishers",
+        link: "/factory/publishers",
         Icon: <HomeIcon />,
     },
     {
         name: "regions",
-        link: "/settings/regions",
-        Icon: <HomeIcon />,
-    },
-    {
-        name: "releaseyears",
-        link: "/settings/releaseyears",
+        link: "/factory/regions",
         Icon: <HomeIcon />,
     },
     {
         name: "developers",
-        link: "/settings/developers",
+        link: "/factory/developers",
         Icon: <HomeIcon />,
     },
     {
-        name: "consoles",
-        link: "/settings/consoles",
+        name: "plataforms",
+        link: "/factory/plataforms",
         Icon: <HomeIcon />,
     },
     {
         name: "typesofconsoles",
-        link: "/settings/typesofconsoles",
+        link: "/factory/typesofconsoles",
         Icon: <HomeIcon />,
     },
-    // {
-    //     name: "paymentmethods",
-    //     link: "/settings/paymentmethods",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "permissiongroups",
-    //     link: "/settings/permissiongroups",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "permissions",
-    //     link: "/settings/permissions",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "models",
-    //     link: "/settings/models",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "categories",
-    //     link: "/settings/categories",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "colors",
-    //     link: "/settings/colors",
-    //     Icon: <HomeIcon />,
-    // },
-    // {
-    //     name: "components",
-    //     link: "/settings/components",
-    //     Icon: <HomeIcon />,
-    // },
+];
+
+export const modulesQuotations = [
+    {
+        name: "quotationsforms",
+        link: "/quotations/quotationsforms",
+        Icon: <ArrowBottomRightIcon />,
+    },
+    {
+        name: "quotationssearchs",
+        link: "/quotations/quotationssearchs",
+        Icon: <ArrowBottomRightIcon />,
+    },
+    {
+        name: "questions",
+        link: "/quotations/questions",
+        Icon: <PersonIcon />,
+    },
+    {
+        name: "questionsgroups",
+        link: "/quotations/questionsgroups",
+        Icon: <CardStackIcon />,
+    },
 ];
