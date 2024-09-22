@@ -17,7 +17,6 @@ import {
     CaretUpIcon,
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
-import { saveAs } from "file-saver";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -137,7 +136,7 @@ const PageInterpreter = () => {
         total: 0,
         rows: [],
     });
-    const [stateXLSX, setXLSX] = useState<any>(null);
+    // const [stateXLSX, setXLSX] = useState<any>(null);
     const [stateWorkbook, setWoorkbook] = useState<{
         [sheet: string]: XLSX.WorkSheet;
     } | null>(null);
@@ -156,7 +155,7 @@ const PageInterpreter = () => {
                     .filter((d) => !!d)
                     .sort();
 
-                setXLSX(dataByColumn.map((d) => ({ name: d })));
+                // setXLSX(dataByColumn.map((d) => ({ name: d })));
                 setData({
                     total: dataByColumn.length,
                     rows: dataByColumn.map((d) => ({ id: d, name: d })),
@@ -208,24 +207,24 @@ const PageInterpreter = () => {
         [location.pathname]
     );
 
-    const handleDownload = useCallback(async () => {
-        const worksheet = XLSX.utils.json_to_sheet(stateXLSX);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        const excelBuffer = XLSX.write(workbook, {
-            bookType: "xlsx",
-            type: "array",
-        });
-        const blob = new Blob([excelBuffer], {
-            type: "application/octet-stream",
-        });
-        saveAs(
-            blob,
-            `${refForm.current?.watch("sheetName")}-${refForm.current?.watch(
-                "column"
-            )}.xlsx`
-        );
-    }, [stateXLSX, refForm]);
+    // const handleDownload = useCallback(async () => {
+    //     const worksheet = XLSX.utils.json_to_sheet(stateXLSX);
+    //     const workbook = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    //     const excelBuffer = XLSX.write(workbook, {
+    //         bookType: "xlsx",
+    //         type: "array",
+    //     });
+    //     const blob = new Blob([excelBuffer], {
+    //         type: "application/octet-stream",
+    //     });
+    //     saveAs(
+    //         blob,
+    //         `${refForm.current?.watch("sheetName")}-${refForm.current?.watch(
+    //             "column"
+    //         )}.xlsx`
+    //     );
+    // }, [stateXLSX, refForm]);
 
     return (
         <>

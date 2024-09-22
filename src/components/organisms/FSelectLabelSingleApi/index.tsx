@@ -46,7 +46,7 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
     const { control, watch } = useFormContext();
 
     const [stateOpen, setOpen] = useState(false);
-    const [stateLoading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [stateData, setData] = useState<{ total: number; rows: IData[] }>({
         total: 0,
         rows: [],

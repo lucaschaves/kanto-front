@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 const PageLogin = () => {
     const { signin, forgot } = useAuth();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const refForm = useRef<IBaseFormRef>(null);

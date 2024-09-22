@@ -27,7 +27,6 @@ const PageGameCreateOrEdit = () => {
     const refForm = useRef<IBaseFormRef>(null);
 
     const [stateLoading, setLoading] = useState(false);
-    const [modeView, setModeView] = useState<"groups" | "tabs">("groups");
     const [file, setFile] = useState<{ url: string; file?: any }>({
         url: "",
         file: null,

@@ -467,7 +467,7 @@ const SegundaEtapa = ({
         if (await onValid("second", data)) nextStep();
     }
 
-    async function onSubmitNewProduct(data: any) {
+    async function onSubmitNewProduct() {
         setOpenNewProduct(false);
         nextStep();
     }
@@ -1103,8 +1103,6 @@ const TerceiraEtapa = ({
 };
 
 const QuartaEtapa = ({ fields }: { fields: any }) => {
-    const [params] = useSearchParams();
-
     return (
         <div
             className={cn(
