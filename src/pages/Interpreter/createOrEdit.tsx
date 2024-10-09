@@ -67,7 +67,7 @@ const PageInterpreterCreateOrEdit = () => {
     useEffect(() => {
         console.log("location", location);
         refForm.current?.reset({
-            ...location.state,
+            ids: location.state?.ids,
         });
     }, [location.pathname]);
 
@@ -83,6 +83,7 @@ const PageInterpreterCreateOrEdit = () => {
             <span>
                 {location.state?.ids?.length} Items a serem importados para
             </span>
+            <input type="hidden" {...refForm.current?.register("ids")} />
             <FSelectLabel
                 label={t("table")}
                 name="table"
