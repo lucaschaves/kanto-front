@@ -7,7 +7,7 @@ import {
 } from "@/constants";
 import { getApi, postApi } from "@/services";
 import { removeProperties } from "@/utils";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface IUser {
     login: string;
@@ -100,91 +100,86 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
     };
 
-    const signin = useCallback(
-        async (props: IUser, callback: VoidFunction, error: VoidFunction) => {
-            const { success, data } = await postApi({
-                url: "/auth/login",
-                body: {
-                    dialeto: "pt-BR",
-                    ...props,
+    const signin = async (
+        props: IUser,
+        callback: VoidFunction,
+        error: VoidFunction
+    ) => {
+        const { success, data } = await postApi({
+            url: "/auth/login",
+            body: {
+                dialeto: "pt-BR",
+                ...props,
+            },
+        });
+
+        if (success) {
+            await signPersist(data);
+            callback();
+        } else {
+            error();
+        }
+    };
+
+    const forgot = async (
+        props: IUserForgot,
+        callback: () => void,
+        error: (err: any) => void
+    ) => {
+        const { success, error: err } = await postApi<any>({
+            url: "/auth/forgot",
+            body: props,
+        });
+        if (success) {
+            callback();
+        } else {
+            error(err);
+        }
+    };
+
+    const reset = async (
+        props: IUserReset,
+        callback: VoidFunction,
+        error: VoidFunction
+    ) => {
+        const { success, data } = await postApi<any>({
+            url: "/auth/reset",
+            body: props,
+        });
+        if (success) {
+            const responseUser = await getApi<any>({
+                url: "/safe/instance",
+                config: {
+                    headers: {
+                        Authorization: data.token,
+                    },
                 },
             });
+            const objUser = {
+                ...data,
+                name: responseUser?.data?.user?.name,
+                email: responseUser?.data?.user?.email,
+            };
+            setUser(objUser);
+            window.sessionStorage.setItem(CONSTANT_TOKEN, data.token);
+            window.sessionStorage.setItem(
+                CONSTANT_USER,
+                JSON.stringify(removeProperties(objUser, "token"))
+            );
+            window.sessionStorage.setItem(CONSTANT_LANGUAGE, "pt");
+            callback();
+        } else {
+            error();
+        }
+    };
 
-            if (success) {
-                await signPersist(data);
-                callback();
-            } else {
-                error();
-            }
-        },
-        []
-    );
-
-    const forgot = useCallback(
-        async (
-            props: IUserForgot,
-            callback: () => void,
-            error: (err: any) => void
-        ) => {
-            const { success, error: err } = await postApi<any>({
-                url: "/auth/forgot",
-                body: props,
-            });
-            if (success) {
-                callback();
-            } else {
-                error(err);
-            }
-        },
-        []
-    );
-
-    const reset = useCallback(
-        async (
-            props: IUserReset,
-            callback: VoidFunction,
-            error: VoidFunction
-        ) => {
-            const { success, data } = await postApi<any>({
-                url: "/auth/reset",
-                body: props,
-            });
-            if (success) {
-                const responseUser = await getApi<any>({
-                    url: "/safe/instance",
-                    config: {
-                        headers: {
-                            Authorization: data.token,
-                        },
-                    },
-                });
-                const objUser = {
-                    ...data,
-                    name: responseUser?.data?.user?.name,
-                    email: responseUser?.data?.user?.email,
-                };
-                setUser(objUser);
-                window.sessionStorage.setItem(CONSTANT_TOKEN, data.token);
-                window.sessionStorage.setItem(
-                    CONSTANT_USER,
-                    JSON.stringify(removeProperties(objUser, "token"))
-                );
-                window.sessionStorage.setItem(CONSTANT_LANGUAGE, "pt");
-                callback();
-            } else {
-                error();
-            }
-        },
-        []
-    );
-
-    const signout = useCallback((callback: VoidFunction) => {
+    const signout = (callback: VoidFunction) => {
         setUser(null);
         window.sessionStorage.clear();
         callback();
-    }, []);
+    };
 
-    const applyRules = useCallback(() => {
+    const applyRules = () => {
         const rulesElements = document.querySelectorAll(
             '[data-rule-component="rule"]'
         );
@@ -193,7 +188,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             // if (!rules.includes(datasetElement?.ruleComponentId))
             // element.classList.add("hidden");
         });
-    }, [rules, user]);
+    };
 
     const value = {
         user,

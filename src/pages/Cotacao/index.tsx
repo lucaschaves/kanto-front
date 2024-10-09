@@ -46,7 +46,7 @@ import { deleteApi, getApi, postApi, putApi } from "@/services";
 import { messageError, sleep } from "@/utils";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -178,7 +178,7 @@ const PrimeiraEtapa = ({
         }
     }
 
-    const getItemsCities = useCallback(async () => {
+    const getItemsCities = async () => {
         const stateWatch = refForm.current?.watch("state");
         if (stateWatch) {
             const response = await getApi({
@@ -192,9 +192,9 @@ const PrimeiraEtapa = ({
                 }))
             );
         }
-    }, [searchCity]);
+    };
 
-    const getItemsStates = useCallback(async () => {
+    const getItemsStates = async () => {
         const response = await getApi({
             url: "https://servicodados.ibge.gov.br/api/v1/localidades/estados?view=nivelado",
             clean: true,
@@ -205,7 +205,7 @@ const PrimeiraEtapa = ({
                 nome: `${k["UF-sigla"]}-${k["UF-nome"]}`,
             }))
         );
-    }, [searchCity]);
+    };
 
     const debounceSearchCity = useDebounce(searchCity, 2000);
 
@@ -472,7 +472,7 @@ const SegundaEtapa = ({
         nextStep();
     }
 
-    const getItemsProducts = useCallback(async () => {
+    const getItemsProducts = async () => {
         const { success, data } = await getApi({
             url: "/quotations/products",
             config: {
@@ -483,9 +483,9 @@ const SegundaEtapa = ({
             },
         });
         if (success) setProducts(data.rows);
-    }, [searchProduct]);
+    };
 
-    const getQuestions = useCallback(async (id: string) => {
+    const getQuestions = async (id: string) => {
         const { success, data } = await getApi({
             url: "/quotations/questions",
             config: {
@@ -495,7 +495,7 @@ const SegundaEtapa = ({
             },
         });
         if (success) setQuestions(data.rows);
-    }, []);
+    };
 
     const debounceSearch = useDebounce(searchProduct, 500);
 
@@ -946,26 +946,23 @@ const TerceiraEtapa = ({
         if (await onValid("three", data)) nextStep();
     }
 
-    const handleDelete = useCallback(
-        async (id: string) => {
-            setLoading(true);
-            const { success } = await deleteApi({
-                url: `/quotations/search/${id}?idForm=${params.get("id")}`,
+    const handleDelete = async (id: string) => {
+        setLoading(true);
+        const { success } = await deleteApi({
+            url: `/quotations/search/${id}?idForm=${params.get("id")}`,
+        });
+        if (success) {
+            const { success: successForm, data } = await getApi({
+                url: `/quotation/${params.get("id")}`,
+                disableMessage: true,
             });
-            if (success) {
-                const { success: successForm, data } = await getApi({
-                    url: `/quotation/${params.get("id")}`,
-                    disableMessage: true,
-                });
-                if (successForm) {
-                    const quotationProducts = formatQuotations(data);
-                    setFields(quotationProducts);
-                }
+            if (successForm) {
+                const quotationProducts = formatQuotations(data);
+                setFields(quotationProducts);
             }
-            setLoading(false);
-        },
-        [params]
-    );
+        }
+        setLoading(false);
+    };
 
     return (
         <div
@@ -1193,78 +1190,76 @@ const PageCotacao = () => {
     const [stateLoading, setLoading] = useState(false);
     const [stateCheckout, setCheckout] = useState({});
 
-    const onValidNextStep = useCallback(
-        async (step: string, data: any): Promise<boolean> => {
-            if (step === "first") {
-                const { success: successProvider, data: dataProvider } =
+    const onValidNextStep = async (
+        step: string,
+        data: any
+    ): Promise<boolean> => {
+        if (step === "first") {
+            const { success: successProvider, data: dataProvider } =
+                await postApi({
+                    url: "/quotations/provider",
+                    body: data,
+                });
+            if (successProvider) {
+                const { success: successQuotation, data: dataQuotation } =
                     await postApi({
-                        url: "/quotations/provider",
-                        body: data,
-                    });
-                if (successProvider) {
-                    const { success: successQuotation, data: dataQuotation } =
-                        await postApi({
-                            url: "/quotations/form",
-                            body: {
-                                providerId: dataProvider.id,
-                            },
-                        });
-                    if (successQuotation) {
-                        navigate(`${location.pathname}?id=${dataQuotation.id}`);
-                        return true;
-                    }
-                }
-            }
-            if (step === "second") {
-                const { success: successSearch, data: dataSearch } =
-                    await postApi({
-                        url: `/quotations/search`,
-                        body: data,
-                    });
-                if (successSearch) {
-                    const formFile = new FormData();
-                    formFile.append("image", data?.image?.file);
-                    await postApi({
-                        url: `/quotation/search/upload/${dataSearch?.id}`,
-                        body: formFile,
-                        config: {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
+                        url: "/quotations/form",
+                        body: {
+                            providerId: dataProvider.id,
                         },
                     });
-
-                    const { success: successForm, data: dataForm } =
-                        await putApi({
-                            url: `/quotations/form/${params.get("id")}`,
-                            body: {
-                                quotationSearchId: dataSearch?.id,
-                            },
-                        });
-                    if (successForm) {
-                        const quotationProducts = formatQuotations(dataForm);
-                        setCotacao(quotationProducts);
-                        return true;
-                    }
-                }
-            }
-            if (step === "three") {
-                const { success: successCheckout, data: dataCheckout } =
-                    await postApi({
-                        url: `/quotation/history/${params?.get("id")}`,
-                        body: {},
-                    });
-                if (successCheckout) {
-                    setCheckout(dataCheckout);
+                if (successQuotation) {
+                    navigate(`${location.pathname}?id=${dataQuotation.id}`);
                     return true;
                 }
             }
-            return true;
-        },
-        [stateCotacao, stateCheckout, params]
-    );
+        }
+        if (step === "second") {
+            const { success: successSearch, data: dataSearch } = await postApi({
+                url: `/quotations/search`,
+                body: data,
+            });
+            if (successSearch) {
+                const formFile = new FormData();
+                formFile.append("image", data?.image?.file);
+                await postApi({
+                    url: `/quotation/search/upload/${dataSearch?.id}`,
+                    body: formFile,
+                    config: {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    },
+                });
 
-    const verifyQuotation = useCallback(async () => {
+                const { success: successForm, data: dataForm } = await putApi({
+                    url: `/quotations/form/${params.get("id")}`,
+                    body: {
+                        quotationSearchId: dataSearch?.id,
+                    },
+                });
+                if (successForm) {
+                    const quotationProducts = formatQuotations(dataForm);
+                    setCotacao(quotationProducts);
+                    return true;
+                }
+            }
+        }
+        if (step === "three") {
+            const { success: successCheckout, data: dataCheckout } =
+                await postApi({
+                    url: `/quotation/history/${params?.get("id")}`,
+                    body: {},
+                });
+            if (successCheckout) {
+                setCheckout(dataCheckout);
+                return true;
+            }
+        }
+        return true;
+    };
+
+    const verifyQuotation = async () => {
         setLoading(true);
         const paramsId = params.get("id");
         if (paramsId) {
@@ -1283,7 +1278,7 @@ const PageCotacao = () => {
             }
         }
         setLoading(false);
-    }, [params]);
+    };
 
     useEffect(() => {
         verifyQuotation();

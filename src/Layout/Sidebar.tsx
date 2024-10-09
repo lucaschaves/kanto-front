@@ -119,7 +119,12 @@ export const Sidebar = (props: IPropsSidebar) => {
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn("flex", "flex-col", "gap-2", "p-2")}
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            // "gap-2",
+                            "p-2"
+                        )}
                         side="right"
                     >
                         {modulesProducts.map((v) => (
@@ -161,7 +166,12 @@ export const Sidebar = (props: IPropsSidebar) => {
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn("flex", "flex-col", "gap-2", "p-2")}
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            // "gap-2",
+                            "p-2"
+                        )}
                         side="right"
                     >
                         {modulesPayments.map((v) => (
@@ -203,7 +213,12 @@ export const Sidebar = (props: IPropsSidebar) => {
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn("flex", "flex-col", "gap-2", "p-2")}
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            // "gap-2",
+                            "p-2"
+                        )}
                         side="right"
                     >
                         {modulesQuotations.map((v) => (
@@ -245,7 +260,12 @@ export const Sidebar = (props: IPropsSidebar) => {
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn("flex", "flex-col", "gap-2", "p-2")}
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            // "gap-2",
+                            "p-2"
+                        )}
                         side="right"
                     >
                         {modulesFactory.map((v) => (
@@ -287,7 +307,12 @@ export const Sidebar = (props: IPropsSidebar) => {
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn("flex", "flex-col", "gap-2", "p-2")}
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            // "gap-2",
+                            "p-2"
+                        )}
                         side="right"
                     >
                         {modulesSettings.map((v) => (

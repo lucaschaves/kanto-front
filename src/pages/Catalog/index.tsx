@@ -4,18 +4,18 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
-import { PageProductRegistrationCreateOrEdit } from "./createOrEdit";
-import { FilterProductsRegistration } from "./filter";
+import { PageCatalogCreateOrEdit } from "./createOrEdit";
+import { FilterCatalogs } from "./filter";
 
-type IProductRegistration = {
+type ICatalog = {
     id: string;
     name: string;
 };
 
-const PageProductsRegistration = () => {
+const PageCatalogs = () => {
     const { t } = useTranslation();
 
-    const [stateColumns] = useState<ColumnDef<IProductRegistration>[]>(() => {
+    const [stateColumns] = useState<ColumnDef<ICatalog>[]>(() => {
         const columns: any[] = [];
         const colsDef: ICreateColumn[] = [
             { name: "select", title: "Select" },
@@ -155,8 +155,4 @@ const PageProductsRegistration = () => {
     );
 };
 
-export {
-    FilterProductsRegistration,
-    PageProductRegistrationCreateOrEdit,
-    PageProductsRegistration,
-};
+export { FilterCatalogs, PageCatalogCreateOrEdit, PageCatalogs };

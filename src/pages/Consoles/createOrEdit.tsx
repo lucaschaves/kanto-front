@@ -11,7 +11,7 @@ import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { getAmbientURL, getParamByPath } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -33,60 +33,75 @@ const PageConsoleCreateOrEdit = () => {
         file: null,
     });
 
-    const onClose = useCallback(() => {
+    const onClose = () => {
         navigate(-1);
-    }, []);
+    };
 
-    const onUploadImage = useCallback(
-        async (id: string) => {
-            const formFile = new FormData();
-            formFile.append("image", file?.file);
-            const { success } = await postApi({
+    const onUploadImage = async (id: string) => {
+        const formFile = new FormData();
+        formFile.append("image", file?.file);
+        const { success } = await postApi({
+            url: `${formActual.substring(
+                0,
+                formActual.length - 1
+            )}/upload/${id}`,
+            body: formFile,
+            config: {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            },
+        });
+        if (success) onClose();
+    };
+
+    const onSubmit = async (data: FieldValues) => {
+        let newData = data;
+
+        newData["tagsDefault"] = "";
+        if (data.consoleWorking) newData.tagsDefault += `consoleWorking,`;
+        if (data.consoleUnlocked) newData.tagsDefault += `consoleUnlocked,`;
+        if (data.consoleTypeUnlocked)
+            newData.tagsDefault += `consoleTypeUnlocked,`;
+        if (data.consoleSealed) newData.tagsDefault += `consoleSealed,`;
+        if (data.consolePackaging) newData.tagsDefault += `consolePackaging,`;
+        if (data.consoleComplete) newData.tagsDefault += `consoleComplete,`;
+
+        delete newData.consoleWorking;
+        delete newData.consoleUnlocked;
+        delete newData.consoleTypeUnlocked;
+        delete newData.consoleSealed;
+        delete newData.consolePackaging;
+        delete newData.consoleComplete;
+
+        if (newData?.releaseYear)
+            newData.releaseYear = [Number(newData.releaseYear)];
+
+        if (isEdit) {
+            const { success, data: dataResp } = await putApi({
                 url: `${formActual.substring(
                     0,
                     formActual.length - 1
-                )}/upload/${id}`,
-                body: formFile,
-                config: {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                },
+                )}/${searchParams.get("id")}`,
+                body: newData,
             });
-            if (success) onClose();
-        },
-        [file, formActual]
-    );
-
-    const onSubmit = useCallback(
-        async (data: FieldValues) => {
-            if (isEdit) {
-                const { success, data: dataResp } = await putApi({
-                    url: `${formActual.substring(
-                        0,
-                        formActual.length - 1
-                    )}/${searchParams.get("id")}`,
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
-            } else {
-                const { success, data: dataResp } = await postApi({
-                    url: formActual.substring(0, formActual.length - 1),
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
             }
-        },
-        [onClose, isEdit, formActual, onUploadImage, file]
-    );
+        } else {
+            const { success, data: dataResp } = await postApi({
+                url: formActual.substring(0, formActual.length - 1),
+                body: newData,
+            });
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
+            }
+        }
+    };
 
-    const getData = useCallback(async () => {
+    const getData = async () => {
         setLoading(true);
         const { success, data } = await getApi({
             url: `${formActual.substring(
@@ -103,10 +118,20 @@ const PageConsoleCreateOrEdit = () => {
                 });
             }
             delete data.images;
-            refForm.current?.reset(data);
+            let newData = data;
+            if (data?.tagsDefault) {
+                data.tagsDefault.split(",").forEach((key: string) => {
+                    newData = {
+                        ...newData,
+                        [key]: true,
+                    };
+                });
+            }
+            delete newData.tagsDefault;
+            refForm.current?.reset(newData);
         }
         setLoading(false);
-    }, [formActual, searchParams]);
+    };
 
     useEffect(() => {
         if (isEdit) getData();
@@ -145,6 +170,44 @@ const PageConsoleCreateOrEdit = () => {
                 />
             </GroupForm>
             <GroupForm
+                title={t("tagsDefault")}
+                className={cn(
+                    "w-full",
+                    "grid",
+                    "grid-cols-2",
+                    "sm:grid-cols-2",
+                    `md:grid-cols-3`,
+                    "gap-1",
+                    "sm:gap-2",
+                    "px-3"
+                )}
+            >
+                <FCheckboxLabel
+                    label={t("consoleComplete")}
+                    name="consoleComplete"
+                />
+                <FCheckboxLabel
+                    label={t("consolePackaging")}
+                    name="consolePackaging"
+                />
+                <FCheckboxLabel
+                    label={t("consoleSealed")}
+                    name="consoleSealed"
+                />
+                <FCheckboxLabel
+                    label={t("consoleTypeUnlocked")}
+                    name="consoleTypeUnlocked"
+                />
+                <FCheckboxLabel
+                    label={t("consoleUnlocked")}
+                    name="consoleUnlocked"
+                />
+                <FCheckboxLabel
+                    label={t("consoleWorking")}
+                    name="consoleWorking"
+                />
+            </GroupForm>
+            <GroupForm
                 title={t("dados")}
                 className={cn(
                     "w-full",
@@ -180,12 +243,6 @@ const PageConsoleCreateOrEdit = () => {
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
-                    label={t("developer")}
-                    name="developerId"
-                    url="/developers"
-                    disabled={stateLoading}
-                />
-                <FSelectLabelMultiApi
                     label={t("brand")}
                     name="brandId"
                     url="/brands"
@@ -200,12 +257,19 @@ const PageConsoleCreateOrEdit = () => {
                 <FSelectLabelMultiApi
                     label={t("typeOfConsole")}
                     name="typeOfConsoleId"
-                    url="/typeofconsoles"
+                    url="/typesofconsoles"
                     disabled={stateLoading}
                 />
-                <FInputLabel
+                <FSelectLabelMultiApi
+                    label={t("plataform")}
+                    name="plataformId"
+                    url="/plataforms"
+                    disabled={stateLoading}
+                />
+                <FSelectLabelMultiApi
                     label={t("storage")}
-                    name="storage"
+                    name="storageId"
+                    url="/storages"
                     disabled={stateLoading}
                 />
                 <FCheckboxLabel

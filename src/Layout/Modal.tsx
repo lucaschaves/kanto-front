@@ -19,17 +19,33 @@ interface IPropsModal {
     title?: string;
     className?: string;
     classNameContent?: string;
+    disabled?: boolean;
     onClose: () => void;
     onSubmit: (data: FieldValues) => void;
 }
 export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
-    const { children, title, onClose, onSubmit, className, classNameContent } =
-        props;
+    const {
+        children,
+        disabled,
+        title,
+        onClose,
+        onSubmit,
+        className,
+        classNameContent,
+    } = props;
 
     const { t } = useTranslation();
 
     return (
-        <Dialog modal open onOpenChange={onClose}>
+        <Dialog
+            modal
+            open
+            onOpenChange={() => {
+                if (!disabled) {
+                    onClose();
+                }
+            }}
+        >
             <DialogContent className={cn("max-w-4xl", className)}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
@@ -74,10 +90,14 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
                                 type="button"
                                 onClick={onClose}
                                 variant="outline"
+                                disabled={disabled}
                             >
                                 {t("cancel")}
                             </Button>
-                            <FButtonSubmit label={t("save")} />
+                            <FButtonSubmit
+                                label={t("save")}
+                                disabled={disabled}
+                            />
                         </div>
                     </div>
                 </BaseForm>

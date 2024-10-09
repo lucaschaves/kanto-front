@@ -11,8 +11,8 @@ import {
 } from "@/components";
 import { cn } from "@/lib";
 import {
+    FilterCatalogs,
     FilterProducts,
-    FilterProductsRegistration,
     FilterQuestions,
     FilterQuestionsGroups,
     FilterQuotationsForms,
@@ -32,13 +32,7 @@ import {
     MagnifyingGlassIcon,
 } from "@radix-ui/react-icons";
 import { FactoryIcon, SettingsIcon } from "lucide-react";
-import {
-    forwardRef,
-    useCallback,
-    useEffect,
-    useImperativeHandle,
-    useState,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -68,9 +62,9 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
 
     const [fields, setFields] = useState("");
 
-    const getFields = useCallback(() => {
+    const getFields = () => {
         setFields(formActual);
-    }, [formActual]);
+    };
 
     useEffect(() => {
         if (openFilters) getFields();
@@ -350,7 +344,7 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
             >
                 {[
                     "products",
-                    "productsregistration",
+                    "catalogs",
                     "questions",
                     "questionsgroups",
                     "quotationsforms",
@@ -394,8 +388,8 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                     "flex-col"
                 )}
             >
-                {["productsregistration"].includes(fields) ? (
-                    <FilterProductsRegistration />
+                {["catalogs"].includes(fields) ? (
+                    <FilterCatalogs />
                 ) : ["quotationsforms"].includes(fields) ? (
                     <FilterQuotationsForms />
                 ) : ["quotationssearchs"].includes(fields) ? (

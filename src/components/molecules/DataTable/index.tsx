@@ -99,7 +99,6 @@ import Papa from "papaparse";
 import {
     CSSProperties,
     SetStateAction,
-    useCallback,
     useEffect,
     useImperativeHandle,
     useRef,
@@ -267,21 +266,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [stateRowFocus, setRowFocus] = useState<any>({});
 
-    const handleSort = useCallback(
-        (propsV: SetStateAction<SortingState>) => {
-            onSortingChange(propsV);
-            const defPagination = {
-                pagination: { skip: 0, limit: limitPage },
-                sort: { field, order },
-            };
-            onPaginationChange({
-                pageSize: defPagination.pagination.limit,
-                pageIndex: defPagination.pagination.skip,
-            });
-            onRefresh(defPagination);
-        },
-        [field, order, sorting, skip, limitPage, pagination]
-    );
+    const handleSort = (propsV: SetStateAction<SortingState>) => {
+        onSortingChange(propsV);
+        const defPagination = {
+            pagination: { skip: 0, limit: limitPage },
+            sort: { field, order },
+        };
+        onPaginationChange({
+            pageSize: defPagination.pagination.limit,
+            pageIndex: defPagination.pagination.skip,
+        });
+        onRefresh(defPagination);
+    };
 
     const table = useReactTable({
         data,
@@ -310,22 +306,19 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         },
     });
 
-    const handleAddOrEditDialog = useCallback(
-        (id?: string) => {
-            if (id) {
-                navigate(`${location.pathname}/edit?id=${id}`);
-            } else {
-                navigate(`${location.pathname}/new`);
-            }
-        },
-        [location.pathname]
-    );
+    const handleAddOrEditDialog = (id?: string) => {
+        if (id) {
+            navigate(`${location.pathname}/edit?id=${id}`);
+        } else {
+            navigate(`${location.pathname}/new`);
+        }
+    };
 
-    const handleRowClick = useCallback((row: any) => {
+    const handleRowClick = (row: any) => {
         setRowFocus(row?.original);
-    }, []);
+    };
 
-    const toggleDelete = useCallback(() => {
+    const toggleDelete = () => {
         if (
             Object.values(rowSelection).length > 0 ||
             Object.values(stateRowFocus).length > 0
@@ -336,9 +329,9 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 message: t("selectALine"),
             });
         }
-    }, [rowSelection, stateRowFocus]);
+    };
 
-    const handleDelete = useCallback(() => {
+    const handleDelete = () => {
         if (Object.values(rowSelection).length) {
             const rowsIds = table
                 .getSelectedRowModel()
@@ -347,62 +340,50 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         } else if (Object.values(stateRowFocus).length) {
             onDelete([stateRowFocus?.id]);
         }
-    }, [stateRowFocus, rowSelection]);
+    };
 
-    const handleRefresh = useCallback(
-        (filters?: any) => {
-            onRefresh({
-                pagination: { skip, limit: limitPage },
-                sort: { field, order },
-                filters,
+    const handleRefresh = (filters?: any) => {
+        onRefresh({
+            pagination: { skip, limit: limitPage },
+            sort: { field, order },
+            filters,
+        });
+    };
+
+    const handleFilterCell = async (propsV: any) => {
+        const refToolbar = getRef<IRefToolbar>(REF_TOOLBAR);
+        refToolbar?.current?.toggleFilters &&
+            refToolbar?.current?.toggleFilters(true);
+        await sleep(50);
+        const value =
+            typeof propsV.value === "object"
+                ? propsV.value?.map((v: any) => v?.name)?.join(",")
+                : propsV.value;
+        const refFormToolbar = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
+        refFormToolbar.current?.reset({
+            [`filter_${propsV.column}`]: value,
+        });
+        await sleep(50);
+        refFormToolbar.current?.submit();
+    };
+
+    const handleHistoryCell = async (id: string, col: string) => {
+        const { success, data } = await getApi({
+            url: `/log/${nameDefault || name}.${id}.${col}`,
+        });
+        if (success) {
+            setHistory({
+                show: true,
+                values: data?.log,
             });
-        },
-        [limitPage, skip, pagination, sorting, field, order]
-    );
+        }
+    };
 
-    const handleFilterCell = useCallback(
-        async (propsV: any) => {
-            const refToolbar = getRef<IRefToolbar>(REF_TOOLBAR);
-            refToolbar?.current?.toggleFilters &&
-                refToolbar?.current?.toggleFilters(true);
-            await sleep(50);
-            const value =
-                typeof propsV.value === "object"
-                    ? propsV.value?.map((v: any) => v?.name)?.join(",")
-                    : propsV.value;
-            const refFormToolbar = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
-            refFormToolbar.current?.reset({
-                [`filter_${propsV.column}`]: value,
-            });
-            await sleep(50);
-            refFormToolbar.current?.submit();
-        },
-        [name]
-    );
+    const handleNavigateTo = (id: string) => {
+        navigate(`${navigateForm}?${filter_name}=${id}`);
+    };
 
-    const handleHistoryCell = useCallback(
-        async (id: string, col: string) => {
-            const { success, data } = await getApi({
-                url: `/log/${nameDefault}.${id}.${col}`,
-            });
-            if (success) {
-                setHistory({
-                    show: true,
-                    values: data?.log,
-                });
-            }
-        },
-        [name, nameDefault, stateHistory]
-    );
-
-    const handleNavigateTo = useCallback(
-        (id: string) => {
-            navigate(`${navigateForm}?${filter_name}=${id}`);
-        },
-        [filter_name, navigateForm]
-    );
-
-    const handleExportCSV = useCallback(() => {
+    const handleExportCSV = () => {
         const dataFormat: any[] = [];
         data.forEach((row: any) => {
             let dataRow = {};
@@ -426,9 +407,9 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
         const con = convertJsonToCSV(dataFormat);
         downloadBlobAsFile(con, name);
-    }, [data, columns, columnVisibility, name]);
+    };
 
-    const handleExportTemplateCSV = useCallback(() => {
+    const handleExportTemplateCSV = () => {
         const dataFormat: any[] = [];
         Array({ length: 1 }).forEach(() => {
             let dataRow = {};
@@ -454,96 +435,90 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
         const con = convertJsonToCSV(dataFormat);
         downloadBlobAsFile(con, name);
-    }, [data, columns, columnVisibility, name]);
+    };
 
-    const handleImportCSV = useCallback(
-        async (file: File) => {
-            Papa.parse(file, {
-                delimiter: ";",
-                header: true,
-                skipEmptyLines: true,
-                complete: async (res) => {
-                    const formatCols: any[] = [];
-                    res.meta.fields?.forEach((key) => {
-                        const findCol = columns.find(
-                            (col: any) => t(col.accessorKey) === key
-                        ) as any;
-                        formatCols.push({
-                            field: key,
-                            fieldName: findCol?.accessorKey,
-                        });
+    const handleImportCSV = async (file: File) => {
+        Papa.parse(file, {
+            delimiter: ";",
+            header: true,
+            skipEmptyLines: true,
+            complete: async (res) => {
+                const formatCols: any[] = [];
+                res.meta.fields?.forEach((key) => {
+                    const findCol = columns.find(
+                        (col: any) => t(col.accessorKey) === key
+                    ) as any;
+                    formatCols.push({
+                        field: key,
+                        fieldName: findCol?.accessorKey,
                     });
-                    const formatData: any[] = [];
-                    res.data.forEach((row: any) => {
-                        let dataRow: any = {};
-                        Object.keys(row).forEach((key: any) => {
-                            const keyData = formatCols.find(
-                                (col) => col.field === key
-                            );
-                            dataRow = {
-                                ...dataRow,
-                                [keyData.fieldName]: row[key],
-                            };
-                        });
-                        formatData.push(dataRow);
-                    });
-                    const { success } = await postApi({
-                        url: nameDefault || name,
-                        body: { data: formatData },
-                    });
-                    if (success) {
-                        messageSuccess({ message: "Sucesso" });
-                    }
-                },
-            });
-            if (refFile.current?.value) {
-                refFile.current.type = "text";
-                refFile.current.value = "";
-                refFile.current.type = "file";
-            }
-        },
-        [refFile, name, nameDefault]
-    );
-
-    const getColumns = useCallback(() => {
-        return columns;
-    }, [columns]);
-
-    const handleActionStatus = useCallback(
-        async (st: string, ids: number[]) => {
-            let idsState = ids;
-            if (ids.length === 0) {
-                if (stateRowFocus?.id) {
-                    idsState = [stateRowFocus?.id];
-                } else {
-                    messageError({
-                        message: "Selecione ao menos uma linha",
-                    });
-                    return;
-                }
-            }
-            const { success } = await putApi({
-                url: urlMethod || name,
-                body: {
-                    ids: idsState,
-                    status: st,
-                },
-            });
-            if (success) {
-                messageSuccess({
-                    message: "Status alterado com sucesso",
                 });
-                handleRefresh();
+                const formatData: any[] = [];
+                res.data.forEach((row: any) => {
+                    let dataRow: any = {};
+                    Object.keys(row).forEach((key: any) => {
+                        const keyData = formatCols.find(
+                            (col) => col.field === key
+                        );
+                        dataRow = {
+                            ...dataRow,
+                            [keyData.fieldName]: row[key],
+                        };
+                    });
+                    formatData.push(dataRow);
+                });
+                const { success } = await postApi({
+                    url: nameDefault || name,
+                    body: { data: formatData },
+                });
+                if (success) {
+                    messageSuccess({ message: "Sucesso" });
+                }
+            },
+        });
+        if (refFile.current?.value) {
+            refFile.current.type = "text";
+            refFile.current.value = "";
+            refFile.current.type = "file";
+        }
+    };
+
+    const getColumns = () => {
+        return columns;
+    };
+
+    const handleActionStatus = async (st: string, ids: number[]) => {
+        let idsState = ids;
+        if (ids.length === 0) {
+            if (stateRowFocus?.id) {
+                idsState = [stateRowFocus?.id];
+            } else {
+                messageError({
+                    message: "Selecione ao menos uma linha",
+                });
+                return;
             }
-        },
-        [stateRowFocus, name, handleRefresh, urlMethod]
-    );
+        }
+        const { success } = await putApi({
+            url: urlMethod || name,
+            body: {
+                ids: idsState,
+                status: st,
+            },
+        });
+        if (success) {
+            messageSuccess({
+                message: "Status alterado com sucesso",
+            });
+            handleRefresh();
+        }
+    };
 
-    const hiddeColumns = useCallback((hiddenCols: VisibilityState) => {
+    const hiddeColumns = (hiddenCols: VisibilityState) => {
         setColumnVisibility(hiddenCols);
-    }, []);
+    };
 
-    const handleApprove = useCallback(async () => {
+    const handleApprove = async () => {
         let idsState = table.getSelectedRowModel().rows.map((r) => r.original);
         if (idsState.length === 0) {
             if (stateRowFocus?.id) {
@@ -560,18 +535,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
             if (t?.gameId) {
                 dataProcuts.push({
                     name: t.gameId?.name,
-                    status: "receiving",
+                    status: "recebimento",
                     receiptDate: new Date(),
                     images: t?.images,
-                    productsRegistrationsId: 1,
+                    catalogsId: 1,
                 });
             } else if (t?.consoleId) {
                 dataProcuts.push({
                     name: t.consoleId?.name,
-                    status: "receiving",
+                    status: "recebimento",
                     receiptDate: new Date(),
                     images: t?.images,
-                    productsRegistrationsId: 1,
+                    catalogsId: 1,
                 });
             }
         });
@@ -588,7 +563,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 message: "Produtos enviados com sucesso",
             });
         }
-    }, [table, stateRowFocus]);
+    };
 
     useEffect(() => {
         if (refInit.current) {
@@ -846,17 +821,17 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         <Separator className="w-full" />
                                         <div className="flex flex-col">
                                             {[
-                                                "receiving",
-                                                "processing",
-                                                "sold",
-                                                "repair",
-                                                "loan",
-                                                "test",
-                                                "disposal",
-                                                "lost",
-                                                "part",
-                                                "exchange",
-                                                "gift",
+                                                "recebimento",
+                                                "processando",
+                                                "vendido",
+                                                "conserto",
+                                                "emprestimo",
+                                                "teste",
+                                                "descarte",
+                                                "perdido",
+                                                "peça",
+                                                "permuta",
+                                                "presente",
                                             ].map((v) => (
                                                 <Button
                                                     key={v}
@@ -1138,6 +1113,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                         getCommonPinningStyles(
                                                             cell.column
                                                         );
+
                                                     return (
                                                         <TableCell
                                                             key={cell.id}
@@ -1152,8 +1128,13 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                             }
                                                             className="text-nowrap"
                                                         >
-                                                            <ContextMenu>
-                                                                <ContextMenuTrigger>
+                                                            {[
+                                                                "id",
+                                                                "select",
+                                                            ].includes(
+                                                                cell.column.id
+                                                            ) ? (
+                                                                <>
                                                                     {flexRender(
                                                                         cell
                                                                             .column
@@ -1161,65 +1142,79 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                                             .cell,
                                                                         cell.getContext()
                                                                     )}
-                                                                </ContextMenuTrigger>
-                                                                <ContextMenuContent className="w-64">
-                                                                    {canNavigate ? (
+                                                                </>
+                                                            ) : (
+                                                                <ContextMenu>
+                                                                    <ContextMenuTrigger>
+                                                                        {flexRender(
+                                                                            cell
+                                                                                .column
+                                                                                .columnDef
+                                                                                .cell,
+                                                                            cell.getContext()
+                                                                        )}
+                                                                    </ContextMenuTrigger>
+                                                                    <ContextMenuContent className="w-64">
+                                                                        {canNavigate ? (
+                                                                            <ContextMenuItem
+                                                                                onClick={() =>
+                                                                                    handleNavigateTo(
+                                                                                        (
+                                                                                            cell
+                                                                                                .row
+                                                                                                .original as any
+                                                                                        )
+                                                                                            .id
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "navigateTo"
+                                                                                )}
+                                                                            </ContextMenuItem>
+                                                                        ) : (
+                                                                            <>
+
+                                                                            </>
+                                                                        )}
                                                                         <ContextMenuItem
                                                                             onClick={() =>
-                                                                                handleNavigateTo(
+                                                                                handleHistoryCell(
                                                                                     (
                                                                                         cell
                                                                                             .row
                                                                                             .original as any
                                                                                     )
+                                                                                        .id,
+                                                                                    cell
+                                                                                        .column
                                                                                         .id
                                                                                 )
                                                                             }
                                                                         >
                                                                             {t(
-                                                                                "navigateTo"
+                                                                                "changeHistory"
                                                                             )}
                                                                         </ContextMenuItem>
-                                                                    ) : (
-                                                                        <></>
-                                                                    )}
-                                                                    <ContextMenuItem
-                                                                        onClick={() =>
-                                                                            handleHistoryCell(
-                                                                                (
-                                                                                    cell
-                                                                                        .row
-                                                                                        .original as any
+                                                                        <ContextMenuItem
+                                                                            onClick={() =>
+                                                                                handleFilterCell(
+                                                                                    {
+                                                                                        column: cell
+                                                                                            .column
+                                                                                            .id,
+                                                                                        value: cell.getValue(),
+                                                                                    }
                                                                                 )
-                                                                                    .id,
-                                                                                cell
-                                                                                    .column
-                                                                                    .id
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            "changeHistory"
-                                                                        )}
-                                                                    </ContextMenuItem>
-                                                                    <ContextMenuItem
-                                                                        onClick={() =>
-                                                                            handleFilterCell(
-                                                                                {
-                                                                                    column: cell
-                                                                                        .column
-                                                                                        .id,
-                                                                                    value: cell.getValue(),
-                                                                                }
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            "filterByCellValue"
-                                                                        )}
-                                                                    </ContextMenuItem>
-                                                                </ContextMenuContent>
-                                                            </ContextMenu>
+                                                                            }
+                                                                        >
+                                                                            {t(
+                                                                                "filterByCellValue"
+                                                                            )}
+                                                                        </ContextMenuItem>
+                                                                    </ContextMenuContent>
+                                                                </ContextMenu>
+                                                            )}
                                                         </TableCell>
                                                     );
                                                 })}

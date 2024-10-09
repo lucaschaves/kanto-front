@@ -103,23 +103,6 @@ const PageConsoles = () => {
                                     <CaretSortIcon className="ml-2 h-4 w-4" />
                                 )}
                             </Button>
-                            {/* <Button
-                                variant="ghost"
-                                className="px-1"
-                                onClick={() => {
-                                    if (column.getIsPinned()) {
-                                        column.pin(false);
-                                    } else {
-                                        column.pin("left");
-                                    }
-                                }}
-                            >
-                                {column.getIsPinned() ? (
-                                    <DrawingPinFilledIcon className="h-4 w-4" />
-                                ) : (
-                                    <DrawingPinIcon className="h-4 w-4" />
-                                )}
-                            </Button> */}
                         </div>
                     );
                 },
@@ -182,13 +165,11 @@ const PageConsoles = () => {
                     );
                 },
                 cell: ({ row }) => (
-                    <div className="capitalize">
-                        {row.getValue("specialEdition")}
-                    </div>
+                    <Checkbox checked={row.getValue("specialEdition")} />
                 ),
             },
             {
-                accessorKey: "storage",
+                accessorKey: "storageId",
                 header: ({ column }) => {
                     return (
                         <div className="flex items-center">
@@ -212,9 +193,12 @@ const PageConsoles = () => {
                         </div>
                     );
                 },
-                cell: ({ row }) => (
-                    <div className="capitalize">{row.getValue("storage")}</div>
-                ),
+                cell: ({ row }) => {
+                    const rowValue = (row.getValue("storageId") as any[])
+                        ?.map((r) => r?.name)
+                        ?.join(", ");
+                    return <div className="capitalize">{rowValue}</div>;
+                },
             },
             {
                 accessorKey: "releaseYear",
@@ -241,11 +225,12 @@ const PageConsoles = () => {
                         </div>
                     );
                 },
-                cell: ({ row }) => (
-                    <div className="capitalize">
-                        {row.getValue("releaseYear")}
-                    </div>
-                ),
+                cell: ({ row }) => {
+                    const rowValue = (row.getValue("releaseYear") as any[])
+                        ?.map((r) => r)
+                        ?.join(", ");
+                    return <div className="capitalize">{rowValue}</div>;
+                },
             },
             {
                 accessorKey: "createdAt",

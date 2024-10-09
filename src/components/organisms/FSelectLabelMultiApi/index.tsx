@@ -1,6 +1,6 @@
 import { getApi } from "@/services";
 import { capitalize } from "@/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 import {
     FormField,
@@ -49,76 +49,69 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
     });
     const [statePage, setPage] = useState(0);
 
-    const getItems = useCallback(
-        async ({
-            more,
-            page,
-            filter,
-        }: {
-            more?: boolean;
-            page?: number;
-            filter?: any;
-        }) => {
-            setLoading(true);
+    const getItems = async ({
+        more,
+        page,
+        filter,
+    }: {
+        more?: boolean;
+        page?: number;
+        filter?: any;
+    }) => {
+        setLoading(true);
 
-            let params = {};
-            dependencies?.forEach((key) => {
-                params = {
+        let params = {};
+        dependencies?.forEach((key) => {
+            params = {
+                ...params,
+                [key]: watch(key),
+            };
+        });
+
+        const actualPage = page ? page : more ? statePage + LIMIT : statePage;
+
+        if (filter?.field) {
+            params = {
+                ...params,
+                [`filter_${filter.field}`]: filter?.filter,
+            };
+        }
+
+        const { success, data } = await getApi({
+            url,
+            config: {
+                params: {
                     ...params,
-                    [key]: watch(key),
-                };
-            });
-
-            const actualPage = page
-                ? page
-                : more
-                ? statePage + LIMIT
-                : statePage;
-
-            if (filter?.field) {
-                params = {
-                    ...params,
-                    [`filter_${filter.field}`]: filter?.filter,
-                };
-            }
-
-            const { success, data } = await getApi({
-                url,
-                config: {
-                    params: {
-                        ...params,
-                        skip: actualPage,
-                        limit: LIMIT,
-                    },
+                    skip: actualPage,
+                    limit: LIMIT,
                 },
+            },
+        });
+        if (success) {
+            setPage(actualPage);
+            const newData = actualPage === 0 ? [] : stateData.rows;
+            data?.rows?.map((d: any) => {
+                newData.push({
+                    id: d.id?.toString(),
+                    name: capitalize(d.name),
+                });
             });
-            if (success) {
-                setPage(actualPage);
-                const newData = actualPage === 0 ? [] : stateData.rows;
-                data?.rows?.map((d: any) => {
-                    newData.push({
-                        id: d.id?.toString(),
-                        name: capitalize(d.name),
-                    });
-                });
-                setData({
-                    rows: newData,
-                    total: data?.total,
-                });
-            }
-            setLoading(false);
-        },
-        [url, stateData]
-    );
+            setData({
+                rows: newData,
+                total: data?.total,
+            });
+        }
+        setLoading(false);
+    };
 
-    const disabledDependencies = useCallback(() => {
+    const disabledDependencies = () => {
         let objDisabled = false;
         dependencies?.forEach((key) => {
             const watchValue = watch(key);
             if (!watchValue) objDisabled = true;
         });
         return objDisabled;
-    }, [watch, dependencies]);
+    };
 
     useEffect(() => {
         if (stateOpen) {

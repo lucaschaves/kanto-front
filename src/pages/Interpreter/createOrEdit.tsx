@@ -2,7 +2,8 @@ import { Modal } from "@/Layout/Modal";
 import { FSelectLabel, IBaseFormRef } from "@/components";
 import { modulesFactory } from "@/routes/modules";
 import { postApi } from "@/services";
-import { useCallback, useEffect, useRef } from "react";
+import { messageSuccess, sleep } from "@/utils";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,24 +15,40 @@ const PageInterpreterCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const onClose = useCallback(() => {
-        navigate(-1);
-    }, []);
+    const [stateDisabled, setDisabled] = useState(false);
 
-    const onSubmit = useCallback(
-        async (data: FieldValues) => {
-            const { ids, table } = data;
-            const dataIds = ids?.map((id: any) => ({ name: id }));
+    const onClose = () => {
+        navigate(-1);
+    };
+
+    const onSubmit = async (data: FieldValues) => {
+        const { ids, table } = data;
+        setDisabled(true);
+        let successAll = true;
+        const dataIds: any[] = ids.map((id: any) => ({ name: id }));
+        const count = Math.ceil(dataIds.length / 1000);
+        let indexCount = 0;
+        for (let index = 0; index < count; index++) {
+            const element = dataIds.slice(indexCount, indexCount + 1000);
             const { success } = await postApi({
                 url: table,
                 body: {
-                    data: dataIds,
+                    data: element,
                 },
             });
-            if (success) onClose();
-        },
-        [onClose]
-    );
+            indexCount += 1000;
+            if (!success) {
+                successAll = false;
+            }
+            await sleep(500);
+        }
+
+        if (successAll) {
+            messageSuccess({ message: "Importado com sucesso" });
+            onClose();
+        }
+        setDisabled(false);
+    };
 
     useEffect(() => {
         refForm.current?.reset({
@@ -46,6 +63,7 @@ const PageInterpreterCreateOrEdit = () => {
             onSubmit={onSubmit}
             title={t("import")}
             className="max-w-sm"
+            disabled={stateDisabled}
         >
             <span>
                 {location.state?.ids?.length} Items a serem importados para

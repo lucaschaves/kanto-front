@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib";
 import { capitalize } from "@/utils";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { KeyboardEvent, useCallback, useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface IItem {
@@ -56,30 +56,24 @@ function MultiSelect({
 
     const [stateFilter, setFilter] = useState("");
 
-    const handleUnselect = useCallback(
-        (itemId: string) => {
-            onChange(selected?.filter((i) => i?.id != itemId));
-        },
-        [onChange, selected]
-    );
+    const handleUnselect = (itemId: string) => {
+        onChange(selected?.filter((i) => i?.id != itemId));
+    };
 
-    const handleFilter = useCallback(
-        (e: KeyboardEvent<HTMLInputElement>) => {
-            switch (e.keyCode) {
-                case 13:
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onRefresh({
-                        page: 0,
-                        filter: { field: "name", filter: stateFilter },
-                    });
-                    break;
-                default:
-                    break;
-            }
-        },
-        [stateFilter]
-    );
+    const handleFilter = (e: KeyboardEvent<HTMLInputElement>) => {
+        switch (e.keyCode) {
+            case 13:
+                e.preventDefault();
+                e.stopPropagation();
+                onRefresh({
+                    page: 0,
+                    filter: { field: "name", filter: stateFilter },
+                });
+                break;
+            default:
+                break;
+        }
+    };
 
     return (
         <Popover open={open} onOpenChange={toggle} {...props}>

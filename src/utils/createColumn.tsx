@@ -1,4 +1,5 @@
 import { Button, Checkbox } from "@/components";
+import { cn } from "@/lib";
 import {
     CaretDownIcon,
     CaretSortIcon,
@@ -18,7 +19,8 @@ type ITypeColumn =
     | "calc"
     | "object"
     | "currency"
-    | "percentage";
+    | "percentage"
+    | "array";
 
 export interface ICreateColumn {
     name: string;
@@ -29,6 +31,7 @@ export interface ICreateColumn {
     fieldCompare?: string;
     enableSorting?: boolean;
     enableHiding?: boolean;
+    capitalize?: boolean;
 }
 
 const formatValueByType = (props: { type: ITypeColumn; value: any }): any => {
@@ -78,6 +81,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
         fieldCompare,
         enableSorting = true,
         enableHiding = true,
+        capitalize = true,
     } = props;
 
     if (name === "select") {
@@ -175,7 +179,12 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     field && rowVal && rowVal[field] ? rowVal[field] : "";
 
                 return (
-                    <div className="capitalize text-center">
+                    <div
+                        className={cn(
+                            capitalize ? "capitalize" : "",
+                            "text-center"
+                        )}
+                    >
                         {formatValueByType({
                             type: subType,
                             value: valObj,
@@ -183,8 +192,34 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     </div>
                 );
             }
+            if (type === "array") {
+                const rowVal = row.getValue(name) as any[];
+                let valArr = "";
+                rowVal.forEach((key) => {
+                    valArr += `${field ? key[field] : ""},`;
+                });
+                valArr = valArr.slice(0, valArr.length - 1);
+                return (
+                    <div
+                        className={cn(
+                            capitalize ? "capitalize" : "",
+                            "text-center"
+                        )}
+                    >
+                        {formatValueByType({
+                            type: subType,
+                            value: valArr,
+                        })}
+                    </div>
+                );
+            }
             return (
-                <div className="capitalize text-center">
+                <div
+                    className={cn(
+                        capitalize ? "capitalize" : "",
+                        "text-center"
+                    )}
+                >
                     {formatValueByType({
                         type,
                         value: row.getValue(name),

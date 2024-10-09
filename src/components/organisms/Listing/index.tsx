@@ -8,7 +8,7 @@ import {
     getParamByPath,
 } from "@/utils";
 import { ColumnDef, VisibilityState } from "@tanstack/react-table";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
@@ -86,94 +86,87 @@ export function Listing<T>(props: IPropsListing<T>) {
     });
     const [stateColumns, setColumns] = useState<ColumnDef<T>[]>(columns ?? []);
 
-    const getData = useCallback(
-        async (propsV?: IOnRefresh) => {
-            setLoading(true);
-            const { success, data } = await getApi({
-                url: formActual,
-                config: {
-                    params: {
-                        skip: propsV?.pagination.skip,
-                        limit: propsV?.pagination.limit,
-                        order: propsV?.sort.field,
-                        direction: propsV?.sort.order,
-                        ...propsV?.filters,
-                    },
+    const getData = async (propsV?: IOnRefresh) => {
+        setLoading(true);
+        const { success, data } = await getApi({
+            url: formActual,
+            config: {
+                params: {
+                    skip: propsV?.pagination.skip,
+                    limit: propsV?.pagination.limit,
+                    order: propsV?.sort.field,
+                    direction: propsV?.sort.order,
+                    ...propsV?.filters,
                 },
-            });
-            if (success) {
-                if (!columns) {
-                    const columnsAt: any[] = [];
-                    if (data.rows.length) {
-                        const row = data.rows[0];
-                        Object.keys(row).forEach((key) => {
-                            const column = createColumn({
-                                name: key,
-                                title: t(key) as any,
-                            });
-                            columnsAt.push(column);
+            },
+        });
+        if (success) {
+            if (!columns) {
+                const columnsAt: any[] = [];
+                if (data.rows.length) {
+                    const row = data.rows[0];
+                    Object.keys(row).forEach((key) => {
+                        const column = createColumn({
+                            name: key,
+                            title: t(key) as any,
                         });
-                    }
-                    setColumns([columnId as any, ...columnsAt]);
+                        columnsAt.push(column);
+                    });
                 }
-                if (columnsDynamic) {
-                    const columnsAt: any[] = columns
-                        ? [...columns]
-                        : [...stateColumns];
-                    if (data.rows.length) {
-                        const row = data.rows[0];
-                        Object.keys(row).forEach((key) => {
-                            columnsDynamic.forEach((d) => {
-                                if (key === d) {
-                                    const arrayName = row[d];
-                                    arrayName?.forEach((a: any) => {
-                                        const column = createColumn({
-                                            name: a.name,
-                                            title: capitalize(t(a.name)) as any,
-                                            type: "currency",
-                                        });
-                                        columnsAt.push(column);
-                                    });
-                                }
-                            });
-                        });
-                    }
-                    setColumns(columnsAt);
-                }
-                setData(data);
+                setColumns([columnId as any, ...columnsAt]);
             }
-            setLoading(false);
-        },
-        [formActual, stateColumns]
-    );
-
-    const handleDelete = useCallback(
-        async (ids: string[]) => {
-            const promisesDelete = ids.map(async (id) => {
-                const responsePromise = new Promise((resolve, reject) => {
-                    console.log(index);
-                    deleteApi({
-                        url: urlDelete
-                            ? `${urlDelete}/${id}`
-                            : `${formActual.substring(
-                                  0,
-                                  formActual.length
-                              )}/${id}`,
-                    })
-                        .then((value) => {
-                            resolve(value);
-                        })
-                        .catch((err) => {
-                            reject(err);
+            if (columnsDynamic) {
+                const columnsAt: any[] = columns
+                    ? [...columns]
+                    : [...stateColumns];
+                if (data.rows.length) {
+                    const row = data.rows[0];
+                    Object.keys(row).forEach((key) => {
+                        columnsDynamic.forEach((d) => {
+                            if (key === d) {
+                                const arrayName = row[d];
+                                arrayName?.forEach((a: any) => {
+                                    const column = createColumn({
+                                        name: a.name,
+                                        title: capitalize(t(a.name)) as any,
+                                        type: "currency",
+                                    });
+                                    columnsAt.push(column);
+                                });
+                            }
                         });
-                });
-                return responsePromise;
+                    });
+                }
+                setColumns(columnsAt);
+            }
+            setData(data);
+        }
+        setLoading(false);
+    };
+
+    const handleDelete = async (ids: string[]) => {
+        const promisesDelete = ids.map(async (id) => {
+            const responsePromise = new Promise((resolve, reject) => {
+                deleteApi({
+                    url: urlDelete
+                        ? `${urlDelete}/${id}`
+                        : `${formActual.substring(
+                              0,
+                              formActual.length - 1
+                          )}/${id}`,
+                })
+                    .then((value) => {
+                        resolve(value);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
             });
-            await Promise.all(promisesDelete);
-            getData();
-        },
-        [formActual, getData, urlDelete]
-    );
+            return responsePromise;
+        });
+        await Promise.all(promisesDelete);
+        getData();
+    };
 
     useEffect(() => {
         if (

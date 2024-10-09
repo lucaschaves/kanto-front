@@ -8,13 +8,7 @@ import {
 } from "@/components";
 import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
-import {
-    decodeSearchParams,
-    encodeSearchParams,
-    getParamByPath,
-    sleep,
-} from "@/utils";
-import { useCallback } from "react";
+import { decodeSearchParams, encodeSearchParams, sleep } from "@/utils";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -26,22 +20,17 @@ export const FilterSettings = () => {
 
     const { t } = useTranslation();
 
-    const formActual = getParamByPath(location.pathname, 2);
+    const onSubmit = async (data: any) => {
+        navigate(
+            {
+                pathname: location.pathname,
+                search: encodeSearchParams(data),
+            },
+            {}
+        );
+    };
 
-    const onSubmit = useCallback(
-        async (data: any) => {
-            navigate(
-                {
-                    pathname: location.pathname,
-                    search: encodeSearchParams(data),
-                },
-                {}
-            );
-        },
-        [formActual]
-    );
-
-    const onClose = useCallback(async () => {
+    const onClose = async () => {
         navigate(
             {
                 pathname: location.pathname,
@@ -52,7 +41,7 @@ export const FilterSettings = () => {
         await sleep(500);
         const refForm = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
         refForm.current?.reset({});
-    }, [REF_TOOLBAR_FORM, formActual, location.pathname]);
+    };
 
     return (
         <BaseForm

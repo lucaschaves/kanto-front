@@ -8,9 +8,10 @@ import {
 import { useAuth } from "@/context";
 import { cn } from "@/lib";
 import { messageSuccess, sleep } from "@/utils";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { version } from "../../../package.json";
 
 const PageLogin = () => {
     const { signin, forgot } = useAuth();
@@ -21,7 +22,7 @@ const PageLogin = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = useCallback(async (data: any) => {
+    const onSubmit = async (data: any) => {
         setLoading(true);
         await sleep(1000);
         signin(
@@ -34,7 +35,7 @@ const PageLogin = () => {
                 setLoading(false);
             }
         );
-    }, []);
+    };
 
     return (
         <div
@@ -77,6 +78,9 @@ const PageLogin = () => {
                     "max-w-xl"
                 )}
             >
+                <span className="fixed top-2 right-5 text-gray-600">
+                    {version}
+                </span>
                 <img
                     src="https://http2.mlstatic.com/storage/mshops-appearance-api/images/31/153113631/logo-2023070222281087800.webp"
                     width={180}

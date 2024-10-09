@@ -15,10 +15,19 @@ interface IFCheckboxLabelProps {
     className?: string;
     description?: string;
     rules?: RegisterOptions;
+    onEffect?: () => void;
 }
 
 const FCheckboxLabel = (props: IFCheckboxLabelProps) => {
-    const { label, name, description, rules, className, ...rest } = props;
+    const {
+        label,
+        name,
+        description,
+        rules,
+        className,
+        onEffect = () => ({}),
+        ...rest
+    } = props;
 
     const { control } = useFormContext();
 
@@ -29,21 +38,22 @@ const FCheckboxLabel = (props: IFCheckboxLabelProps) => {
             render={({ field }) => (
                 <FormItem
                     className={cn(
-                        "flex flex-row items-start space-x-3 space-y-0 p-4",
+                        "flex flex-col items-start justify-start pt-1.5 gap-2",
                         className
                     )}
                 >
+                    <FormLabel>{label}</FormLabel>
                     <FormControl>
                         <Checkbox
                             checked={field.value}
-                            onCheckedChange={field.onChange}
+                            onCheckedChange={(e) => {
+                                field.onChange(e);
+                                onEffect();
+                            }}
                             {...rest}
                         />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                        <FormLabel>{label}</FormLabel>
-                        <FormDescription>{description}</FormDescription>
-                    </div>
+                    <FormDescription>{description}</FormDescription>
                 </FormItem>
             )}
         />

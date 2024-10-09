@@ -22,7 +22,7 @@ const getHiddenColumns = (name: string): any => {
         ].includes(name)
     ) {
         return {
-            productRegistrationId: false,
+            catalogId: false,
             sku: false,
             dateSale: false,
             dateEntryInStock: false,
@@ -41,7 +41,7 @@ const getHiddenColumns = (name: string): any => {
     }
     if (["productstest", "productsloan"].includes(name)) {
         return {
-            productRegistrationId: false,
+            catalogId: false,
             sku: false,
             dateSale: false,
             status: false,
@@ -96,7 +96,7 @@ const getHiddenColumns = (name: string): any => {
     // return {
     //     id: false,
     //     name: false,
-    //     productRegistrationId: false,
+    //     catalogId: false,
     //     sku: false,
     //     dateSale: false,
     //     status: false,
@@ -128,9 +128,9 @@ const PageProducts = ({ index }: { index: number }) => {
             { name: "sku", title: t("sku") },
             { name: "name", title: t("name") },
             {
-                name: "productRegistrationId",
-                title: t("productRegistrationId"),
-                type: "object",
+                name: "catalogId",
+                title: t("catalogId"),
+                type: "array",
                 field: "type",
             },
 
@@ -205,7 +205,7 @@ const PageProducts = ({ index }: { index: number }) => {
                 nameDefault="products"
                 canStatus
                 urlDelete="product"
-                columnsDynamic={["PaymentPv"]}
+                columnsDynamic={["payments"]}
                 // urlMethod="product"
             />
             <Outlet />

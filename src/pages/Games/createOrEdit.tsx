@@ -1,7 +1,9 @@
 import { Modal } from "@/Layout/Modal";
 import {
     Dropzone,
+    FCheckboxLabel,
     FInputLabel,
+    FSelectLabel,
     FSelectLabelMultiApi,
     GroupForm,
     IBaseFormRef,
@@ -9,8 +11,8 @@ import {
 import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { getAmbientURL, getParamByPath } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { getAmbientURL } from "@/utils";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -22,7 +24,6 @@ const PageGameCreateOrEdit = () => {
     const { t } = useTranslation();
 
     const isEdit = location.pathname.includes("edit");
-    const formActual = getParamByPath(location.pathname, 2);
 
     const refForm = useRef<IBaseFormRef>(null);
 
@@ -32,66 +33,69 @@ const PageGameCreateOrEdit = () => {
         file: null,
     });
 
-    const onClose = useCallback(() => {
+    const onClose = () => {
         navigate(-1);
-    }, []);
+    };
 
-    const onUploadImage = useCallback(
-        async (id: string) => {
-            const formFile = new FormData();
-            formFile.append("image", file?.file);
-            const { success } = await postApi({
-                url: `${formActual.substring(
-                    0,
-                    formActual.length - 1
-                )}/upload/${id}`,
-                body: formFile,
-                config: {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
+    const onUploadImage = async (id: string) => {
+        const formFile = new FormData();
+        formFile.append("image", file?.file);
+        const { success } = await postApi({
+            url: `game/upload/${id}`,
+            body: formFile,
+            config: {
+                headers: {
+                    "Content-Type": "multipart/form-data",
                 },
+            },
+        });
+        if (success) onClose();
+    };
+
+    const onSubmit = async (data: FieldValues) => {
+        let newData = data;
+
+        newData["tagsDefault"] = "";
+        if (data.conservation) newData.tagsDefault += `conservation,`;
+        if (data.gameWorking) newData.tagsDefault += `gameWorking,`;
+        if (data.gameSealed) newData.tagsDefault += `gameSealed,`;
+        if (data.gamePackagingRental)
+            newData.tagsDefault += `gamePackagingRental,`;
+        if (data.gamePackaging) newData.tagsDefault += `gamePackaging,`;
+        if (data.gameManual) newData.tagsDefault += `gameManual,`;
+
+        delete newData.conservation;
+        delete newData.gameWorking;
+        delete newData.gameSealed;
+        delete newData.gamePackagingRental;
+        delete newData.gamePackaging;
+        delete newData.gameManual;
+
+        if (isEdit) {
+            const { success, data: dataResp } = await putApi({
+                url: `game/${searchParams.get("id")}`,
+                body: newData,
             });
-            if (success) onClose();
-        },
-        [file, formActual]
-    );
-
-    const onSubmit = useCallback(
-        async (data: FieldValues) => {
-            if (isEdit) {
-                const { success, data: dataResp } = await putApi({
-                    url: `${formActual.substring(
-                        0,
-                        formActual.length - 1
-                    )}/${searchParams.get("id")}`,
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
-            } else {
-                const { success, data: dataResp } = await postApi({
-                    url: formActual.substring(0, formActual.length - 1),
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
             }
-        },
-        [onClose, isEdit, formActual, onUploadImage, file]
-    );
+        } else {
+            const { success, data: dataResp } = await postApi({
+                url: "game",
+                body: newData,
+            });
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
+            }
+        }
+    };
 
-    const getData = useCallback(async () => {
+    const getData = async () => {
         setLoading(true);
         const { success, data } = await getApi({
-            url: `${formActual.substring(
-                0,
-                formActual.length - 1
-            )}/${searchParams.get("id")}`,
+            url: `game/${searchParams.get("id")}`,
         });
         if (success) {
             if (data.images?.image) {
@@ -102,10 +106,21 @@ const PageGameCreateOrEdit = () => {
                 });
             }
             delete data.images;
-            refForm.current?.reset(data);
+
+            let newData = data;
+            if (data?.tagsDefault) {
+                data.tagsDefault.split(",").forEach((key: string) => {
+                    newData = {
+                        ...newData,
+                        [key]: true,
+                    };
+                });
+            }
+            delete newData.tagsDefault;
+            refForm.current?.reset(newData);
         }
         setLoading(false);
-    }, [formActual, searchParams]);
+    };
 
     useEffect(() => {
         if (isEdit) getData();
@@ -141,6 +156,57 @@ const PageGameCreateOrEdit = () => {
                     label={t("ean")}
                     name="ean"
                     disabled={stateLoading}
+                />
+            </GroupForm>
+            <GroupForm
+                title={t("tagsDefault")}
+                className={cn(
+                    "w-full",
+                    "grid",
+                    "grid-cols-2",
+                    "sm:grid-cols-2",
+                    `md:grid-cols-3`,
+                    "gap-1",
+                    "sm:gap-2",
+                    "px-3"
+                )}
+            >
+                <FCheckboxLabel label={t("gameManual")} name="gameManual" />
+                <FCheckboxLabel
+                    label={t("gamePackaging")}
+                    name="gamePackaging"
+                />
+                <FCheckboxLabel
+                    label={t("gamePackagingRental")}
+                    name="gamePackagingRental"
+                />
+                <FCheckboxLabel label={t("gameSealed")} name="gameSealed" />
+                <FCheckboxLabel label={t("gameWorking")} name="gameWorking" />
+                <FSelectLabel
+                    label={t("conservation")}
+                    name="conservation"
+                    items={[
+                        {
+                            id: "1",
+                            name: "1",
+                        },
+                        {
+                            id: "2",
+                            name: "2",
+                        },
+                        {
+                            id: "3",
+                            name: "3",
+                        },
+                        {
+                            id: "4",
+                            name: "4",
+                        },
+                        {
+                            id: "5",
+                            name: "5",
+                        },
+                    ]}
                 />
             </GroupForm>
             <GroupForm
@@ -207,6 +273,10 @@ const PageGameCreateOrEdit = () => {
                     name="numberOfPlayerId"
                     url="/numberofplayers"
                     disabled={stateLoading}
+                />
+                <FCheckboxLabel
+                    label={t("specialEdition")}
+                    name="specialEdition"
                 />
             </GroupForm>
             <GroupForm

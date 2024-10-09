@@ -16,8 +16,8 @@ export const modulesDef = [
         Icon: <DashboardIcon />,
     },
     {
-        name: "productsregistration",
-        link: "/productsregistration",
+        name: "catalogs",
+        link: "/catalogs",
         Icon: <TableIcon />,
     },
     {
@@ -129,8 +129,23 @@ export const modulesFactory = [
         Icon: <HomeIcon />,
     },
     {
+        name: "storages",
+        link: "/factory/storages",
+        Icon: <HomeIcon />,
+    },
+    {
+        name: "colors",
+        link: "/factory/colors",
+        Icon: <HomeIcon />,
+    },
+    {
         name: "brands",
         link: "/factory/brands",
+        Icon: <HomeIcon />,
+    },
+    {
+        name: "models",
+        link: "/factory/models",
         Icon: <HomeIcon />,
     },
     {

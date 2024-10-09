@@ -1,7 +1,7 @@
 import { cn } from "@/lib";
 import { getApi } from "@/services";
 import { capitalize } from "@/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 import {
     FormControl,
@@ -49,7 +49,7 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
     const [items, setItems] = useState<IItem[]>([]);
     const [stateOpen, setOpen] = useState(false);
 
-    const getItems = useCallback(async () => {
+    const getItems = async () => {
         let params = {};
         dependencies?.forEach((key) => {
             params = {
@@ -71,16 +71,16 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
                 }))
             );
         }
-    }, [url, dependencies, watch]);
+    };
 
-    const disabledDependencies = useCallback(() => {
+    const disabledDependencies = () => {
         let objDisabled = false;
         dependencies?.forEach((key) => {
             const watchValue = watch(key);
             if (!watchValue) objDisabled = true;
         });
         return objDisabled;
-    }, [watch, dependencies]);
+    };
 
     useEffect(() => {
         if (stateOpen) getItems();

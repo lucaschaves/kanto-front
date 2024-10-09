@@ -4,7 +4,7 @@ import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { getAmbientURL, getParamByPath } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -26,60 +26,54 @@ const PageAccessoryCreateOrEdit = () => {
         file: null,
     });
 
-    const onClose = useCallback(() => {
+    const onClose = () => {
         navigate(-1);
-    }, []);
+    };
 
-    const onUploadImage = useCallback(
-        async (id: string) => {
-            const formFile = new FormData();
-            formFile.append("image", file?.file);
-            const { success } = await postApi({
+    const onUploadImage = async (id: string) => {
+        const formFile = new FormData();
+        formFile.append("image", file?.file);
+        const { success } = await postApi({
+            url: `${formActual.substring(
+                0,
+                formActual.length - 1
+            )}/upload/${id}`,
+            body: formFile,
+            config: {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            },
+        });
+        if (success) onClose();
+    };
+
+    const onSubmit = async (data: FieldValues) => {
+        if (isEdit) {
+            const { success, data: dataResp } = await putApi({
                 url: `${formActual.substring(
                     0,
                     formActual.length - 1
-                )}/upload/${id}`,
-                body: formFile,
-                config: {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                },
+                )}/${searchParams.get("id")}`,
+                body: data,
             });
-            if (success) onClose();
-        },
-        [file, formActual]
-    );
-
-    const onSubmit = useCallback(
-        async (data: FieldValues) => {
-            if (isEdit) {
-                const { success, data: dataResp } = await putApi({
-                    url: `${formActual.substring(
-                        0,
-                        formActual.length - 1
-                    )}/${searchParams.get("id")}`,
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
-            } else {
-                const { success, data: dataResp } = await postApi({
-                    url: formActual.substring(0, formActual.length - 1),
-                    body: data,
-                });
-                if (success) {
-                    if (file?.file) onUploadImage(dataResp?.id);
-                    else onClose();
-                }
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
             }
-        },
-        [onClose, isEdit, formActual, onUploadImage, file]
-    );
+        } else {
+            const { success, data: dataResp } = await postApi({
+                url: formActual.substring(0, formActual.length - 1),
+                body: data,
+            });
+            if (success) {
+                if (file?.file) onUploadImage(dataResp?.id);
+                else onClose();
+            }
+        }
+    };
 
-    const getData = useCallback(async () => {
+    const getData = async () => {
         setLoading(true);
         const { success, data } = await getApi({
             url: `${formActual.substring(
@@ -99,7 +93,7 @@ const PageAccessoryCreateOrEdit = () => {
             refForm.current?.reset(data);
         }
         setLoading(false);
-    }, [formActual, searchParams]);
+    };
 
     useEffect(() => {
         if (isEdit) getData();

@@ -23,7 +23,7 @@ const PagePaymentsPv = () => {
             { name: "select", title: "Select" },
             { name: "id", title: t("id") },
             { name: "name", title: t("name") },
-            { name: "value", title: t("Função") },
+            { name: "value", title: t("Função"), capitalize: false },
             { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
             { name: "createdAt", title: t("createdAt"), type: "datetime" },
         ];
@@ -33,6 +33,7 @@ const PagePaymentsPv = () => {
                     name: col.name,
                     title: col.title,
                     type: col?.type as any,
+                    capitalize: col.capitalize,
                 })
             );
         });

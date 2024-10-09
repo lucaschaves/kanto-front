@@ -17,7 +17,7 @@ import {
     CaretUpIcon,
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
@@ -141,31 +141,28 @@ const PageInterpreter = () => {
         [sheet: string]: XLSX.WorkSheet;
     } | null>(null);
 
-    const handleSubmit = useCallback(
-        (data: any) => {
-            if (stateWorkbook) {
-                const { sheetName, column } = data;
-                const sheetsWork = XLSX.utils.sheet_to_json(
-                    stateWorkbook[sheetName]
-                );
-                const dataByColumn = sheetsWork
-                    .map((d: any) => String(d[column])?.toLowerCase())
-                    .filter((d, i, s) => s.indexOf(d) === i)
-                    .filter((d) => d != "undefined")
-                    .filter((d) => !!d)
-                    .sort();
+    const handleSubmit = (data: any) => {
+        if (stateWorkbook) {
+            const { sheetName, column } = data;
+            const sheetsWork = XLSX.utils.sheet_to_json(
+                stateWorkbook[sheetName]
+            );
+            const dataByColumn = sheetsWork
+                .map((d: any) => String(d[column])?.toLowerCase())
+                .filter((d, i, s) => s.indexOf(d) === i)
+                .filter((d) => d != "undefined")
+                .filter((d) => !!d)
+                .sort();
 
-                // setXLSX(dataByColumn.map((d) => ({ name: d })));
-                setData({
-                    total: dataByColumn.length,
-                    rows: dataByColumn.map((d) => ({ id: d, name: d })),
-                });
-            }
-        },
-        [file, stateWorkbook]
-    );
+            // setXLSX(dataByColumn.map((d) => ({ name: d })));
+            setData({
+                total: dataByColumn.length,
+                rows: dataByColumn.map((d) => ({ id: d, name: d })),
+            });
+        }
+    };
 
-    const handleChange = useCallback((data: any) => {
+    const handleChange = (data: any) => {
         setLoading(true);
         const reader = new FileReader();
         reader.onload = (event: any) => {
@@ -178,36 +175,30 @@ const PageInterpreter = () => {
         };
         reader.readAsArrayBuffer(data.file);
         setFile(data);
-    }, []);
+    };
 
-    const handleChangeSheet = useCallback(
-        (sheetName: string) => {
-            if (stateWorkbook) {
-                const sheetsWork = XLSX.utils.sheet_to_json(
-                    stateWorkbook[sheetName]
-                )[0] as any;
-                const columns = Object.keys(sheetsWork).map((key) => ({
-                    id: key,
-                    name: key,
-                }));
-                setOptionsColumns(columns);
-            }
-        },
-        [stateWorkbook]
-    );
+    const handleChangeSheet = (sheetName: string) => {
+        if (stateWorkbook) {
+            const sheetsWork = XLSX.utils.sheet_to_json(
+                stateWorkbook[sheetName]
+            )[0] as any;
+            const columns = Object.keys(sheetsWork).map((key) => ({
+                id: key,
+                name: key,
+            }));
+            setOptionsColumns(columns);
+        }
+    };
 
-    const onImport = useCallback(
-        (ids: string[]) => {
-            navigate(`${location.pathname}/import`, {
-                state: {
-                    ids,
-                },
-            });
-        },
-        [location.pathname]
-    );
+    const onImport = (ids: string[]) => {
+        navigate(`${location.pathname}/import`, {
+            state: {
+                ids,
+            },
+        });
+    };
 
-    // const handleDownload = useCallback(async () => {
+    // const handleDownload = async () => {
     //     const worksheet = XLSX.utils.json_to_sheet(stateXLSX);
     //     const workbook = XLSX.utils.book_new();
     //     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
@@ -224,7 +215,7 @@ const PageInterpreter = () => {
     //             "column"
     //         )}.xlsx`
     //     );
-    // }, [stateXLSX, refForm]);
+    // }
 
     return (
         <>

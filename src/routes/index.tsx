@@ -4,6 +4,8 @@ import { RequireAuth } from "@/hooks";
 import {
     PageAccessories,
     PageAccessoryCreateOrEdit,
+    PageCatalogCreateOrEdit,
+    PageCatalogs,
     PageCotacao,
     PageCotacaoHello,
     PageDashboard,
@@ -18,12 +20,11 @@ import {
     PageInterpreter,
     PageInterpreterCreateOrEdit,
     PageLogin,
+    PageNotifications,
     PagePaymentsPv,
     PagePaymentsPvCreateOrEdit,
     PageProductCreateOrEdit,
-    PageProductRegistrationCreateOrEdit,
     PageProducts,
-    PageProductsRegistration,
     PageQuestionCreateOrEdit,
     PageQuestions,
     PageQuestionsGroupCreateOrEdit,
@@ -34,6 +35,8 @@ import {
     PageQuotationsSearchs,
     PageSettingCreateOrEdit,
     PageSettings,
+    PageUserCreateOrEdit,
+    PageUsers,
 } from "@/pages";
 import { PageConsoleCreateOrEdit, PageConsoles } from "@/pages/Consoles";
 import { createBrowserRouter } from "react-router-dom";
@@ -71,6 +74,11 @@ export const appRoutes = () => {
                     path: "/",
                     errorElement: <PageError />,
                     element: <PageDashboard />,
+                },
+                {
+                    path: "/notifications",
+                    errorElement: <PageError />,
+                    element: <PageNotifications />,
                 },
                 {
                     path: "/productsreceiving",
@@ -151,19 +159,19 @@ export const appRoutes = () => {
                     })),
                 },
                 {
-                    path: "/productsregistration",
+                    path: "/catalogs",
                     errorElement: <PageError />,
-                    element: <PageProductsRegistration />,
+                    element: <PageCatalogs />,
                     children: [
                         {
-                            path: "/productsregistration/new",
+                            path: "/catalogs/new",
                             errorElement: <PageError />,
-                            element: <PageProductRegistrationCreateOrEdit />,
+                            element: <PageCatalogCreateOrEdit />,
                         },
                         {
-                            path: "/productsregistration/edit",
+                            path: "/catalogs/edit",
                             errorElement: <PageError />,
-                            element: <PageProductRegistrationCreateOrEdit />,
+                            element: <PageCatalogCreateOrEdit />,
                         },
                     ],
                 },
@@ -208,17 +216,17 @@ export const appRoutes = () => {
                         {
                             path: "/settings/users",
                             errorElement: <PageError />,
-                            element: <PageSettings />,
+                            element: <PageUsers />,
                             children: [
                                 {
                                     path: "/settings/users/new",
                                     errorElement: <PageError />,
-                                    element: <PageSettingCreateOrEdit />,
+                                    element: <PageUserCreateOrEdit />,
                                 },
                                 {
                                     path: "/settings/users/edit",
                                     errorElement: <PageError />,
-                                    element: <PageSettingCreateOrEdit />,
+                                    element: <PageUserCreateOrEdit />,
                                 },
                             ],
                         },

@@ -482,7 +482,7 @@ const PageQuotationsForms = () => {
                 name="quotationsform"
                 filter_name="filter_form_id"
                 navigateForm="/quotations/quotationssearchs"
-                canAdd={false}
+                // canAdd={false}
             />
             <Outlet />
         </>

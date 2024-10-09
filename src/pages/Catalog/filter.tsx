@@ -12,11 +12,10 @@ import {
 import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import { decodeSearchParams, encodeSearchParams, sleep } from "@/utils";
-import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export const FilterProductsRegistration = () => {
+export const FilterCatalogs = () => {
     const [getRef, setRef] = useDynamicRefs();
 
     const navigate = useNavigate();
@@ -24,22 +23,17 @@ export const FilterProductsRegistration = () => {
 
     const { t } = useTranslation();
 
-    const formActual = "productsregistration";
+    const onSubmit = async (data: any) => {
+        navigate(
+            {
+                pathname: location.pathname,
+                search: encodeSearchParams(data),
+            },
+            {}
+        );
+    };
 
-    const onSubmit = useCallback(
-        async (data: any) => {
-            navigate(
-                {
-                    pathname: location.pathname,
-                    search: encodeSearchParams(data),
-                },
-                {}
-            );
-        },
-        [formActual]
-    );
-
-    const onClose = useCallback(async () => {
+    const onClose = async () => {
         navigate(
             {
                 pathname: location.pathname,
@@ -50,7 +44,7 @@ export const FilterProductsRegistration = () => {
         await sleep(500);
         const refForm = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
         refForm.current?.reset({});
-    }, [REF_TOOLBAR_FORM, formActual, location.pathname]);
+    };
 
     return (
         <BaseForm

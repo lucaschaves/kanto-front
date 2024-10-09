@@ -111,23 +111,6 @@ const PageGames = () => {
                                     <CaretSortIcon className="ml-2 h-4 w-4" />
                                 )}
                             </Button>
-                            {/* <Button
-                                variant="ghost"
-                                className="px-1"
-                                onClick={() => {
-                                    if (column.getIsPinned()) {
-                                        column.pin(false);
-                                    } else {
-                                        column.pin("left");
-                                    }
-                                }}
-                            >
-                                {column.getIsPinned() ? (
-                                    <DrawingPinFilledIcon className="h-4 w-4" />
-                                ) : (
-                                    <DrawingPinIcon className="h-4 w-4" />
-                                )}
-                            </Button> */}
                         </div>
                     );
                 },
@@ -165,7 +148,7 @@ const PageGames = () => {
                 ),
             },
             {
-                accessorKey: "consoleId",
+                accessorKey: "plataformId",
                 header: ({ column }) => {
                     return (
                         <div className="flex items-center">
@@ -177,7 +160,7 @@ const PageGames = () => {
                                     )
                                 }
                             >
-                                {t("console")}
+                                {t("plataform")}
                                 {column.getIsSorted() === "desc" ? (
                                     <CaretDownIcon className="ml-2 h-4 w-4" />
                                 ) : column.getIsSorted() === "asc" ? (
@@ -190,7 +173,7 @@ const PageGames = () => {
                     );
                 },
                 cell: ({ row }) => {
-                    const rowValue = (row.getValue("consoleId") as any[])
+                    const rowValue = (row.getValue("plataformId") as any[])
                         ?.map((r) => r?.name)
                         ?.join(", ");
                     return <div className="capitalize">{rowValue}</div>;

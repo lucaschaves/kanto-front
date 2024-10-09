@@ -2,12 +2,13 @@ import { Modal } from "@/Layout/Modal";
 import {
     FCheckboxLabel,
     FInputLabel,
+    FSelectLabel,
     GroupForm,
     IBaseFormRef,
 } from "@/components";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -22,41 +23,38 @@ export const PageQuestionCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const onClose = useCallback(() => {
+    const onClose = () => {
         navigate(-1);
-    }, []);
+    };
 
-    const onSubmit = useCallback(
-        async (data: FieldValues) => {
-            if (isEdit) {
-                const { success } = await putApi({
-                    url: `/question/${searchParams.get("id")}`,
-                    body: data,
-                });
-                if (success) {
-                    onClose();
-                }
-            } else {
-                const { success } = await postApi({
-                    url: "/question",
-                    body: data,
-                });
-                if (success) {
-                    onClose();
-                }
+    const onSubmit = async (data: FieldValues) => {
+        if (isEdit) {
+            const { success } = await putApi({
+                url: `/question/${searchParams.get("id")}`,
+                body: data,
+            });
+            if (success) {
+                onClose();
             }
-        },
-        [onClose, isEdit]
-    );
+        } else {
+            const { success } = await postApi({
+                url: "/question",
+                body: data,
+            });
+            if (success) {
+                onClose();
+            }
+        }
+    };
 
-    const getData = useCallback(async () => {
+    const getData = async () => {
         const { success, data } = await getApi({
             url: `/question/${searchParams.get("id")}`,
         });
         if (success) {
             refForm.current?.reset(data);
         }
-    }, [searchParams, refForm]);
+    };
 
     useEffect(() => {
         if (isEdit) getData();
@@ -95,7 +93,24 @@ export const PageQuestionCreateOrEdit = () => {
                 <FCheckboxLabel label={t("unlocked")} name="unlocked" />
                 <FCheckboxLabel label={t("withBox")} name="withBox" />
                 <FCheckboxLabel label={t("working")} name="working" />
-                <FInputLabel label={t("conservation")} name="conservation" />
+                <FSelectLabel
+                    label={t("conservation")}
+                    name="conservation"
+                    items={[
+                        {
+                            id: "1",
+                            name: "1",
+                        },
+                        {
+                            id: "2",
+                            name: "2",
+                        },
+                        {
+                            id: "3",
+                            name: "3",
+                        },
+                    ]}
+                />
             </GroupForm>
         </Modal>
     );

@@ -34,13 +34,14 @@ import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import { getApi, putApi } from "@/services";
 import {
+    BellIcon,
     ExitIcon,
     HamburgerMenuIcon,
     PersonIcon,
     StarIcon,
 } from "@radix-ui/react-icons";
-import { Copy } from "lucide-react";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { ChevronRight, Copy } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -54,6 +55,13 @@ export interface IPropsOutletContext {
     openToolbar?: boolean;
 }
 
+interface INotification {
+    id: number;
+    link?: string;
+    message: string;
+    read: boolean;
+}
+
 const Layout = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -65,47 +73,38 @@ const Layout = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
+    const [stateNotifications, setNotifications] = useState<INotification[]>(
+        []
+    );
     const [stateUser, setUser] = useState<string | null>(null);
     const [stateLoading, setLoading] = useState(false);
     const [stateOpenSidebar, setOpenSidebar] = useState(false);
     const [stateOpenToolbar, setOpenToolbar] = useState(false);
     const [stateOpenFilters, setOpenFilter] = useState(false);
 
-    const toggleSidebar = useCallback(
-        () => setOpenSidebar(!stateOpenSidebar),
-        [stateOpenSidebar]
-    );
+    const toggleSidebar = () => setOpenSidebar(!stateOpenSidebar);
 
-    const toggleToolbar = useCallback(
-        () => setOpenToolbar(!stateOpenToolbar),
-        [stateOpenToolbar]
-    );
+    const toggleToolbar = () => setOpenToolbar(!stateOpenToolbar);
 
-    const toggleFilters = useCallback(
-        (p?: boolean) => {
-            if (!!p) {
-                setOpenFilter(p);
-            } else {
-                setOpenFilter(!stateOpenFilters);
-            }
-        },
-        [stateOpenFilters]
-    );
+    const toggleFilters = (p?: boolean) => {
+        if (!!p) {
+            setOpenFilter(p);
+        } else {
+            setOpenFilter(!stateOpenFilters);
+        }
+    };
 
-    const onSubmit = useCallback(
-        async (data: any) => {
-            const { success } = await putApi({
-                url: `user/${stateUser}`,
-                body: data,
-            });
-            if (success) {
-                setUser(null);
-            }
-        },
-        [stateUser]
-    );
+    const onSubmit = async (data: any) => {
+        const { success } = await putApi({
+            url: `user/${stateUser}`,
+            body: data,
+        });
+        if (success) {
+            setUser(null);
+        }
+    };
 
-    const getDataUser = useCallback(async () => {
+    const getDataUser = async () => {
         setLoading(true);
         const { success, data } = await getApi({
             url: `/user/${stateUser}`,
@@ -114,7 +113,16 @@ const Layout = () => {
             refForm.current?.reset(data);
         }
         setLoading(false);
-    }, [stateUser]);
+    };
+
+    const getNotifications = async () => {
+        const { success, data } = await getApi({
+            url: `/notifications`,
+        });
+        if (success) {
+            setNotifications(data.rows);
+        }
+    };
 
     useEffect(() => {
         if (!!stateUser) getDataUser();
@@ -122,6 +130,10 @@ const Layout = () => {
 
     useEffect(() => {
         applyRules();
+    }, [location.pathname]);
+
+    useEffect(() => {
+        getNotifications();
     }, [location.pathname]);
 
     return (
@@ -224,9 +236,50 @@ const Layout = () => {
                                 "flex",
                                 "items-center",
                                 "justify-end",
-                                "gap-2"
+                                "gap-4"
                             )}
                         >
+                            <Popover>
+                                <PopoverTrigger>
+                                    <Button variant="ghost" size="icon">
+                                        <BellIcon width={20} height={20} />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="flex flex-col gap-2 p-2 max-w-60 mr-2">
+                                    <span className="text-sm text-center w-full">
+                                        Notificações
+                                    </span>
+                                    <Separator />
+                                    {stateNotifications.map((notify) => (
+                                        <Button
+                                            key={notify.id}
+                                            variant="ghost"
+                                            className="flex items-center justify-start gap-2"
+                                            onClick={() => {
+                                                if (notify.link)
+                                                    navigate(notify.link);
+                                            }}
+                                        >
+                                            {notify.message}
+                                            <ChevronRight
+                                                width={15}
+                                                height={15}
+                                            />
+                                        </Button>
+                                    ))}
+                                    <Separator />
+                                    <Button
+                                        variant="ghost"
+                                        className="flex items-center justify-start gap-2"
+                                        onClick={() =>
+                                            navigate("/notifications")
+                                        }
+                                    >
+                                        <BellIcon />
+                                        Ver todos
+                                    </Button>
+                                </PopoverContent>
+                            </Popover>
                             <Popover>
                                 <PopoverTrigger>
                                     <Button variant="ghost" size="icon">

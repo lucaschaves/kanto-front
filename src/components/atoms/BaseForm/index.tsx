@@ -1,11 +1,5 @@
 import { cn } from "@/lib";
-import React, {
-    ReactNode,
-    Ref,
-    forwardRef,
-    useCallback,
-    useImperativeHandle,
-} from "react";
+import React, { ReactNode, Ref, forwardRef, useImperativeHandle } from "react";
 import {
     FieldErrors,
     FieldValues,
@@ -43,39 +37,30 @@ const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
         resolver,
     });
 
-    const onValid = useCallback(
-        (data: FieldValues, event?: React.BaseSyntheticEvent) => {
-            if (event?.preventDefault) {
-                event?.preventDefault();
-                event?.stopPropagation();
-            }
-            onSubmit(data, event);
-        },
-        [id, onSubmit]
-    );
+    const onValid = (data: FieldValues, event?: React.BaseSyntheticEvent) => {
+        if (event?.preventDefault) {
+            event?.preventDefault();
+            event?.stopPropagation();
+        }
+        onSubmit(data, event);
+    };
 
-    const onInvalid = useCallback(
-        (
-            errors: FieldErrors<FieldValues>,
-            event?: React.BaseSyntheticEvent
-        ) => {
-            if (event?.preventDefault) {
-                event?.preventDefault();
-            }
-            if (event?.stopPropagation) {
-                event?.stopPropagation();
-            }
-            onError && onError(errors);
-        },
-        [onError]
-    );
+    const onInvalid = (
+        errors: FieldErrors<FieldValues>,
+        event?: React.BaseSyntheticEvent
+    ) => {
+        if (event?.preventDefault) {
+            event?.preventDefault();
+        }
+        if (event?.stopPropagation) {
+            event?.stopPropagation();
+        }
+        onError && onError(errors);
+    };
 
-    const handleSubmit = useCallback(
-        async (data?: any) => {
-            methods.handleSubmit(onValid, onInvalid)(data);
-        },
-        [methods, onInvalid, onValid]
-    );
+    const handleSubmit = async (data?: any) => {
+        methods.handleSubmit(onValid, onInvalid)(data);
+    };
 
     useImperativeHandle(
         ref,

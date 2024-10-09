@@ -36,13 +36,14 @@ function SingleSelect({
     className,
     open,
     toggle,
+    disabled,
     ...props
 }: SingleSelectProps) {
     const { t } = useTranslation();
 
     return (
         <Popover open={open} onOpenChange={toggle} {...props}>
-            <PopoverTrigger asChild>
+            <PopoverTrigger asChild disabled={disabled}>
                 <Button
                     variant="outline"
                     role="combobox"
@@ -52,7 +53,8 @@ function SingleSelect({
                         "w-full",
                         "justify-between",
                         "min-h-9",
-                        "h-9"
+                        "h-9",
+                        "truncate"
                     )}
                     onClick={() => toggle(!open)}
                 >
@@ -63,7 +65,8 @@ function SingleSelect({
                             "justify-start",
                             "gap-1",
                             "px-2",
-                            "font-normal"
+                            "font-normal",
+                            "truncate"
                         )}
                     >
                         {capitalize(selected?.name)}

@@ -77,7 +77,7 @@ const chartConfigMercados = {
 } satisfies ChartConfig;
 
 const chartDataStatus = [
-    { status: "Processamento", items: 186 },
+    { status: "Processando", items: 186 },
     { status: "Conserto", items: 305 },
     { status: "Recebimento", items: 237 },
     { status: "Estoque", items: 73 },
