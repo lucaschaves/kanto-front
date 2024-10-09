@@ -26,8 +26,10 @@ const PageInterpreterCreateOrEdit = () => {
         setDisabled(true);
         try {
             let successAll = true;
+            console.log("ids", table, ids);
             const dataIds: any[] = ids?.map((id: any) => ({ name: id }));
-            if (dataIds.length) {
+            console.log("dataIds", dataIds);
+            if (dataIds?.length) {
                 const count = Math.ceil(dataIds.length / 1000);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
