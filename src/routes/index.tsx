@@ -39,7 +39,7 @@ import {
     PageUsers,
 } from "@/pages";
 import { PageConsoleCreateOrEdit, PageConsoles } from "@/pages/Consoles";
-import { createBrowserRouter } from "react-router-dom";
+import { createMemoryRouter } from "react-router-dom";
 import {
     modulesDef,
     modulesFactory,
@@ -373,7 +373,8 @@ export const appRoutes = () => {
         },
     ];
 
-    return createBrowserRouter(arrRoutes);
+    return createMemoryRouter(arrRoutes);
+    // return createBrowserRouter(arrRoutes);
 };
 
 export { modulesDef, modulesFactory, modulesQuotations, modulesSettings };
