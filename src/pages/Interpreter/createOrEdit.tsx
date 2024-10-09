@@ -2,7 +2,7 @@ import { Modal } from "@/Layout/Modal";
 import { FSelectLabel, IBaseFormRef } from "@/components";
 import { modulesFactory } from "@/routes/modules";
 import { postApi } from "@/services";
-import { messageSuccess, sleep } from "@/utils";
+import { messageError, messageSuccess, sleep } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -24,30 +24,42 @@ const PageInterpreterCreateOrEdit = () => {
     const onSubmit = async (data: FieldValues) => {
         const { ids, table } = data;
         setDisabled(true);
-        let successAll = true;
-        const dataIds: any[] = ids.map((id: any) => ({ name: id }));
-        const count = Math.ceil(dataIds.length / 1000);
-        let indexCount = 0;
-        for (let index = 0; index < count; index++) {
-            const element = dataIds.slice(indexCount, indexCount + 1000);
-            const { success } = await postApi({
-                url: table,
-                body: {
-                    data: element,
-                },
-            });
-            indexCount += 1000;
-            if (!success) {
-                successAll = false;
-            }
-            await sleep(500);
-        }
+        try {
+            let successAll = true;
+            const dataIds: any[] = ids?.map((id: any) => ({ name: id }));
+            if (dataIds.length) {
+                const count = Math.ceil(dataIds.length / 1000);
+                let indexCount = 0;
+                for (let index = 0; index < count; index++) {
+                    const element = dataIds.slice(
+                        indexCount,
+                        indexCount + 1000
+                    );
+                    const { success } = await postApi({
+                        url: table,
+                        body: {
+                            data: element,
+                        },
+                    });
+                    indexCount += 1000;
+                    if (!success) {
+                        successAll = false;
+                    }
+                    await sleep(500);
+                }
 
-        if (successAll) {
-            messageSuccess({ message: "Importado com sucesso" });
-            onClose();
+                if (successAll) {
+                    messageSuccess({ message: "Importado com sucesso" });
+                    onClose();
+                }
+            } else {
+                messageError({ message: "Não há dados a importar" });
+            }
+            setDisabled(false);
+        } catch (err) {
+            console.error("error", err);
+            setDisabled(false);
         }
-        setDisabled(false);
     };
 
     useEffect(() => {
