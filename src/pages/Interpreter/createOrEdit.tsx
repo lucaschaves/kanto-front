@@ -16,18 +16,19 @@ const PageInterpreterCreateOrEdit = () => {
     const refForm = useRef<IBaseFormRef>(null);
 
     const [stateDisabled, setDisabled] = useState(false);
+    const [stateIds, setIds] = useState<string[]>([]);
 
     const onClose = () => {
         navigate(-1);
     };
 
     const onSubmit = async (data: FieldValues) => {
-        const { ids, table } = data;
+        const { table } = data;
         setDisabled(true);
         try {
             let successAll = true;
-            console.log("ids", table, ids);
-            const dataIds: any[] = ids?.map((id: any) => ({ name: id }));
+            console.log("ids", table, stateIds);
+            const dataIds: any[] = stateIds?.map((id: any) => ({ name: id }));
             console.log("dataIds", dataIds);
             if (dataIds?.length) {
                 const count = Math.ceil(dataIds.length / 1000);
@@ -65,10 +66,7 @@ const PageInterpreterCreateOrEdit = () => {
     };
 
     useEffect(() => {
-        console.log("location", location);
-        refForm.current?.reset({
-            ids: location.state?.ids,
-        });
+        setIds(location.state?.ids);
     }, [location.pathname]);
 
     return (
@@ -83,7 +81,6 @@ const PageInterpreterCreateOrEdit = () => {
             <span>
                 {location.state?.ids?.length} Items a serem importados para
             </span>
-            <input type="hidden" {...refForm.current?.register("ids")} />
             <FSelectLabel
                 label={t("table")}
                 name="table"
