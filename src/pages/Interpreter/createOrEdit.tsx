@@ -65,6 +65,7 @@ const PageInterpreterCreateOrEdit = () => {
     };
 
     useEffect(() => {
+        console.log("location", location);
         refForm.current?.reset({
             ...location.state,
         });
