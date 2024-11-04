@@ -619,7 +619,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                     }
                 });
                 let successAll = true;
-                const countSend = 300;
+                const countSend = 100;
                 const count = Math.ceil(formatData.length / countSend);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
