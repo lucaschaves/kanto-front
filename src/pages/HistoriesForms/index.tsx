@@ -53,7 +53,7 @@ const PageHistoriesForms = () => {
             accessorKey: "id",
             header: ({ column }) => {
                 return (
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <Button
                             variant="ghost"
                             onClick={() =>
@@ -61,6 +61,7 @@ const PageHistoriesForms = () => {
                                     column.getIsSorted() == "asc"
                                 )
                             }
+                            className="pl-0"
                         >
                             {t("id")}
                             {column.getIsSorted() === "desc" ? (
@@ -87,6 +88,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("adjusted")}
                         {column.getIsSorted() === "desc" ? (
@@ -114,6 +116,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("budgetedValues")}
                         {column.getIsSorted() === "desc" ? (
@@ -143,6 +146,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("completionDate")}
                         {column.getIsSorted() === "desc" ? (
@@ -172,6 +176,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("finalValue")}
                         {column.getIsSorted() === "desc" ? (
@@ -201,6 +206,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("finished")}
                         {column.getIsSorted() === "desc" ? (
@@ -228,6 +234,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("openingDate")}
                         {column.getIsSorted() === "desc" ? (
@@ -249,7 +256,7 @@ const PageHistoriesForms = () => {
             },
         },
         {
-            accessorKey: "paymentMethodId",
+            accessorKey: "paymentMethod",
             header: ({ column }) => {
                 return (
                     <Button
@@ -257,8 +264,9 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
-                        {t("paymentMethodId")}
+                        {t("paymentMethod")}
                         {column.getIsSorted() === "desc" ? (
                             <CaretDownIcon className="ml-2 h-4 w-4" />
                         ) : column.getIsSorted() === "asc" ? (
@@ -272,7 +280,7 @@ const PageHistoriesForms = () => {
             cell: ({ row }) => {
                 return (
                     <div className="capitalize">
-                        {row.getValue("paymentMethodId")}
+                        {row.getValue("paymentMethod")}
                     </div>
                 );
             },
@@ -286,6 +294,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("receiptDate")}
                         {column.getIsSorted() === "desc" ? (
@@ -315,6 +324,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("received")}
                         {column.getIsSorted() === "desc" ? (
@@ -342,6 +352,7 @@ const PageHistoriesForms = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("returned")}
                         {column.getIsSorted() === "desc" ? (

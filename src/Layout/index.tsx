@@ -32,6 +32,7 @@ import { CONSTANT_TOKEN } from "@/constants";
 import { useAuth } from "@/context";
 import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
+import { modulesAll } from "@/routes/modules";
 import { getApi, putApi } from "@/services";
 import {
     BellIcon,
@@ -67,7 +68,7 @@ const Layout = () => {
     const navigate = useNavigate();
 
     const { t, i18n } = useTranslation();
-    const { applyRules, signout, user } = useAuth();
+    const { applyRules, signout, user, favorites } = useAuth();
 
     const [, setRef] = useDynamicRefs();
 
@@ -124,6 +125,16 @@ const Layout = () => {
         }
     };
 
+    const getLinkFav = () => {
+        if (favorites?.data?.length) {
+            const findFav = modulesAll.find(
+                (f) => f.name === favorites.data[0].name
+            );
+            if (findFav) return findFav.link;
+        }
+        return "/productsreceiving";
+    };
+
     useEffect(() => {
         if (!!stateUser) getDataUser();
     }, [stateUser]);
@@ -135,6 +146,8 @@ const Layout = () => {
     useEffect(() => {
         getNotifications();
     }, [location.pathname]);
+
+    const linkFav = getLinkFav();
 
     return (
         <>
@@ -198,13 +211,19 @@ const Layout = () => {
                             <Breadcrumb>
                                 <BreadcrumbList>
                                     <BreadcrumbItem>
-                                        <BreadcrumbLink href="/">
+                                        <BreadcrumbLink href={linkFav}>
                                             {t("home")}
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
                                     {location.pathname
                                         .split("/")
-                                        .filter((item) => !!item)
+                                        .filter(
+                                            (_, i) =>
+                                                i ===
+                                                location.pathname.split("/")
+                                                    .length -
+                                                    1
+                                        )
                                         .map((item, i, s) =>
                                             i < s.length - 1 ? (
                                                 <Fragment key={item}>

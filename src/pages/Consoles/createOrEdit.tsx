@@ -238,37 +238,37 @@ const PageConsoleCreateOrEdit = () => {
                 />
                 <FSelectLabelMultiApi
                     label={t("color")}
-                    name="colorId"
+                    name="color"
                     url="/colors"
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
                     label={t("brand")}
-                    name="brandId"
+                    name="brand"
                     url="/brands"
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
                     label={t("model")}
-                    name="modelId"
+                    name="model"
                     url="/models"
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
                     label={t("typeOfConsole")}
-                    name="typeOfConsoleId"
+                    name="typeOfConsole"
                     url="/typesofconsoles"
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
                     label={t("plataform")}
-                    name="plataformId"
+                    name="plataform"
                     url="/plataforms"
                     disabled={stateLoading}
                 />
                 <FSelectLabelMultiApi
                     label={t("storage")}
-                    name="storageId"
+                    name="storage"
                     url="/storages"
                     disabled={stateLoading}
                 />
@@ -309,7 +309,11 @@ const PageConsoleCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone onChange={setFile} disabled={stateLoading} />
+                    <Dropzone
+                        onChange={setFile}
+                        // disabled={stateLoading}
+                        disabled
+                    />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

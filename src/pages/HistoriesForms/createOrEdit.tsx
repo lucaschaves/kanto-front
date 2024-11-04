@@ -76,7 +76,7 @@ export const PageHistoriesFormsCreateOrEdit = () => {
             >
                 <FSelectLabelSingleApi
                     label={t("region")}
-                    name="regionId"
+                    name="region"
                     url="/regions"
                 />
             </GroupForm>

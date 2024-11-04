@@ -31,6 +31,7 @@ interface MultiSelectProps {
     disabled?: boolean;
     loading?: boolean;
     disabledMore?: boolean;
+    single?: boolean;
     total?: number;
     moreOptions?: () => void;
     onRefresh?: (props: any) => void;
@@ -50,6 +51,7 @@ function MultiSelect({
     onRefresh = () => ({}),
     disabledMore = true,
     total,
+    single,
     ...props
 }: MultiSelectProps) {
     const { t } = useTranslation();
@@ -128,7 +130,7 @@ function MultiSelect({
                                     </button>
                                 </Badge>
                             ))}
-                        {selected.length > 6 ? "..." : ""}
+                        {selected?.length > 6 ? "..." : ""}
                     </div>
                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -164,15 +166,21 @@ function MultiSelect({
                                     <CommandItem
                                         key={option.id}
                                         onSelect={() => {
-                                            const stateChange = selected?.find(
-                                                (s) => s.id == option.id
-                                            )
-                                                ? selected?.filter(
-                                                      (item) =>
-                                                          item?.id != option.id
-                                                  )
-                                                : [...selected, option];
-                                            onChange(stateChange);
+                                            if (single) {
+                                                onChange([option]);
+                                            } else {
+                                                const stateChange =
+                                                    selected?.find(
+                                                        (s) => s.id == option.id
+                                                    )
+                                                        ? selected?.filter(
+                                                              (item) =>
+                                                                  item?.id !=
+                                                                  option.id
+                                                          )
+                                                        : [...selected, option];
+                                                onChange(stateChange);
+                                            }
                                             toggle(true);
                                         }}
                                     >
@@ -221,7 +229,7 @@ function MultiSelect({
                     )}
                 >
                     <span className={cn("text-xs")}>
-                        {t("selected")} {selected.length}
+                        {t("selected")} {selected?.length}
                     </span>
                     <span className={cn("text-xs")}>Total {total}</span>
                 </div>

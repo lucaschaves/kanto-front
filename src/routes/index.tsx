@@ -39,7 +39,7 @@ import {
     PageUsers,
 } from "@/pages";
 import { PageConsoleCreateOrEdit, PageConsoles } from "@/pages/Consoles";
-import { createMemoryRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import {
     modulesDef,
     modulesFactory,
@@ -115,21 +115,38 @@ export const appRoutes = () => {
                     ],
                 },
                 {
-                    path: "/payments",
+                    path: "/productslist",
+                    errorElement: <PageError />,
+                    element: <PageProducts index={1} />,
+                    children: [
+                        {
+                            path: `/productslist/new`,
+                            errorElement: <PageError />,
+                            element: <PageProductCreateOrEdit />,
+                        },
+                        {
+                            path: `/productslist/edit`,
+                            errorElement: <PageError />,
+                            element: <PageProductCreateOrEdit />,
+                        },
+                    ],
+                },
+                {
+                    path: "/settings",
                     errorElement: <PageError />,
                     children: [
                         {
-                            path: "/payments/paymentspvs",
+                            path: "/settings/paymentspvs",
                             errorElement: <PageError />,
                             element: <PagePaymentsPv />,
                             children: [
                                 {
-                                    path: `/payments/paymentspvs/new`,
+                                    path: `/settings/paymentspvs/new`,
                                     errorElement: <PageError />,
                                     element: <PagePaymentsPvCreateOrEdit />,
                                 },
                                 {
-                                    path: `/payments/paymentspvs/edit`,
+                                    path: `/settings/paymentspvs/edit`,
                                     errorElement: <PageError />,
                                     element: <PagePaymentsPvCreateOrEdit />,
                                 },
@@ -159,17 +176,17 @@ export const appRoutes = () => {
                     })),
                 },
                 {
-                    path: "/catalogs",
+                    path: "/factory/catalogs",
                     errorElement: <PageError />,
                     element: <PageCatalogs />,
                     children: [
                         {
-                            path: "/catalogs/new",
+                            path: "/factory/catalogs/new",
                             errorElement: <PageError />,
                             element: <PageCatalogCreateOrEdit />,
                         },
                         {
-                            path: "/catalogs/edit",
+                            path: "/factory/catalogs/edit",
                             errorElement: <PageError />,
                             element: <PageCatalogCreateOrEdit />,
                         },
@@ -373,8 +390,8 @@ export const appRoutes = () => {
         },
     ];
 
-    return createMemoryRouter(arrRoutes);
-    // return createBrowserRouter(arrRoutes);
+    // return createMemoryRouter(arrRoutes);
+    return createBrowserRouter(arrRoutes);
 };
 
 export { modulesDef, modulesFactory, modulesQuotations, modulesSettings };

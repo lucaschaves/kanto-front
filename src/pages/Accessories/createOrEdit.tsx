@@ -158,7 +158,11 @@ const PageAccessoryCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone onChange={setFile} disabled={stateLoading} />
+                    <Dropzone
+                        onChange={setFile}
+                        // disabled={stateLoading}
+                        disabled
+                    />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

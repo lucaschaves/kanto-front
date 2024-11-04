@@ -20,6 +20,7 @@ interface IPropsModal {
     className?: string;
     classNameContent?: string;
     disabled?: boolean;
+    defaultValues?: any;
     onClose: () => void;
     onSubmit: (data: FieldValues) => void;
 }
@@ -32,6 +33,7 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
         onSubmit,
         className,
         classNameContent,
+        defaultValues,
     } = props;
 
     const { t } = useTranslation();
@@ -50,7 +52,11 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
-                <BaseForm ref={ref} onSubmit={onSubmit}>
+                <BaseForm
+                    ref={ref}
+                    onSubmit={onSubmit}
+                    defaultValues={defaultValues}
+                >
                     <div
                         className={cn(
                             "w-full",

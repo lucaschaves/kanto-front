@@ -1,13 +1,13 @@
 import { Modal } from "@/Layout/Modal";
 import {
     Dropzone,
-    FCheckboxLabel,
     FInputDatePicker,
     FInputLabel,
     FSelectLabel,
     FSelectLabelSingleApi,
     GroupForm,
     IBaseFormRef,
+    SearchCatalog,
 } from "@/components";
 import { CONSTANT_TOKEN } from "@/constants";
 import { cn } from "@/lib";
@@ -17,7 +17,6 @@ import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { dataItemsType } from "../Catalog/createOrEdit";
 
 export const PageProductCreateOrEdit = () => {
     const navigate = useNavigate();
@@ -29,7 +28,7 @@ export const PageProductCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const [stateType, setType] = useState("");
+    const [stateFindCatalog, setFindCatalog] = useState<any>({});
     const [stateLoading, setLoading] = useState(false);
     const [fieldsPayments] = useState<string[]>([]);
     const [file, setFile] = useState<{ url: string; file?: any }>({
@@ -108,16 +107,8 @@ export const PageProductCreateOrEdit = () => {
         setLoading(false);
     };
 
-    const onCleanCatalog = () => {};
-
-    const onEffectFactory = (value: any) => {
-        value?.tagsDefault
-            ?.split(",")
-            .filter((key: string) => !!key)
-            .forEach((key: string) => {
-                refForm.current?.setValue(key, true);
-            });
-        onCleanCatalog();
+    const onCleanCatalog = () => {
+        // onChangeValue("catalog", null);
     };
 
     useEffect(() => {
@@ -131,141 +122,17 @@ export const PageProductCreateOrEdit = () => {
             onSubmit={onSubmit}
             title={`${isEdit ? t("edit") : t("add")} produto`}
         >
-            <GroupForm
-                title={t("product")}
-                className={cn(
-                    "w-full",
-                    "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
-                    "md:grid-cols-3",
-                    "gap-1",
-                    "sm:gap-2",
-                    "px-3"
-                )}
-            >
-                <FSelectLabel
-                    label={t("type")}
-                    name="type"
-                    items={dataItemsType}
-                    onEffect={(e) => {
-                        setType(e);
+            {isEdit ? (
+                <></>
+            ) : (
+                <SearchCatalog
+                    onChange={(n, v) => {
+                        setFindCatalog((prev: any) => ({ ...prev, [n]: v }));
                         onCleanCatalog();
                     }}
+                    value={stateFindCatalog}
                 />
-                <FSelectLabelSingleApi
-                    label={t("region")}
-                    name="regionId"
-                    url="/regions"
-                    onEffect={onCleanCatalog}
-                    disabled={!stateType}
-                />
-                <FSelectLabelSingleApi
-                    label={t("factory")}
-                    name="factoryId"
-                    url="/catalogs/factory"
-                    dependencies={["type"]}
-                    onEffect={onEffectFactory}
-                    addLinkCrud={
-                        stateType === "console"
-                            ? "/factory/consoles/new"
-                            : stateType === "console"
-                            ? "/factory/games/new"
-                            : ""
-                    }
-                />
-                {stateType === "console" ? (
-                    <>
-                        <FCheckboxLabel
-                            label={t("consoleComplete")}
-                            name="consoleComplete"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("consolePackaging")}
-                            name="consolePackaging"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("consoleSealed")}
-                            name="consoleSealed"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("consoleTypeUnlocked")}
-                            name="consoleTypeUnlocked"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("consoleUnlocked")}
-                            name="consoleUnlocked"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("consoleWorking")}
-                            name="consoleWorking"
-                            onEffect={onCleanCatalog}
-                        />
-                    </>
-                ) : stateType === "game" ? (
-                    <>
-                        <FCheckboxLabel
-                            label={t("gameManual")}
-                            name="gameManual"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("gamePackaging")}
-                            name="gamePackaging"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("gamePackagingRental")}
-                            name="gamePackagingRental"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("gameSealed")}
-                            name="gameSealed"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FCheckboxLabel
-                            label={t("gameWorking")}
-                            name="gameWorking"
-                            onEffect={onCleanCatalog}
-                        />
-                        <FSelectLabel
-                            label={t("gameConversation")}
-                            name="gameConversation"
-                            items={[
-                                {
-                                    id: "1",
-                                    name: "1",
-                                },
-                                {
-                                    id: "2",
-                                    name: "2",
-                                },
-                                {
-                                    id: "3",
-                                    name: "3",
-                                },
-                                {
-                                    id: "4",
-                                    name: "4",
-                                },
-                                {
-                                    id: "5",
-                                    name: "5",
-                                },
-                            ]}
-                            onEffect={onCleanCatalog}
-                        />
-                    </>
-                ) : (
-                    <></>
-                )}
-            </GroupForm>
+            )}
             <GroupForm
                 title={t("general")}
                 className={cn(
@@ -279,83 +146,98 @@ export const PageProductCreateOrEdit = () => {
                     "px-3"
                 )}
             >
-                <FSelectLabelSingleApi
-                    label={t("catalog")}
-                    name="catalog"
-                    url="/catalogs/fields"
-                    dependencies={[
-                        "type",
-                        "regionId.id",
-                        "factoryId.id",
-                        "consoleComplete",
-                        "conservation",
-                        "consolePackaging",
-                        "consoleSealed",
-                        "consoleTypeUnlocked",
-                        "consoleWorking",
-                        "consoleUnlocked",
-                        "gameManual",
-                        "gamePackaging",
-                        "gamePackagingRental",
-                        "gameSealed",
-                        "gameWorking",
-                    ]}
-                    keyValue={["catalog.name"]}
-                    addLinkCrud={
-                        refForm.current?.watch("catalog")
-                            ? ""
-                            : "/factory/consoles/new"
-                    }
-                    onEffect={(val) => {
-                        refForm.current?.setValue("name", val?.name);
-                        refForm.current?.setValue("pvProfit", val?.pvProfit);
-                        refForm.current?.setValue(
-                            "pvMercadoLivre",
-                            val?.pvMercadoLivre
-                        );
-                        refForm.current?.setValue("pvCost", val?.pvCost);
-                    }}
-                    disabled={!stateType}
-                    className={cn(
-                        "col-span-1",
-                        "sm:col-span-2",
-                        "md:col-span-3"
-                    )}
+                {isEdit ? (
+                    <></>
+                ) : (
+                    <FSelectLabelSingleApi
+                        defControl={refForm.current?.control}
+                        className="col-span-2"
+                        label={t("catalog")}
+                        name="catalog"
+                        url="/catalogs/fields"
+                        dependenciesValue={{
+                            type: stateFindCatalog?.type,
+                            plataform: stateFindCatalog?.plataform
+                                ?.map((d: any) => d?.id)
+                                .join(","),
+                            region: stateFindCatalog?.region
+                                ?.map((d: any) => d?.id)
+                                .join(","),
+                            factory: stateFindCatalog?.factory
+                                ?.map((d: any) => d?.id)
+                                .join(","),
+                        }}
+                        // dependencies={[
+                        //     "consoleComplete",
+                        //     "conservation",
+                        //     "consolePackaging",
+                        //     "consoleSealed",
+                        //     "consoleTypeUnlocked",
+                        //     "consoleWorking",
+                        //     "consoleUnlocked",
+                        //     "gameManual",
+                        //     "gamePackaging",
+                        //     "gamePackagingRental",
+                        //     "gameSealed",
+                        //     "gameWorking",
+                        // ]}
+                        keyValue={["catalog.name"]}
+                        // addLinkCrud={
+                        //     refForm.current?.watch("catalog")
+                        //         ? ""
+                        //         : "/factory/consoles/new"
+                        // }
+                        onEffect={(val) => {
+                            refForm.current?.setValue("name", val?.name);
+                            // refForm.current?.setValue("pvMercadoLivre", val?.pvMercadoLivre);
+                            // refForm.current?.setValue("pvCost", val?.pvCost);
+                            // refForm.current?.setValue("pvProfit", val?.pvProfit);
+                        }}
+                        // disabled={!stateType}
+                        // className={cn(
+                        //     "col-span-1",
+                        //     "sm:col-span-2",
+                        //     "md:col-span-3"
+                        // )}
+                        disabled={!stateFindCatalog?.type}
+                    />
+                )}
+                {isEdit ? (
+                    <>
+                        <FInputLabel
+                            label={t("catalog")}
+                            name="catalog.id"
+                            disabled
+                        />
+                        <FInputLabel
+                            label={t("type")}
+                            name="catalog.type"
+                            disabled
+                        />
+                    </>
+                ) : (
+                    <></>
+                )}
+                <FInputLabel
+                    label={t("sku")}
+                    name="sku"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
                 />
                 <FInputLabel
                     label={t("name")}
                     name="name"
-                    disabled={!stateType}
-                    className={cn(
-                        "col-span-1",
-                        "sm:col-span-2",
-                        "md:col-span-3"
-                    )}
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    className={cn("col-span-1", "sm:col-span-2")}
                 />
                 <FInputLabel
                     label={t("addressInStock")}
                     name="addressInStock"
-                    disabled={!stateType}
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
                 />
-                <FInputDatePicker
-                    label={t("receiptDate")}
-                    name="receiptDate"
-                    disabled={!stateType}
-                />
-                <FInputDatePicker
-                    label={t("announcementDate")}
-                    name="announcementDate"
-                    disabled={!stateType}
-                />
-                <FInputDatePicker
-                    label={t("dateEntryInStock")}
-                    name="dateEntryInStock"
-                    disabled={!stateType}
-                />
-                <FInputDatePicker
-                    label={t("dateSale")}
-                    name="dateSale"
-                    disabled={!stateType}
+                <FInputLabel
+                    label={t("Plataforma de venda")}
+                    name="salesPlatform"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
                 />
                 <FSelectLabel
                     label={t("status")}
@@ -374,8 +256,8 @@ export const PageProductCreateOrEdit = () => {
                             name: "Peça",
                         },
                         {
-                            id: "processando",
-                            name: "Processando",
+                            id: "processamento",
+                            name: "Processamento",
                         },
                         {
                             id: "descarte",
@@ -394,10 +276,6 @@ export const PageProductCreateOrEdit = () => {
                             name: "Conserto",
                         },
                         {
-                            id: "processando",
-                            name: "Processando",
-                        },
-                        {
                             id: "recebimento",
                             name: "Recebimento",
                         },
@@ -406,7 +284,27 @@ export const PageProductCreateOrEdit = () => {
                             name: "Estoque",
                         },
                     ]}
-                    disabled={!stateType}
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                />
+                <FInputDatePicker
+                    label={t("receiptDate")}
+                    name="receiptDate"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                />
+                <FInputDatePicker
+                    label={t("announcementDate")}
+                    name="announcementDate"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                />
+                <FInputDatePicker
+                    label={t("dateEntryInStock")}
+                    name="dateEntryInStock"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                />
+                <FInputDatePicker
+                    label={t("dateSale")}
+                    name="dateSale"
+                    disabled={isEdit ? false : !stateFindCatalog?.type}
                 />
             </GroupForm>
             <GroupForm
@@ -416,29 +314,21 @@ export const PageProductCreateOrEdit = () => {
                     "grid",
                     "grid-cols-2",
                     "sm:grid-cols-2",
-                    "md:grid-cols-3",
                     "gap-1",
                     "sm:gap-2",
                     "px-3"
                 )}
             >
-                <FInputLabel
-                    label={t("cost")}
-                    name="pvCost"
-                    type="currency"
-                    disabled
-                />
+                <FInputLabel label={t("cost")} name="pvCost" type="currency" />
                 <FInputLabel
                     label={t("pvMercadoLivre")}
                     name="pvMercadoLivre"
                     type="currency"
-                    disabled
                 />
                 <FInputLabel
-                    label={t("pvProfit")}
+                    label={t("profit")}
                     name="pvProfit"
                     type="currency"
-                    disabled
                 />
                 {fieldsPayments?.map((k: any) => (
                     <FInputLabel
@@ -446,9 +336,13 @@ export const PageProductCreateOrEdit = () => {
                         label={capitalize(t(k.name))}
                         name={k.name}
                         type="currency"
-                        disabled
                     />
                 ))}
+                <FInputLabel
+                    label={t("pvFinal")}
+                    name="pvFinal"
+                    type="currency"
+                />
             </GroupForm>
             <GroupForm
                 title={t("images")}
@@ -482,7 +376,11 @@ export const PageProductCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone onChange={setFile} disabled={stateLoading} />
+                    <Dropzone
+                        onChange={setFile}
+                        // disabled={stateLoading}
+                        disabled
+                    />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

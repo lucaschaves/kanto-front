@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+    CONSTANT_FAVORITES,
     CONSTANT_LANGUAGE,
     CONSTANT_ROLES,
     CONSTANT_TOKEN,
@@ -34,8 +35,17 @@ interface IUserReset {
     dialect: string;
 }
 
+interface IFavorites {
+    id: number;
+    name: string;
+    userId: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 interface AuthContextType {
     isAuthenticated: boolean;
+    favorites: { user: string; data: IFavorites[] };
     user: IUserAuth | null;
     rules: string[];
     signin: (props: IUser, callback: VoidFunction, error: VoidFunction) => void;
@@ -51,6 +61,7 @@ interface AuthContextType {
     ) => void;
     signout: (callback: VoidFunction) => void;
     applyRules: () => void;
+    refreshFavorites: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -75,6 +86,16 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         return null;
     });
+    const [favorites, setFavorites] = useState<{
+        user: string;
+        data: IFavorites[];
+    }>(() => {
+        const favs = window.sessionStorage.getItem(CONSTANT_FAVORITES);
+        if (favs) {
+            return JSON.parse(favs);
+        }
+        return { data: [], user: "" };
+    });
 
     const signPersist = async (data: any) => {
         const objUser = {
@@ -97,12 +118,48 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             );
             setRules(dataRules);
         }
-        return;
+        const { success: successFav, data: dataFav } = await getApi({
+            url: "/favorites",
+            config: {
+                params: {
+                    email: objUser.email,
+                },
+            },
+        });
+        if (successFav) {
+            window.sessionStorage.setItem(
+                CONSTANT_FAVORITES,
+                JSON.stringify({ user: objUser.email, data: dataFav.rows })
+            );
+            setFavorites({ user: objUser.email, data: dataFav.rows });
+            if (dataFav.rows?.length) {
+                return `/${dataFav.rows[0]?.name}`;
+            }
+        }
+        return undefined;
+    };
+
+    const refreshFavorites = async () => {
+        const { success: successFav, data: dataFav } = await getApi({
+            url: "/favorites",
+            config: {
+                params: {
+                    email: user?.email,
+                },
+            },
+        });
+        if (successFav && user?.email) {
+            window.sessionStorage.setItem(
+                CONSTANT_FAVORITES,
+                JSON.stringify({ user: user.email, data: dataFav.rows })
+            );
+            setFavorites({ user: user?.email, data: dataFav.rows });
+        }
     };
 
     const signin = async (
         props: IUser,
-        callback: VoidFunction,
+        callback: (link?: string) => void,
         error: VoidFunction
     ) => {
         const { success, data } = await postApi({
@@ -114,8 +171,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (success) {
-            await signPersist(data);
-            callback();
+            const link = await signPersist(data);
+            callback(link);
         } else {
             error();
         }
@@ -200,6 +257,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         signPersist,
         applyRules,
         isAuthenticated: !!user?.token,
+        favorites,
+        refreshFavorites,
     };
 
     return (

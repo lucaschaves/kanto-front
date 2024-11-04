@@ -27,9 +27,9 @@ const PageLogin = () => {
         await sleep(1000);
         signin(
             data,
-            async () => {
+            async (link?: string) => {
                 setLoading(false);
-                navigate("/");
+                navigate(link || "/productsreceiving");
             },
             async () => {
                 setLoading(false);

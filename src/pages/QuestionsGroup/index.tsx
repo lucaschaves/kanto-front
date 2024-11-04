@@ -20,21 +20,21 @@ const PageQuestionsGroups = () => {
         const colsDef = [
             { name: "select", title: "Select" },
             { name: "id", title: t("id") },
-            { name: "gameId", title: t("game"), type: "object", field: "name" },
+            { name: "game", title: t("game"), type: "object", field: "name" },
             {
-                name: "consoleId",
+                name: "console",
                 title: t("console"),
                 type: "object",
                 field: "name",
             },
             {
-                name: "categoryId",
+                name: "category",
                 title: t("category"),
                 type: "object",
                 field: "name",
             },
             {
-                name: "questionId",
+                name: "question",
                 title: t("question"),
                 type: "object",
                 field: "question",

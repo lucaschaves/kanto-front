@@ -76,7 +76,7 @@ const PageInterpreter = () => {
                 accessorKey: "id",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -84,6 +84,7 @@ const PageInterpreter = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("id")}
                                 {column.getIsSorted() === "desc" ? (
@@ -105,7 +106,7 @@ const PageInterpreter = () => {
                 accessorKey: "name",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -113,6 +114,7 @@ const PageInterpreter = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("name")}
                                 {column.getIsSorted() === "desc" ? (

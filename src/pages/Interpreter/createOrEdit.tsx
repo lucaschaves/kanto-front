@@ -26,11 +26,9 @@ const PageInterpreterCreateOrEdit = () => {
         const { table } = data;
         setDisabled(true);
         try {
-            let successAll = true;
-            console.log("ids", table, stateIds);
             const dataIds: any[] = stateIds?.map((id: any) => ({ name: id }));
-            console.log("dataIds", dataIds);
             if (dataIds?.length) {
+                let successAll = true;
                 const count = Math.ceil(dataIds.length / 1000);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {

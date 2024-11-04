@@ -56,7 +56,7 @@ const PageAccessories = () => {
                 accessorKey: "id",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -64,6 +64,7 @@ const PageAccessories = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("id")}
                                 {column.getIsSorted() === "desc" ? (
@@ -85,7 +86,7 @@ const PageAccessories = () => {
                 accessorKey: "name",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -93,6 +94,7 @@ const PageAccessories = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("name")}
                                 {column.getIsSorted() === "desc" ? (
@@ -114,7 +116,7 @@ const PageAccessories = () => {
                 accessorKey: "createdAt",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -122,6 +124,7 @@ const PageAccessories = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("createdAt")}
                                 {column.getIsSorted() === "desc" ? (
@@ -158,6 +161,7 @@ const PageAccessories = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("updatedAt")}
                                 {column.getIsSorted() === "desc" ? (

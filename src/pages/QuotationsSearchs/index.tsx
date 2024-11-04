@@ -53,7 +53,7 @@ const PageQuotationsSearchs = () => {
             accessorKey: "id",
             header: ({ column }) => {
                 return (
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <Button
                             variant="ghost"
                             onClick={() =>
@@ -61,6 +61,7 @@ const PageQuotationsSearchs = () => {
                                     column.getIsSorted() == "asc"
                                 )
                             }
+                            className="pl-0"
                         >
                             {t("id")}
                             {column.getIsSorted() === "desc" ? (
@@ -79,7 +80,7 @@ const PageQuotationsSearchs = () => {
             ),
         },
         {
-            accessorKey: "consoleId",
+            accessorKey: "console",
             header: ({ column }) => {
                 return (
                     <Button
@@ -87,6 +88,7 @@ const PageQuotationsSearchs = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("console")}
                         {column.getIsSorted() === "desc" ? (
@@ -100,12 +102,12 @@ const PageQuotationsSearchs = () => {
                 );
             },
             cell: ({ row }) => {
-                const rowValue = row.getValue("consoleId") as any;
+                const rowValue = row.getValue("console") as any;
                 return <div className="capitalize">{rowValue?.name}</div>;
             },
         },
         {
-            accessorKey: "gameId",
+            accessorKey: "game",
             header: ({ column }) => {
                 return (
                     <Button
@@ -113,6 +115,7 @@ const PageQuotationsSearchs = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("game")}
                         {column.getIsSorted() === "desc" ? (
@@ -126,12 +129,12 @@ const PageQuotationsSearchs = () => {
                 );
             },
             cell: ({ row }) => {
-                const rowValue = row.getValue("gameId") as any;
+                const rowValue = row.getValue("game") as any;
                 return <div className="capitalize">{rowValue?.name}</div>;
             },
         },
         {
-            accessorKey: "questionId",
+            accessorKey: "question",
             header: ({ column }) => {
                 return (
                     <Button
@@ -139,6 +142,7 @@ const PageQuotationsSearchs = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("question")}
                         {column.getIsSorted() === "desc" ? (
@@ -152,7 +156,7 @@ const PageQuotationsSearchs = () => {
                 );
             },
             cell: ({ row }) => {
-                const rowValue = row.getValue("questionId") as any;
+                const rowValue = row.getValue("question") as any;
                 return <div className="capitalize">{rowValue?.question}</div>;
             },
         },
@@ -165,6 +169,7 @@ const PageQuotationsSearchs = () => {
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() == "asc")
                         }
+                        className="pl-0"
                     >
                         {t("reviewComments")}
                         {column.getIsSorted() === "desc" ? (

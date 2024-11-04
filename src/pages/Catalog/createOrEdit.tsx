@@ -144,7 +144,7 @@ export const PageCatalogCreateOrEdit = () => {
             ref={refForm}
             onClose={onClose}
             onSubmit={onSubmit}
-            title={`${isEdit ? t("edit") : t("add")} catalogo`}
+            title={`${isEdit ? t("edit") : t("add")} catálogo`}
         >
             <GroupForm
                 title={t("general")}
@@ -166,14 +166,14 @@ export const PageCatalogCreateOrEdit = () => {
                 />
                 <FSelectLabelSingleApi
                     label={t("factory")}
-                    name="factoryId"
+                    name="factory"
                     url="/catalogs/factory"
                     dependencies={["type"]}
                     onEffect={(e) => onEffectFactory(e?.tagsDefault)}
                 />
                 <FSelectLabelSingleApi
                     label={t("region")}
-                    name="regionId"
+                    name="region"
                     url="/regions"
                 />
                 <FCheckboxLabel label={t("unique")} name="unique" />
@@ -282,7 +282,6 @@ export const PageCatalogCreateOrEdit = () => {
                     "grid",
                     "grid-cols-2",
                     "sm:grid-cols-2",
-                    `md:grid-cols-3`,
                     "gap-1",
                     "sm:gap-2",
                     "px-3"
@@ -294,11 +293,6 @@ export const PageCatalogCreateOrEdit = () => {
                     type="currency"
                 />
                 <FInputLabel label={t("cost")} name="pvCost" type="currency" />
-                <FInputLabel
-                    label={t("profit")}
-                    name="pvProfit"
-                    type="currency"
-                />
             </GroupForm>
             <GroupForm
                 title={t("images")}
@@ -332,7 +326,11 @@ export const PageCatalogCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone onChange={setFile} disabled={stateLoading} />
+                    <Dropzone
+                        onChange={setFile}
+                        // disabled={stateLoading}
+                        disabled
+                    />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

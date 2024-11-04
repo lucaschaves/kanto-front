@@ -7,6 +7,7 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
+    Separator,
     Sheet,
     SheetContent,
     SheetHeader,
@@ -20,10 +21,18 @@ import {
     modulesQuotations,
     modulesSettings,
 } from "@/routes";
-import { modulesPayments, modulesProducts } from "@/routes/modules";
-import { FileTextIcon, HomeIcon } from "@radix-ui/react-icons";
+import { modulesAll, modulesProducts } from "@/routes/modules";
+import { deleteApi, postApi } from "@/services";
+import {
+    DashboardIcon,
+    FileTextIcon,
+    HomeIcon,
+    StarFilledIcon,
+    StarIcon,
+    TrashIcon,
+} from "@radix-ui/react-icons";
 import { FactoryIcon, PackageSearchIcon, SettingsIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -39,9 +48,37 @@ export const Sidebar = (props: IPropsSidebar) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
-    const { applyRules } = useAuth();
+    const { applyRules, favorites, user, refreshFavorites } = useAuth();
 
     const [stateOpen, setOpen] = useState("");
+
+    const handleFav = async (item: any) => {
+        const { success } = await postApi({
+            url: "/favorite",
+            body: {
+                email: user?.email,
+                name: item.name,
+            },
+        });
+        if (success) {
+            refreshFavorites();
+        }
+    };
+
+    const handleUnFav = async (item: any) => {
+        const { success } = await deleteApi({
+            url: "/favorite",
+            config: {
+                params: {
+                    email: user?.email,
+                    name: item.name,
+                },
+            },
+        });
+        if (success) {
+            refreshFavorites();
+        }
+    };
 
     useEffect(() => {
         applyRules();
@@ -93,6 +130,89 @@ export const Sidebar = (props: IPropsSidebar) => {
                         className={cn("object-contain", "max-h-16", "w-full")}
                     />
                 </div>
+
+                {favorites.data
+                    .filter((_, i) => i < 4)
+                    .map((v) => {
+                        const findModule = modulesAll.find(
+                            (d) => d.name == v.name
+                        );
+                        if (findModule) {
+                            return (
+                                <Button
+                                    key={v.name}
+                                    size="icon"
+                                    onClick={() => navigate(findModule.link)}
+                                    variant={
+                                        findModule.link == location.pathname
+                                            ? "outline"
+                                            : "default"
+                                    }
+                                >
+                                    {findModule.Icon}
+                                </Button>
+                            );
+                        }
+                        return <Fragment key={v.id}></Fragment>;
+                    })}
+                {favorites.data.length >= 5 ? (
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button size="icon" variant="default">
+                                <StarFilledIcon />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className={cn("flex", "flex-col", "p-2")}
+                            side="right"
+                        >
+                            {favorites.data
+                                .filter((_, i) => i >= 5)
+                                .map((v) => {
+                                    const findModule = modulesAll.find(
+                                        (d) => d.name == v.name
+                                    );
+                                    if (findModule) {
+                                        return (
+                                            <Button
+                                                key={`favs-${findModule.name}`}
+                                                className={cn(
+                                                    "w-auto",
+                                                    "px-4",
+                                                    "py-2",
+                                                    "gap-2",
+                                                    "justify-between"
+                                                )}
+                                                onClick={() =>
+                                                    navigate(findModule.link)
+                                                }
+                                                variant={
+                                                    findModule.link ==
+                                                    location.pathname
+                                                        ? "outline"
+                                                        : "ghost"
+                                                }
+                                            >
+                                                {findModule.Icon}
+                                                <span
+                                                    className={cn(
+                                                        "flex-1",
+                                                        "text-left"
+                                                    )}
+                                                >
+                                                    {t(findModule.name)}
+                                                </span>
+                                            </Button>
+                                        );
+                                    }
+                                    return <Fragment key={v.id}></Fragment>;
+                                })}
+                        </PopoverContent>
+                    </Popover>
+                ) : (
+                    <></>
+                )}
+                <Separator />
                 {modulesDef.map((v) => (
                     <Button
                         key={v.name}
@@ -128,53 +248,6 @@ export const Sidebar = (props: IPropsSidebar) => {
                         side="right"
                     >
                         {modulesProducts.map((v) => (
-                            <Button
-                                key={v.name}
-                                className={cn(
-                                    "w-auto",
-                                    "px-4",
-                                    "py-2",
-                                    "gap-2",
-                                    "justify-between"
-                                )}
-                                onClick={() => navigate(v.link)}
-                                variant={
-                                    v.link == location.pathname
-                                        ? "outline"
-                                        : "ghost"
-                                }
-                            >
-                                {v.Icon}
-                                <span className={cn("flex-1", "text-left")}>
-                                    {t(v.name)}
-                                </span>
-                            </Button>
-                        ))}
-                    </PopoverContent>
-                </Popover>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant={
-                                location.pathname.split("/")[1] === "payments"
-                                    ? "outline"
-                                    : "default"
-                            }
-                        >
-                            <PackageSearchIcon size={15} />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className={cn(
-                            "flex",
-                            "flex-col",
-                            // "gap-2",
-                            "p-2"
-                        )}
-                        side="right"
-                    >
-                        {modulesPayments.map((v) => (
                             <Button
                                 key={v.name}
                                 className={cn(
@@ -293,6 +366,13 @@ export const Sidebar = (props: IPropsSidebar) => {
                         ))}
                     </PopoverContent>
                 </Popover>
+                <Button
+                    size="icon"
+                    onClick={() => navigate("/")}
+                    variant={"/" == location.pathname ? "outline" : "default"}
+                >
+                    <DashboardIcon />
+                </Button>
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -366,41 +446,177 @@ export const Sidebar = (props: IPropsSidebar) => {
                             "flex-col"
                         )}
                     >
-                        {modulesDef.map((v) => (
-                            <Button
-                                key={v.name}
-                                className={cn(
-                                    "p-0",
-                                    "sm:w-9",
-                                    "lg:w-auto",
-                                    "lg:px-4",
-                                    "lg:py-2",
-                                    "gap-2",
-                                    "justify-center",
-                                    "lg:justify-between"
-                                )}
-                                onClick={() => navigate(v.link)}
-                                variant={
-                                    v.link == location.pathname
-                                        ? "outline"
-                                        : "default"
-                                }
-                                data-rule-component="rule"
-                                data-rule-component-id={v.name}
-                            >
-                                {v.Icon}
-                                <span
-                                    className={cn(
-                                        "flex-1",
-                                        "text-left",
-                                        "hidden",
-                                        "lg:block"
-                                    )}
+                        {favorites.data.length ? (
+                            <>
+                                <span className="text-white">Favoritos</span>
+                                <div className="w-full max-h-40 overflow-auto">
+                                    {favorites.data.map((v: any) => {
+                                        const findModule = modulesAll.find(
+                                            (d) => d.name == v.name
+                                        );
+                                        if (findModule) {
+                                            return (
+                                                <div
+                                                    key={`fav-${v.name}`}
+                                                    className="w-full flex items-center justify-between gap-2"
+                                                >
+                                                    <Button
+                                                        className={cn(
+                                                            "p-0",
+                                                            "sm:w-9",
+                                                            "lg:w-full",
+                                                            "lg:px-4",
+                                                            "lg:py-2",
+                                                            "gap-2",
+                                                            "justify-center",
+                                                            "lg:justify-between"
+                                                        )}
+                                                        onClick={() =>
+                                                            navigate(
+                                                                findModule.link
+                                                            )
+                                                        }
+                                                        variant={
+                                                            findModule.link ==
+                                                            location.pathname
+                                                                ? "outline"
+                                                                : "default"
+                                                        }
+                                                        data-rule-component="rule"
+                                                        data-rule-component-id={
+                                                            findModule.name
+                                                        }
+                                                    >
+                                                        {findModule.Icon}
+                                                        <span
+                                                            className={cn(
+                                                                "flex-1",
+                                                                "text-left",
+                                                                "hidden",
+                                                                "lg:block"
+                                                            )}
+                                                        >
+                                                            {t(findModule.name)}
+                                                        </span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="default"
+                                                        onClick={() =>
+                                                            handleUnFav(
+                                                                findModule
+                                                            )
+                                                        }
+                                                    >
+                                                        <TrashIcon />
+                                                    </Button>
+                                                </div>
+                                            );
+                                        }
+                                        return <Fragment key={v.id}></Fragment>;
+                                    })}
+                                </div>
+                                <Separator />
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                        {modulesDef.map((v) => {
+                            if (
+                                favorites?.data?.find((d) => d.name == v.name)
+                            ) {
+                                return (
+                                    <div
+                                        key={v.name}
+                                        className="w-full flex items-center justify-between gap-2"
+                                    >
+                                        <Button
+                                            className={cn(
+                                                "p-0",
+                                                "sm:w-9",
+                                                "lg:w-full",
+                                                "lg:px-4",
+                                                "lg:py-2",
+                                                "gap-2",
+                                                "justify-center",
+                                                "lg:justify-between"
+                                            )}
+                                            onClick={() => navigate(v.link)}
+                                            variant={
+                                                v.link == location.pathname
+                                                    ? "outline"
+                                                    : "default"
+                                            }
+                                            data-rule-component="rule"
+                                            data-rule-component-id={v.name}
+                                        >
+                                            {v.Icon}
+                                            <span
+                                                className={cn(
+                                                    "flex-1",
+                                                    "text-left",
+                                                    "hidden",
+                                                    "lg:block"
+                                                )}
+                                            >
+                                                {t(v.name)}
+                                            </span>
+                                        </Button>
+                                        <Button
+                                            variant="default"
+                                            onClick={() => handleUnFav(v)}
+                                        >
+                                            <StarFilledIcon />
+                                        </Button>
+                                    </div>
+                                );
+                            }
+                            return (
+                                <div
+                                    key={v.name}
+                                    className="w-full flex items-center justify-between gap-2"
                                 >
-                                    {t(v.name)}
-                                </span>
-                            </Button>
-                        ))}
+                                    <Button
+                                        className={cn(
+                                            "p-0",
+                                            "sm:w-9",
+                                            "lg:w-full",
+                                            "lg:px-4",
+                                            "lg:py-2",
+                                            "gap-2",
+                                            "justify-center",
+                                            "lg:justify-between"
+                                        )}
+                                        onClick={() => navigate(v.link)}
+                                        variant={
+                                            v.link == location.pathname
+                                                ? "outline"
+                                                : "default"
+                                        }
+                                        data-rule-component="rule"
+                                        data-rule-component-id={v.name}
+                                    >
+                                        {v.Icon}
+                                        <span
+                                            className={cn(
+                                                "flex-1",
+                                                "text-left",
+                                                "hidden",
+                                                "lg:block"
+                                            )}
+                                        >
+                                            {t(v.name)}
+                                        </span>
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        onClick={() => handleFav(v)}
+                                    >
+                                        <StarIcon />
+                                    </Button>
+                                </div>
+                            );
+                        })}
+
                         <Accordion
                             type="single"
                             collapsible
@@ -445,45 +661,120 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         "ml-5",
                                         "border-none",
                                         "overflow-auto",
-                                        "max-h-[calc(100vh-310px)]",
+                                        "max-h-[calc(100svh-500px)]",
                                         "pb-1"
                                     )}
                                 >
-                                    {modulesQuotations.map((s) => (
-                                        <Button
-                                            key={s.name}
-                                            className={cn(
-                                                "p-0",
-                                                "sm:w-9",
-                                                "lg:w-auto",
-                                                "lg:px-4",
-                                                "lg:py-2",
-                                                "gap-2",
-                                                "justify-center",
-                                                "lg:justify-between"
-                                            )}
-                                            onClick={() => navigate(s.link)}
-                                            variant={
-                                                s.link == location.pathname
-                                                    ? "outline"
-                                                    : "default"
-                                            }
-                                            data-rule-component="rule"
-                                            data-rule-component-id={s.name}
-                                        >
-                                            <HomeIcon />
-                                            <span
-                                                className={cn(
-                                                    "flex-1",
-                                                    "text-left",
-                                                    "hidden",
-                                                    "lg:block"
-                                                )}
+                                    {modulesQuotations.map((s: any) => {
+                                        if (
+                                            favorites?.data?.find(
+                                                (d) => d.name == s.name
+                                            )
+                                        ) {
+                                            return (
+                                                <div
+                                                    key={s.name}
+                                                    className="w-full flex items-center justify-between gap-2"
+                                                >
+                                                    <Button
+                                                        className={cn(
+                                                            "p-0",
+                                                            "sm:w-9",
+                                                            "lg:w-full",
+                                                            "lg:px-4",
+                                                            "lg:py-2",
+                                                            "gap-2",
+                                                            "justify-center",
+                                                            "lg:justify-between"
+                                                        )}
+                                                        onClick={() =>
+                                                            navigate(s.link)
+                                                        }
+                                                        variant={
+                                                            s.link ==
+                                                            location.pathname
+                                                                ? "outline"
+                                                                : "default"
+                                                        }
+                                                        data-rule-component="rule"
+                                                        data-rule-component-id={
+                                                            s.name
+                                                        }
+                                                    >
+                                                        <HomeIcon />
+                                                        <span
+                                                            className={cn(
+                                                                "flex-1",
+                                                                "text-left",
+                                                                "hidden",
+                                                                "lg:block"
+                                                            )}
+                                                        >
+                                                            {t(s.name)}
+                                                        </span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="default"
+                                                        onClick={() =>
+                                                            handleUnFav(s)
+                                                        }
+                                                    >
+                                                        <StarFilledIcon />
+                                                    </Button>
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div
+                                                key={s.name}
+                                                className="w-full flex items-center justify-between gap-2"
                                             >
-                                                {t(s.name)}
-                                            </span>
-                                        </Button>
-                                    ))}
+                                                <Button
+                                                    className={cn(
+                                                        "p-0",
+                                                        "sm:w-9",
+                                                        "lg:w-full",
+                                                        "lg:px-4",
+                                                        "lg:py-2",
+                                                        "gap-2",
+                                                        "justify-center",
+                                                        "lg:justify-between"
+                                                    )}
+                                                    onClick={() =>
+                                                        navigate(s.link)
+                                                    }
+                                                    variant={
+                                                        s.link ==
+                                                        location.pathname
+                                                            ? "outline"
+                                                            : "default"
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={
+                                                        s.name
+                                                    }
+                                                >
+                                                    <HomeIcon />
+                                                    <span
+                                                        className={cn(
+                                                            "flex-1",
+                                                            "text-left",
+                                                            "hidden",
+                                                            "lg:block"
+                                                        )}
+                                                    >
+                                                        {t(s.name)}
+                                                    </span>
+                                                </Button>
+                                                <Button
+                                                    variant="default"
+                                                    onClick={() => handleFav(s)}
+                                                >
+                                                    <StarIcon />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
                                 </AccordionContent>
                             </AccordionItem>
                             <AccordionItem
@@ -523,47 +814,154 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         "ml-5",
                                         "border-none",
                                         "overflow-auto",
-                                        "max-h-[calc(100vh-310px)]",
+                                        "max-h-[calc(100svh-500px)]",
                                         "pb-1"
                                     )}
                                 >
-                                    {modulesFactory.map((s) => (
-                                        <Button
-                                            key={s.name}
-                                            className={cn(
-                                                "p-0",
-                                                "sm:w-9",
-                                                "lg:w-auto",
-                                                "lg:px-4",
-                                                "lg:py-2",
-                                                "gap-2",
-                                                "justify-center",
-                                                "lg:justify-between"
-                                            )}
-                                            onClick={() => navigate(s.link)}
-                                            variant={
-                                                s.link == location.pathname
-                                                    ? "outline"
-                                                    : "default"
-                                            }
-                                            data-rule-component="rule"
-                                            data-rule-component-id={s.name}
-                                        >
-                                            <HomeIcon />
-                                            <span
-                                                className={cn(
-                                                    "flex-1",
-                                                    "text-left",
-                                                    "hidden",
-                                                    "lg:block"
-                                                )}
+                                    {modulesFactory.map((s: any) => {
+                                        if (
+                                            favorites?.data?.find(
+                                                (d) => d.name == s.name
+                                            )
+                                        ) {
+                                            return (
+                                                <div
+                                                    key={s.name}
+                                                    className="w-full flex items-center justify-between gap-2"
+                                                >
+                                                    <Button
+                                                        className={cn(
+                                                            "p-0",
+                                                            "sm:w-9",
+                                                            "lg:w-full",
+                                                            "lg:px-4",
+                                                            "lg:py-2",
+                                                            "gap-2",
+                                                            "justify-center",
+                                                            "lg:justify-between"
+                                                        )}
+                                                        onClick={() =>
+                                                            navigate(s.link)
+                                                        }
+                                                        variant={
+                                                            s.link ==
+                                                            location.pathname
+                                                                ? "outline"
+                                                                : "default"
+                                                        }
+                                                        data-rule-component="rule"
+                                                        data-rule-component-id={
+                                                            s.name
+                                                        }
+                                                    >
+                                                        <HomeIcon />
+                                                        <span
+                                                            className={cn(
+                                                                "flex-1",
+                                                                "text-left",
+                                                                "hidden",
+                                                                "lg:block"
+                                                            )}
+                                                        >
+                                                            {t(s.name)}
+                                                        </span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="default"
+                                                        onClick={() =>
+                                                            handleUnFav(s)
+                                                        }
+                                                    >
+                                                        <StarFilledIcon />
+                                                    </Button>
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div
+                                                key={s.name}
+                                                className="w-full flex items-center justify-between gap-2"
                                             >
-                                                {t(s.name)}
-                                            </span>
-                                        </Button>
-                                    ))}
+                                                <Button
+                                                    className={cn(
+                                                        "p-0",
+                                                        "sm:w-9",
+                                                        "lg:w-full",
+                                                        "lg:px-4",
+                                                        "lg:py-2",
+                                                        "gap-2",
+                                                        "justify-center",
+                                                        "lg:justify-between"
+                                                    )}
+                                                    onClick={() =>
+                                                        navigate(s.link)
+                                                    }
+                                                    variant={
+                                                        s.link ==
+                                                        location.pathname
+                                                            ? "outline"
+                                                            : "default"
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={
+                                                        s.name
+                                                    }
+                                                >
+                                                    <HomeIcon />
+                                                    <span
+                                                        className={cn(
+                                                            "flex-1",
+                                                            "text-left",
+                                                            "hidden",
+                                                            "lg:block"
+                                                        )}
+                                                    >
+                                                        {t(s.name)}
+                                                    </span>
+                                                </Button>
+                                                <Button
+                                                    variant="default"
+                                                    onClick={() => handleFav(s)}
+                                                >
+                                                    <StarIcon />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
                                 </AccordionContent>
                             </AccordionItem>
+                            <Button
+                                className={cn(
+                                    "p-0",
+                                    "sm:w-9",
+                                    "lg:w-full",
+                                    "lg:px-4",
+                                    "lg:py-2",
+                                    "gap-2",
+                                    "justify-center",
+                                    "lg:justify-between"
+                                )}
+                                onClick={() => navigate("/")}
+                                variant={
+                                    "/" == location.pathname
+                                        ? "outline"
+                                        : "default"
+                                }
+                                data-rule-component="rule"
+                                data-rule-component-id="dashboard"
+                            >
+                                <DashboardIcon />
+                                <span
+                                    className={cn(
+                                        "flex-1",
+                                        "text-left",
+                                        "hidden",
+                                        "lg:block"
+                                    )}
+                                >
+                                    {t("dashboard")}
+                                </span>
+                            </Button>
                             <AccordionItem
                                 value="settings"
                                 className="border-none"
@@ -601,45 +999,120 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         "ml-5",
                                         "border-none",
                                         "overflow-auto",
-                                        "max-h-[calc(100vh-310px)]",
+                                        "max-h-[calc(100svh-500px)]",
                                         "pb-1"
                                     )}
                                 >
-                                    {modulesSettings.map((s) => (
-                                        <Button
-                                            key={s.name}
-                                            className={cn(
-                                                "p-0",
-                                                "sm:w-9",
-                                                "lg:w-auto",
-                                                "lg:px-4",
-                                                "lg:py-2",
-                                                "gap-2",
-                                                "justify-center",
-                                                "lg:justify-between"
-                                            )}
-                                            onClick={() => navigate(s.link)}
-                                            variant={
-                                                s.link == location.pathname
-                                                    ? "outline"
-                                                    : "default"
-                                            }
-                                            data-rule-component="rule"
-                                            data-rule-component-id={s.name}
-                                        >
-                                            <HomeIcon />
-                                            <span
-                                                className={cn(
-                                                    "flex-1",
-                                                    "text-left",
-                                                    "hidden",
-                                                    "lg:block"
-                                                )}
+                                    {modulesSettings.map((s: any) => {
+                                        if (
+                                            favorites?.data?.find(
+                                                (d) => d.name == s.name
+                                            )
+                                        ) {
+                                            return (
+                                                <div
+                                                    key={s.name}
+                                                    className="w-full flex items-center justify-between gap-2"
+                                                >
+                                                    <Button
+                                                        className={cn(
+                                                            "p-0",
+                                                            "sm:w-9",
+                                                            "lg:w-full",
+                                                            "lg:px-4",
+                                                            "lg:py-2",
+                                                            "gap-2",
+                                                            "justify-center",
+                                                            "lg:justify-between"
+                                                        )}
+                                                        onClick={() =>
+                                                            navigate(s.link)
+                                                        }
+                                                        variant={
+                                                            s.link ==
+                                                            location.pathname
+                                                                ? "outline"
+                                                                : "default"
+                                                        }
+                                                        data-rule-component="rule"
+                                                        data-rule-component-id={
+                                                            s.name
+                                                        }
+                                                    >
+                                                        <HomeIcon />
+                                                        <span
+                                                            className={cn(
+                                                                "flex-1",
+                                                                "text-left",
+                                                                "hidden",
+                                                                "lg:block"
+                                                            )}
+                                                        >
+                                                            {t(s.name)}
+                                                        </span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="default"
+                                                        onClick={() =>
+                                                            handleUnFav(s)
+                                                        }
+                                                    >
+                                                        <StarFilledIcon />
+                                                    </Button>
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div
+                                                key={s.name}
+                                                className="w-full flex items-center justify-between gap-2"
                                             >
-                                                {t(s.name)}
-                                            </span>
-                                        </Button>
-                                    ))}
+                                                <Button
+                                                    className={cn(
+                                                        "p-0",
+                                                        "sm:w-9",
+                                                        "lg:w-full",
+                                                        "lg:px-4",
+                                                        "lg:py-2",
+                                                        "gap-2",
+                                                        "justify-center",
+                                                        "lg:justify-between"
+                                                    )}
+                                                    onClick={() =>
+                                                        navigate(s.link)
+                                                    }
+                                                    variant={
+                                                        s.link ==
+                                                        location.pathname
+                                                            ? "outline"
+                                                            : "default"
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={
+                                                        s.name
+                                                    }
+                                                >
+                                                    <HomeIcon />
+                                                    <span
+                                                        className={cn(
+                                                            "flex-1",
+                                                            "text-left",
+                                                            "hidden",
+                                                            "lg:block"
+                                                        )}
+                                                    >
+                                                        {t(s.name)}
+                                                    </span>
+                                                </Button>
+                                                <Button
+                                                    variant="default"
+                                                    onClick={() => handleFav(s)}
+                                                >
+                                                    <StarIcon />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>

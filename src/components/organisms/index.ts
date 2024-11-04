@@ -8,3 +8,5 @@ export * from "./FSelectLabelApi";
 export * from "./FSelectLabelMultiApi";
 export * from "./FSelectLabelSingleApi";
 export * from "./Listing";
+export * from "./SelectLabelMultiApi";
+export * from "./SelectLabelSingleApi";

@@ -240,39 +240,45 @@ const PageGameCreateOrEdit = () => {
                 />
                 <FSelectLabelMultiApi
                     label={t("plataform")}
-                    name="plataformId"
+                    name="plataform"
                     url="/plataforms"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("developer")}
-                    name="developerId"
+                    name="developer"
                     url="/developers"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("publisher")}
-                    name="publisherId"
+                    name="publisher"
                     url="/publishers"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("gender")}
-                    name="genderId"
+                    name="gender"
                     url="/generous"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("parentalRating")}
-                    name="parentalRatingId"
+                    name="parentalRating"
                     url="/parentalratings"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("numberOfPlayer")}
-                    name="numberOfPlayerId"
+                    name="numberOfPlayer"
                     url="/numberofplayers"
                     disabled={stateLoading}
+                    single
                 />
                 <FCheckboxLabel
                     label={t("specialEdition")}
@@ -311,7 +317,11 @@ const PageGameCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone onChange={setFile} disabled={stateLoading} />
+                    <Dropzone
+                        onChange={setFile}
+                        // disabled={stateLoading}
+                        disabled
+                    />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

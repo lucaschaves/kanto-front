@@ -18,6 +18,7 @@ import {
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
+    Checkbox,
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
@@ -27,14 +28,13 @@ import {
     DialogHeader,
     DialogTitle,
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
     IBaseFormRef,
+    Input,
     Popover,
     PopoverContent,
     PopoverTrigger,
-    ScrollArea,
     Select,
     SelectContent,
     SelectGroup,
@@ -59,6 +59,7 @@ import { useDynamicRefs, usePagination, useSorting } from "@/hooks";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import {
+    camelCaseAndNormalize,
     convertJsonToCSV,
     downloadBlobAsFile,
     messageError,
@@ -70,6 +71,7 @@ import {
     ChevronDownIcon,
     DoubleArrowDownIcon,
     DownloadIcon,
+    DragHandleDots2Icon,
     PaperPlaneIcon,
     Pencil1Icon,
     PlusIcon,
@@ -81,6 +83,7 @@ import {
     Column,
     ColumnDef,
     ColumnFiltersState,
+    ColumnOrderState,
     ColumnPinningState,
     flexRender,
     getCoreRowModel,
@@ -144,6 +147,7 @@ interface IPropsDataTable<T> {
     canStatus?: boolean;
     canExportCsv?: boolean;
     canImportCsv?: boolean;
+    canImportCatalog?: boolean;
     canDelete?: boolean;
     canColumns?: boolean;
     canApprove?: boolean;
@@ -174,6 +178,28 @@ interface IHistory {
     }[];
 }
 
+interface ICatalogCsv {
+    adicionadoALoja: string;
+    anoEstoque: string;
+    anoVenda: string;
+    custoDeEstoque: string;
+    dataAdicaoLoja: string;
+    dataDeVenda: string;
+    dataEntradaEstoque: string;
+    enderecoNoEstoque: string;
+    lucroBruto: string;
+    mesEstoque: string;
+    mesVenda: string;
+    nomeProduto: string;
+    pVFinal: string;
+    pVML: string;
+    pVSite: string;
+    plataforma: string;
+    sKU: string;
+    "vendaML?": string;
+    "vendido?": string;
+}
+
 const getCommonPinningStyles = (column: Column<any>): CSSProperties => {
     const isPinned = column.getIsPinned();
     const isLastLeftPinnedColumn =
@@ -195,6 +221,72 @@ const getCommonPinningStyles = (column: Column<any>): CSSProperties => {
         width: column.getSize(),
         zIndex: isPinned ? 1 : 0,
     };
+};
+
+const DropdownMenuDragInDrop = (props: {
+    items: any[];
+    onChangeColumns: (cols: any[]) => void;
+}) => {
+    const { items, onChangeColumns } = props;
+
+    const { t } = useTranslation();
+
+    const dragItem = useRef<any>(null);
+    const dragOverItem = useRef<any>(null);
+
+    const [stateItems, setItems] = useState(items);
+
+    const dragStart = (e: any) => {
+        dragItem.current = Number(e.target.id);
+    };
+
+    const dragEnter = (e: any) => {
+        dragOverItem.current = Number(e.currentTarget.id);
+    };
+
+    const drop = () => {
+        const copyListItems = [...stateItems];
+        const dragItemContent = copyListItems[dragItem.current];
+        copyListItems.splice(dragItem.current, 1);
+        copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+        dragItem.current = null;
+        dragOverItem.current = null;
+        setItems(copyListItems);
+        onChangeColumns(copyListItems);
+    };
+
+    return (
+        <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild className="w-auto sm:w-auto max-w-48">
+                <Button variant="outline" className="ml-auto">
+                    {`${t("columns")} `}
+                    <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {stateItems.map((item, index) => (
+                    <div
+                        key={item.id}
+                        id={String(index)}
+                        className="flex w-full items-center justify-start gap-2 capitalize px-2 py-0.5"
+                        onDragStart={dragStart}
+                        onDragEnter={dragEnter}
+                        onDragEnd={drop}
+                        draggable
+                    >
+                        <DragHandleDots2Icon />
+                        <Checkbox
+                            checked={item.getIsVisible()}
+                            onCheckedChange={(value) =>
+                                item.toggleVisibility(!!value)
+                            }
+                        />
+                        <span>{t(item.id)}</span>
+                    </div>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
 };
 
 const DataTable = <T,>(props: IPropsDataTable<T>) => {
@@ -219,6 +311,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         canNavigate = false,
         canExportCsv = false,
         canImportCsv = false,
+        canImportCatalog = false,
         canStatus = false,
         canExportTemplateCsv = false,
         canApprove = false,
@@ -237,8 +330,13 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
     const refInit = useRef(true);
     const refFile = useRef<HTMLInputElement>(null);
+    const refFileCatalog = useRef<HTMLInputElement>(null);
 
-    const [stateLimit, setLimit] = useState(limit?.toString() || 10);
+    const [stateLimit, setLimit] = useState(limit?.toString() || 20);
+    const [stateFilterDefault, setFilterDefault] = useState({
+        filter: (columns[2] as any)?.accessorKey || "id",
+        value: "",
+    });
 
     const {
         limit: limitPage,
@@ -263,8 +361,14 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         updatedAt: false,
         ...columnsHidden,
     });
+    const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [stateRowFocus, setRowFocus] = useState<any>({});
+    const [stateQuestionSold, setQuestionSold] = useState({
+        show: false,
+        value: "",
+        ids: [] as any[],
+    });
 
     const handleSort = (propsV: SetStateAction<SortingState>) => {
         onSortingChange(propsV);
@@ -303,6 +407,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
             rowSelection,
             columnPinning,
             pagination,
+            columnOrder,
         },
     });
 
@@ -483,6 +588,69 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         }
     };
 
+    const handleImportCatalog = async (file: File) => {
+        Papa.parse(file, {
+            delimiter: "\t",
+            header: true,
+            skipEmptyLines: true,
+            complete: async (res) => {
+                const formatCols: any[] = [];
+                res.meta.fields?.forEach((key) => {
+                    formatCols.push({
+                        field: key,
+                        fieldName: camelCaseAndNormalize(key),
+                    });
+                });
+                const formatData: ICatalogCsv[] = [];
+
+                res.data.forEach((row: any) => {
+                    let dataRow: any = {};
+                    if (
+                        row["Endereço no Estoque"]?.toLowerCase() === "vendido"
+                    ) {
+                        Object.keys(row).forEach((key: string) => {
+                            const col = formatCols.find((f) => f.field === key);
+                            dataRow = {
+                                ...dataRow,
+                                [col.fieldName]: row[col.field],
+                            };
+                        });
+                        formatData.push(dataRow);
+                    }
+                });
+                let successAll = true;
+                const countSend = 50;
+                const count = 3; //Math.ceil(formatData.length / countSend);
+                let indexCount = 0;
+                for (let index = 0; index < count; index++) {
+                    const element = formatData.slice(
+                        indexCount,
+                        indexCount + countSend
+                    );
+                    const { success } = await postApi({
+                        url: "/catalogs/import",
+                        body: {
+                            data: element,
+                        },
+                    });
+                    indexCount += countSend;
+                    if (!success) {
+                        successAll = false;
+                    }
+                    await sleep(500);
+                }
+                if (successAll) {
+                    messageSuccess({ message: "Importado com sucesso" });
+                }
+            },
+        });
+        if (refFileCatalog.current?.value) {
+            refFileCatalog.current.type = "text";
+            refFileCatalog.current.value = "";
+            refFileCatalog.current.type = "file";
+        }
+    };
+
     const getColumns = () => {
         return columns;
     };
@@ -499,14 +667,37 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 return;
             }
         }
+
+        if (st === "vendido") {
+            setQuestionSold({ show: true, value: "", ids: idsState });
+        } else {
+            const { success } = await putApi({
+                url: urlMethod || name,
+                body: {
+                    ids: idsState,
+                    status: st,
+                },
+            });
+            if (success) {
+                messageSuccess({
+                    message: "Status alterado com sucesso",
+                });
+                handleRefresh();
+            }
+        }
+    };
+
+    const handleStatusSold = async () => {
         const { success } = await putApi({
             url: urlMethod || name,
             body: {
-                ids: idsState,
-                status: st,
+                ids: stateQuestionSold.ids,
+                status: "vendido",
+                plataform: stateQuestionSold.value,
             },
         });
         if (success) {
+            setQuestionSold({ show: false, value: "", ids: [] });
             messageSuccess({
                 message: "Status alterado com sucesso",
             });
@@ -532,21 +723,21 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         }
         const dataProcuts: any[] = [];
         idsState.forEach((t: any) => {
-            if (t?.gameId) {
+            if (t?.game) {
                 dataProcuts.push({
-                    name: t.gameId?.name,
+                    name: t.game?.name,
                     status: "recebimento",
                     receiptDate: new Date(),
                     images: t?.images,
-                    catalogsId: 1,
+                    catalog: 1,
                 });
-            } else if (t?.consoleId) {
+            } else if (t?.console) {
                 dataProcuts.push({
-                    name: t.consoleId?.name,
+                    name: t.console?.name,
                     status: "recebimento",
                     receiptDate: new Date(),
                     images: t?.images,
-                    catalogsId: 1,
+                    catalog: 1,
                 });
             }
         });
@@ -563,6 +754,11 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 message: "Produtos enviados com sucesso",
             });
         }
+    };
+
+    const onChangeOrderColumns = (columnsOr: any[]) => {
+        const idsCols = columnsOr.map((c) => c.id);
+        setColumnOrder(idsCols);
     };
 
     useEffect(() => {
@@ -618,7 +814,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 <div
                     className={cn(
                         "flex",
-                        "flex-col-reverse",
+                        // "flex-col",
                         "sm:flex-row",
                         "items-center",
                         "py-4",
@@ -626,6 +822,78 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         "justify-between"
                     )}
                 >
+                    <div
+                        className={cn(
+                            "flex",
+                            "flex-row",
+                            "items-center",
+                            "justify-start",
+                            "gap-2",
+                            "w-full",
+                            "md:flex-row",
+                            "relative",
+                            "max-w-md"
+                        )}
+                    >
+                        <Select
+                            onValueChange={(e) =>
+                                setFilterDefault({ filter: e, value: "" })
+                            }
+                            value={stateFilterDefault.filter}
+                            disabled={name !== "catalogs"}
+                        >
+                            <SelectTrigger className="w-auto sm:w-auto max-w-48">
+                                <SelectValue placeholder={`${t("filter")} `} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Filtros</SelectLabel>
+                                    {table
+                                        .getAllColumns()
+                                        .filter((column) => column.getCanHide())
+                                        .filter(
+                                            (column) =>
+                                                ![
+                                                    "createdAt",
+                                                    "updatedAt",
+                                                ].includes(column.id)
+                                        )
+                                        .map((column) => {
+                                            return (
+                                                <SelectItem
+                                                    key={column.id}
+                                                    className="capitalize"
+                                                    value={column.id}
+                                                    disabled={
+                                                        column.id !== "factory"
+                                                    }
+                                                >
+                                                    {t(column.id)}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Input
+                            placeholder="buscar..."
+                            disabled={name !== "catalogs"}
+                            value={stateFilterDefault.value}
+                            onChange={(e) =>
+                                setFilterDefault((p) => ({
+                                    ...p,
+                                    value: e.target.value,
+                                }))
+                            }
+                            onKeyDown={(e) => {
+                                if (e.keyCode === 13) {
+                                    navigate(
+                                        `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
+                                    );
+                                }
+                            }}
+                        />
+                    </div>
                     <div
                         className={cn(
                             "flex",
@@ -639,41 +907,13 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         )}
                     >
                         {canColumns ? (
-                            <DropdownMenu modal={false}>
-                                <DropdownMenuTrigger
-                                    asChild
-                                    className="w-auto sm:w-auto max-w-48"
-                                >
-                                    <Button
-                                        variant="outline"
-                                        className="ml-auto"
-                                    >
-                                        {`${t("columns")} `}
-                                        <ChevronDownIcon className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {table
-                                        .getAllColumns()
-                                        .filter((column) => column.getCanHide())
-                                        .map((column) => {
-                                            return (
-                                                <DropdownMenuCheckboxItem
-                                                    key={column.id}
-                                                    className="capitalize"
-                                                    checked={column.getIsVisible()}
-                                                    onCheckedChange={(value) =>
-                                                        column.toggleVisibility(
-                                                            !!value
-                                                        )
-                                                    }
-                                                >
-                                                    {t(column.id)}
-                                                </DropdownMenuCheckboxItem>
-                                            );
-                                        })}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <DropdownMenuDragInDrop
+                                items={table
+                                    .getAllColumns()
+                                    .filter((column) => column.getCanHide())
+                                    .filter((column) => column.id !== "select")}
+                                onChangeColumns={onChangeOrderColumns}
+                            />
                         ) : (
                             <div></div>
                         )}
@@ -698,10 +938,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ) : (
                                 <></>
                             )}
-                            <Separator
+                            {/* <Separator
                                 orientation="vertical"
                                 className="h-10"
-                            />
+                            /> */}
+                            {canAdd || canEdit || canDelete ? (
+                                <Separator
+                                    orientation="vertical"
+                                    className="h-10"
+                                />
+                            ) : (
+                                <></>
+                            )}
                             {canAdd ? (
                                 <TooltipProvider>
                                     <Tooltip>
@@ -785,10 +1033,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ) : (
                                 <></>
                             )}
-                            <Separator
-                                orientation="vertical"
-                                className="h-10"
-                            />
+
+                            {canApprove ||
+                            canStatus ||
+                            canNavigate ||
+                            onAction ? (
+                                <Separator
+                                    orientation="vertical"
+                                    className="h-10"
+                                />
+                            ) : (
+                                <></>
+                            )}
                             {canApprove ? (
                                 <Button
                                     variant="outline"
@@ -821,52 +1077,108 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         <Separator className="w-full" />
                                         <div className="flex flex-col">
                                             {[
-                                                "recebimento",
-                                                "processando",
-                                                "vendido",
-                                                "conserto",
-                                                "emprestimo",
-                                                "teste",
-                                                "descarte",
-                                                "perdido",
-                                                "peça",
-                                                "permuta",
-                                                "presente",
-                                            ].map((v) => (
-                                                <Button
-                                                    key={v}
-                                                    className={cn(
-                                                        "w-auto",
-                                                        "px-4",
-                                                        "py-2",
-                                                        "gap-2",
-                                                        "justify-between"
-                                                    )}
-                                                    onClick={() => {
-                                                        const rowsIds = table
-                                                            .getSelectedRowModel()
-                                                            .rows.map(
-                                                                (r: any) =>
-                                                                    r.original
-                                                                        .id
-                                                            );
-                                                        handleActionStatus(
-                                                            v,
-                                                            rowsIds
-                                                        );
-                                                    }}
-                                                    variant="ghost"
-                                                >
-                                                    <span
+                                                {
+                                                    status: "recebimento",
+                                                    link: [
+                                                        "/productsreceiving",
+                                                        "/productsprocessing",
+                                                        "/products/productssold",
+                                                        "/products/productsrepair",
+                                                        "/products/productstest",
+                                                        "/products/productsdisposal",
+                                                        "/products/productslost",
+                                                        "/products/productspart",
+                                                        "/products/productsexchange",
+                                                        "/products/productsgift",
+                                                    ],
+                                                },
+                                                {
+                                                    status: "processamento",
+                                                    link: [
+                                                        "/productsprocessing",
+                                                    ],
+                                                },
+                                                {
+                                                    status: "vendido",
+                                                    link: ["/productssold"],
+                                                },
+                                                {
+                                                    status: "conserto",
+                                                    link: ["/productsrepair"],
+                                                },
+                                                {
+                                                    status: "teste",
+                                                    link: ["/productstest"],
+                                                },
+                                                {
+                                                    status: "descarte",
+                                                    link: ["/productsdisposal"],
+                                                },
+                                                {
+                                                    status: "perdido",
+                                                    link: ["/productslost"],
+                                                },
+                                                {
+                                                    status: "peça",
+                                                    link: ["/productspart"],
+                                                },
+                                                {
+                                                    status: "permuta",
+                                                    link: ["/productsexchange"],
+                                                },
+                                                {
+                                                    status: "presente",
+                                                    link: ["/productsgift"],
+                                                },
+                                            ]
+                                                .filter((v) => {
+                                                    if (
+                                                        !v.link.includes(
+                                                            location.pathname
+                                                        )
+                                                    ) {
+                                                        return v;
+                                                    }
+                                                })
+                                                .map((v) => (
+                                                    <Button
+                                                        key={v.status}
                                                         className={cn(
-                                                            "flex-1",
-                                                            "text-left"
+                                                            "w-auto",
+                                                            "px-4",
+                                                            "py-2",
+                                                            "gap-2",
+                                                            "justify-between"
                                                         )}
+                                                        onClick={() => {
+                                                            const rowsIds =
+                                                                table
+                                                                    .getSelectedRowModel()
+                                                                    .rows.map(
+                                                                        (
+                                                                            r: any
+                                                                        ) =>
+                                                                            r
+                                                                                .original
+                                                                                .id
+                                                                    );
+                                                            handleActionStatus(
+                                                                v.status,
+                                                                rowsIds
+                                                            );
+                                                        }}
+                                                        variant="ghost"
                                                     >
-                                                        {t(v)}
-                                                    </span>
-                                                </Button>
-                                            ))}
+                                                        <span
+                                                            className={cn(
+                                                                "flex-1",
+                                                                "text-left"
+                                                            )}
+                                                        >
+                                                            {t(v.status)}
+                                                        </span>
+                                                    </Button>
+                                                ))}
                                         </div>
                                     </PopoverContent>
                                 </Popover>
@@ -920,38 +1232,43 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ) : (
                                 <></>
                             )}
-                            <Separator
-                                orientation="vertical"
-                                className="h-10"
-                            />
-                            {canExportTemplateCsv ? (
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() =>
-                                                    handleExportTemplateCSV()
-                                                }
-                                                data-rule-component="rule"
-                                                data-rule-component-id={`${name}.exporttemplate`}
-                                            >
-                                                <FileDownIcon size={15} />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Template</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                            {canExportTemplateCsv ||
+                            canExportCsv ||
+                            canImportCsv ||
+                            canImportCatalog ? (
+                                <Separator
+                                    orientation="vertical"
+                                    className="h-10"
+                                />
                             ) : (
                                 <></>
                             )}
-                            <Separator
-                                orientation="vertical"
-                                className="h-10"
-                            />
+                            {canExportTemplateCsv ? (
+                                <>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        handleExportTemplateCSV()
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={`${name}.exporttemplate`}
+                                                >
+                                                    <FileDownIcon size={15} />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Template</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </>
+                            ) : (
+                                <></>
+                            )}
                             {canExportCsv ? (
                                 <TooltipProvider>
                                     <Tooltip>
@@ -1000,35 +1317,80 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ) : (
                                 <></>
                             )}
+                            {canImportCatalog ? (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() =>
+                                                    refFileCatalog.current?.click()
+                                                }
+                                                data-rule-component="rule"
+                                                data-rule-component-id={`${name}.import`}
+                                            >
+                                                <UploadIcon />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Importar</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </div>
-                <ScrollArea
-                    className={cn("w-full", "max-h-[calc(100svh-230px)]")}
-                    style={{
-                        height: 44 * Number(stateLimit),
-                    }}
+                <div
+                    className={cn(
+                        "rounded-md",
+                        "border",
+                        "overflow-x-auto",
+                        "overflow-y-hidden",
+                        openToolbar
+                            ? cn(
+                                  "max-w-[calc(100svw-350px)]",
+                                  "sm:max-w-[calc(100svw-465px)]"
+                              )
+                            : cn(
+                                  "max-w-[calc(100svw-60px)]",
+                                  "sm:max-w-[calc(100svw-150px)]"
+                              ),
+                        classNameTable
+                    )}
                 >
                     <div
                         className={cn(
-                            "rounded-md",
-                            "border",
-                            "overflow-x-auto",
-                            "overflow-y-hidden",
-                            openToolbar
-                                ? cn(
-                                      "max-w-[calc(100svw-350px)]",
-                                      "sm:max-w-[calc(100svw-465px)]"
-                                  )
-                                : cn(
-                                      "max-w-[calc(100svw-60px)]",
-                                      "sm:max-w-[calc(100svw-150px)]"
-                                  ),
-                            classNameTable
+                            "w-full",
+                            "max-h-[calc(100svh-230px)]",
+                            "overflow-x-auto"
                         )}
+                        style={{
+                            height: 44 * Number(stateLimit),
+                        }}
                     >
-                        <Table>
-                            <TableHeader>
+                        <Table
+                            className={cn(
+                                "rounded-md",
+                                "border",
+                                "overflow-x-auto",
+                                "overflow-y-hidden",
+                                openToolbar
+                                    ? cn(
+                                          "max-w-[calc(100svw-350px)]",
+                                          "sm:max-w-[calc(100svw-465px)]"
+                                      )
+                                    : cn(
+                                          "max-w-[calc(100svw-60px)]",
+                                          "sm:max-w-[calc(100svw-150px)]"
+                                      ),
+                                classNameTable
+                            )}
+                        >
+                            <TableHeader className="sticky top-0 z-50 bg-slate-100">
                                 {table.getHeaderGroups().map((headerGroup) => (
                                     <TableRow key={headerGroup.id}>
                                         {headerGroup.headers.map((header) => {
@@ -1040,12 +1402,12 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 <TableHead
                                                     key={header.id}
                                                     colSpan={header.colSpan}
-                                                    className={
+                                                    className={cn(
                                                         header.column.id ===
-                                                        "id"
+                                                            "id"
                                                             ? "w-[50px] max-w-[50px]"
                                                             : ""
-                                                    }
+                                                    )}
                                                     style={
                                                         header.column.id ===
                                                         "id"
@@ -1096,6 +1458,11 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 "selected"
                                             }
                                             onClick={() => handleRowClick(row)}
+                                            onDoubleClick={() =>
+                                                handleAddOrEditDialog(
+                                                    (row.original as any)?.id
+                                                )
+                                            }
                                             className={cn(
                                                 stateRowFocus?.id ==
                                                     (row?.original as any)?.id
@@ -1233,7 +1600,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             </TableBody>
                         </Table>
                     </div>
-                </ScrollArea>
+                </div>
                 <div className="flex items-center justify-between sm:justify-end space-x-2 py-2">
                     <div className="hidden sm:flex flex-1 text-sm text-muted-foreground items-center gap-2">
                         {table.getFilteredSelectedRowModel().rows.length} de{" "}
@@ -1447,6 +1814,91 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 </DialogContent>
             </Dialog>
 
+            <Dialog
+                open={stateQuestionSold.show}
+                onOpenChange={(p) =>
+                    setQuestionSold((prev) => ({ ...prev, show: p, value: "" }))
+                }
+                modal
+            >
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>{t("sold")}</DialogTitle>
+                    </DialogHeader>
+                    <div
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            "gap-4",
+                            "max-w-sm",
+                            "items-center"
+                        )}
+                    >
+                        <Separator />
+                        <div className="flex flex-col w-full gap-4">
+                            <span>Qual plataforma o produto foi vendido?</span>
+                            <Select
+                                onValueChange={(e) =>
+                                    setQuestionSold((prev) => ({
+                                        ...prev,
+                                        value: e,
+                                    }))
+                                }
+                                value={stateQuestionSold.value}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem
+                                            className="capitalize"
+                                            value="mercado livre"
+                                        >
+                                            Mercado Livre
+                                        </SelectItem>
+                                        <SelectItem
+                                            className="capitalize"
+                                            value="amazon"
+                                        >
+                                            Amazon
+                                        </SelectItem>
+                                        <SelectItem
+                                            className="capitalize"
+                                            value="shopee"
+                                        >
+                                            shopee
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center w-full justify-between">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                    setQuestionSold({
+                                        show: false,
+                                        value: "",
+                                        ids: [],
+                                    })
+                                }
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="default"
+                                onClick={handleStatusSold}
+                                type="button"
+                            >
+                                Confirmar
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             <input
                 ref={refFile}
                 type="file"
@@ -1455,6 +1907,16 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 onChange={(e) => {
                     if (e.target.files?.length) {
                         handleImportCSV(e.target.files[0]);
+                    }
+                }}
+            />
+            <input
+                ref={refFileCatalog}
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                    if (e.target.files?.length) {
+                        handleImportCatalog(e.target.files[0]);
                     }
                 }}
             />

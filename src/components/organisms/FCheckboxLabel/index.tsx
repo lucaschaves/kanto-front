@@ -13,6 +13,7 @@ interface IFCheckboxLabelProps {
     label: string;
     name: string;
     className?: string;
+    classNameLabel?: string;
     description?: string;
     rules?: RegisterOptions;
     onEffect?: () => void;
@@ -26,6 +27,7 @@ const FCheckboxLabel = (props: IFCheckboxLabelProps) => {
         rules,
         className,
         onEffect = () => ({}),
+        classNameLabel,
         ...rest
     } = props;
 
@@ -42,7 +44,7 @@ const FCheckboxLabel = (props: IFCheckboxLabelProps) => {
                         className
                     )}
                 >
-                    <FormLabel>{label}</FormLabel>
+                    <FormLabel className={classNameLabel}>{label}</FormLabel>
                     <FormControl>
                         <Checkbox
                             checked={field.value}

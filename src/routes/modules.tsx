@@ -2,7 +2,6 @@ import {
     ArrowBottomRightIcon,
     CardStackIcon,
     CubeIcon,
-    DashboardIcon,
     HomeIcon,
     PersonIcon,
     RocketIcon,
@@ -10,16 +9,6 @@ import {
 } from "@radix-ui/react-icons";
 
 export const modulesDef = [
-    {
-        name: "dashboard",
-        link: "/",
-        Icon: <DashboardIcon />,
-    },
-    {
-        name: "catalogs",
-        link: "/catalogs",
-        Icon: <TableIcon />,
-    },
     {
         name: "productsreceiving",
         link: "/productsreceiving",
@@ -30,22 +19,14 @@ export const modulesDef = [
         link: "/productsprocessing",
         Icon: <CubeIcon />,
     },
-];
-
-export const modulesPayments = [
     {
-        name: "paymentspvs",
-        link: "/payments/paymentspvs",
+        name: "productslist",
+        link: "/productslist",
         Icon: <CubeIcon />,
     },
 ];
 
 export const modulesProducts = [
-    {
-        name: "productslist",
-        link: "/products/productslist",
-        Icon: <CubeIcon />,
-    },
     {
         name: "productsrepair",
         link: "/products/productsrepair",
@@ -96,6 +77,11 @@ export const modulesProducts = [
 
 export const modulesSettings = [
     {
+        name: "paymentspvs",
+        link: "/settings/paymentspvs",
+        Icon: <CubeIcon />,
+    },
+    {
         name: "users",
         link: "/settings/users",
         Icon: <PersonIcon />,
@@ -108,6 +94,11 @@ export const modulesSettings = [
 ];
 
 export const modulesFactory = [
+    {
+        name: "catalogs",
+        link: "/factory/catalogs",
+        Icon: <TableIcon />,
+    },
     {
         name: "games",
         link: "/factory/games",
@@ -196,11 +187,11 @@ export const modulesQuotations = [
         link: "/quotations/quotationsforms",
         Icon: <ArrowBottomRightIcon />,
     },
-    {
-        name: "quotationssearchs",
-        link: "/quotations/quotationssearchs",
-        Icon: <ArrowBottomRightIcon />,
-    },
+    // {
+    //     name: "quotationssearchs",
+    //     link: "/quotations/quotationssearchs",
+    //     Icon: <ArrowBottomRightIcon />,
+    // },
     {
         name: "questions",
         link: "/quotations/questions",
@@ -211,4 +202,12 @@ export const modulesQuotations = [
         link: "/quotations/questionsgroups",
         Icon: <CardStackIcon />,
     },
+];
+
+export const modulesAll = [
+    ...modulesDef,
+    ...modulesProducts,
+    ...modulesSettings,
+    ...modulesFactory,
+    ...modulesQuotations,
 ];

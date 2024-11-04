@@ -1,4 +1,5 @@
 export * from "./DataTable";
 export * from "./Dropzone";
 export * from "./MultiSelect";
+export * from "./SearchCatalog";
 export * from "./SingleSelect";

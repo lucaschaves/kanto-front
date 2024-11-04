@@ -27,7 +27,9 @@ interface IFSelectLabelSingleApiProps extends InputProps {
     keyValue?: string | string[];
     description?: string;
     rules?: RegisterOptions;
+    defControl?: any;
     dependencies?: string[];
+    dependenciesValue?: any;
     addLinkCrud?: string;
     onEffect?: (value: any) => void;
 }
@@ -44,9 +46,11 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
         className,
         keyValue,
         dependencies = [],
+        dependenciesValue,
         onEffect = () => ({}),
         addLinkCrud,
         disabled,
+        defControl,
         ...rest
     } = props;
 
@@ -85,6 +89,14 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
                 };
             }
         });
+
+        dependenciesValue &&
+            Object.keys(dependenciesValue)?.forEach((key) => {
+                params = {
+                    ...params,
+                    [key]: dependenciesValue[key],
+                };
+            });
 
         const actualPage = page ? page : more ? statePage + LIMIT : statePage;
         const { success, data } = await getApi({
@@ -201,7 +213,7 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
     }
     return (
         <FormField
-            control={control}
+            control={defControl || control}
             name={name}
             disabled={disabled || disabledDependencies()}
             render={({ field }) => (

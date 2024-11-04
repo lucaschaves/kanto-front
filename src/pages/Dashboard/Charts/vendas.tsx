@@ -77,7 +77,7 @@ const chartConfigMercados = {
 } satisfies ChartConfig;
 
 const chartDataStatus = [
-    { status: "Processando", items: 186 },
+    { status: "Processamento", items: 186 },
     { status: "Conserto", items: 305 },
     { status: "Recebimento", items: 237 },
     { status: "Estoque", items: 73 },
@@ -141,11 +141,12 @@ export function ChartVendas() {
                             <ChartContainer
                                 config={chartConfigVendas}
                                 style={{
-                                    height: "100%",
+                                    height: "80%",
                                     width: "100%",
                                 }}
                             >
                                 <LineChart
+                                    className="!max-h-[45vh]"
                                     accessibilityLayer
                                     data={chartDataVendas}
                                     margin={{
@@ -203,7 +204,10 @@ export function ChartVendas() {
                             <ChartContainer
                                 config={chartConfigMercados}
                                 className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                                style={{ height: "100%", width: "100%" }}
+                                style={{
+                                    height: "100%",
+                                    width: "100%",
+                                }}
                             >
                                 <PieChart>
                                     <ChartTooltip
@@ -281,6 +285,7 @@ export function ChartVendas() {
                                     margin={{
                                         right: 16,
                                     }}
+                                    className="!max-h-[45vh]"
                                 >
                                     <CartesianGrid horizontal={false} />
                                     <YAxis

@@ -124,6 +124,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     onClick={() =>
                         column.toggleSorting(column.getIsSorted() == "asc")
                     }
+                    className="pl-0"
                 >
                     {title}
                     {column.getIsSorted() === "desc" ? (
@@ -144,7 +145,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     row.original
                 );
                 return (
-                    <div className="text-center">
+                    <div className="text-left">
                         {formatValueByType({
                             type: subType,
                             value: valueDef - valueAct,
@@ -154,7 +155,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
             }
             if (["date", "datetime"].includes(type)) {
                 return (
-                    <div className="text-center">
+                    <div className="text-left">
                         {formatValueByType({ type, value: row.getValue(name) })}
                     </div>
                 );
@@ -182,7 +183,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     <div
                         className={cn(
                             capitalize ? "capitalize" : "",
-                            "text-center"
+                            "text-left"
                         )}
                     >
                         {formatValueByType({
@@ -195,7 +196,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
             if (type === "array") {
                 const rowVal = row.getValue(name) as any[];
                 let valArr = "";
-                rowVal.forEach((key) => {
+                rowVal?.forEach((key) => {
                     valArr += `${field ? key[field] : ""},`;
                 });
                 valArr = valArr.slice(0, valArr.length - 1);
@@ -203,7 +204,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     <div
                         className={cn(
                             capitalize ? "capitalize" : "",
-                            "text-center"
+                            "text-left"
                         )}
                     >
                         {formatValueByType({
@@ -215,10 +216,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
             }
             return (
                 <div
-                    className={cn(
-                        capitalize ? "capitalize" : "",
-                        "text-center"
-                    )}
+                    className={cn(capitalize ? "capitalize" : "", "text-left")}
                 >
                     {formatValueByType({
                         type,

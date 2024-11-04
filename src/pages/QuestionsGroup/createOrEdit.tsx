@@ -1,17 +1,25 @@
 import { Modal } from "@/Layout/Modal";
-import { FSelectLabelSingleApi, GroupForm, IBaseFormRef } from "@/components";
+import {
+    FSelectLabel,
+    FSelectLabelSingleApi,
+    GroupForm,
+    IBaseFormRef,
+} from "@/components";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { dataItemsType } from "../Catalog/createOrEdit";
 
 export const PageQuestionsGroupCreateOrEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
+
+    const [stateType, setType] = useState("game");
 
     const isEdit = location.pathname.includes("edit");
 
@@ -58,6 +66,7 @@ export const PageQuestionsGroupCreateOrEdit = () => {
             onClose={onClose}
             onSubmit={onSubmit}
             title={isEdit ? t("edit") : t("add")}
+            defaultValues={{ type: stateType }}
         >
             <GroupForm
                 title={t("general")}
@@ -65,42 +74,48 @@ export const PageQuestionsGroupCreateOrEdit = () => {
                     "w-full",
                     "grid",
                     "grid-cols-2",
-                    "sm:grid-cols-2",
                     "gap-1",
                     "sm:gap-2",
                     "px-3"
                 )}
             >
-                <FSelectLabelSingleApi
-                    label={t("game")}
-                    name="gameId"
-                    url="/games"
+                <FSelectLabel
+                    label={t("type")}
+                    name="type"
+                    items={dataItemsType}
+                    onEffect={(e) => setType(e)}
                 />
-                <FSelectLabelSingleApi
-                    label={t("console")}
-                    name="consoleId"
-                    url="/consoles"
-                />
-                <FSelectLabelSingleApi
-                    label={t("extra")}
-                    name="extraId"
-                    url="/extras"
-                />
-                <FSelectLabelSingleApi
-                    label={t("acessory")}
-                    name="acessoryId"
-                    url="/acessories"
-                />
-                <FSelectLabelSingleApi
-                    label={t("category")}
-                    name="category"
-                    url="/categories"
-                />
+                {stateType === "game" ? (
+                    <FSelectLabelSingleApi
+                        label={t("game")}
+                        name="game"
+                        url="/games"
+                    />
+                ) : stateType === "console" ? (
+                    <FSelectLabelSingleApi
+                        label={t("console")}
+                        name="console"
+                        url="/consoles"
+                    />
+                ) : stateType === "extra" ? (
+                    <FSelectLabelSingleApi
+                        label={t("extra")}
+                        name="extra"
+                        url="/extras"
+                    />
+                ) : (
+                    <FSelectLabelSingleApi
+                        label={t("acessory")}
+                        name="acessory"
+                        url="/acessories"
+                    />
+                )}
                 <FSelectLabelSingleApi
                     label={t("question")}
-                    name="questionId"
+                    name="question"
                     url="/questions"
                     keyValue="question"
+                    className="col-span-2"
                 />
             </GroupForm>
         </Modal>

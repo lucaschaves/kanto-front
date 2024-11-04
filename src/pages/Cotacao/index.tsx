@@ -59,17 +59,17 @@ const steps = [
 
 const formatQuotations = (data: any) => {
     const quotationProducts: any[] = [];
-    data?.quotationSearchId?.forEach((s: any) => {
+    data?.quotationSearch?.forEach((s: any) => {
         quotationProducts.push({
             id: s?.id,
             product: {
-                id: s?.gameId?.id,
-                name: s?.gameId?.name,
-                image: s?.gameId?.images?.image,
+                id: s?.game?.id,
+                name: s?.game?.name,
+                image: s?.game?.images?.image,
             },
             question: {
-                id: s?.questionId?.id,
-                question: s?.questionId?.question,
+                id: s?.question?.id,
+                question: s?.question?.question,
             },
             comments: "comentário",
             quantity: 1,
@@ -490,7 +490,7 @@ const SegundaEtapa = ({
             url: "/quotations/questions",
             config: {
                 params: {
-                    gameId: id,
+                    game: id,
                 },
             },
         });
@@ -728,7 +728,7 @@ const SegundaEtapa = ({
                                                                 <RadioGroupItem
                                                                     value={
                                                                         question
-                                                                            .questionId
+                                                                            .question
                                                                             ?.id
                                                                     }
                                                                 />
@@ -736,7 +736,7 @@ const SegundaEtapa = ({
                                                             <FormLabel className="font-normal">
                                                                 {
                                                                     question
-                                                                        .questionId
+                                                                        .question
                                                                         ?.question
                                                                 }
                                                             </FormLabel>
@@ -1153,9 +1153,9 @@ const QuartaEtapa = ({ fields }: { fields: any }) => {
                             <span className="font-semibold text-right">
                                 Quantidade
                             </span>
-                            {fields?.quotationSearchId?.map((field: any) => (
-                                <Fragment key={field?.gameId?.name}>
-                                    <span>{field?.gameId?.name}</span>
+                            {fields?.quotationSearch?.map((field: any) => (
+                                <Fragment key={field?.game?.name}>
+                                    <span>{field?.game?.name}</span>
                                     <span className="text-right">x1</span>
                                 </Fragment>
                             ))}
@@ -1163,9 +1163,9 @@ const QuartaEtapa = ({ fields }: { fields: any }) => {
                     </div>
                 </div>
                 <p className="text-center">
-                    Hey {fields?.providerId?.name}, em breve enviaremos um
-                    e-mail para {fields?.providerId?.email} com todos os
-                    detalhes da sua venda! fique ligado no email
+                    Hey {fields?.provider?.name}, em breve enviaremos um e-mail
+                    para {fields?.provider?.email} com todos os detalhes da sua
+                    venda! fique ligado no email
                 </p>
             </div>
             <Button
@@ -1205,7 +1205,7 @@ const PageCotacao = () => {
                     await postApi({
                         url: "/quotations/form",
                         body: {
-                            providerId: dataProvider.id,
+                            provider: dataProvider.id,
                         },
                     });
                 if (successQuotation) {
@@ -1235,7 +1235,7 @@ const PageCotacao = () => {
                 const { success: successForm, data: dataForm } = await putApi({
                     url: `/quotations/form/${params.get("id")}`,
                     body: {
-                        quotationSearchId: dataSearch?.id,
+                        quotationSearch: dataSearch?.id,
                     },
                 });
                 if (successForm) {
@@ -1270,7 +1270,7 @@ const PageCotacao = () => {
             if (success) {
                 const quotationProducts = formatQuotations(data);
                 setCotacao(quotationProducts);
-                if (data?.quotationSearchId?.length) {
+                if (data?.quotationSearch?.length) {
                     setInitialState(2);
                 } else {
                     setInitialState(1);

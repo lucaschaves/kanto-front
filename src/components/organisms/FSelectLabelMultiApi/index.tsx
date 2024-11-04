@@ -18,6 +18,7 @@ interface IFSelectLabelMultiApiProps extends InputProps {
     description?: string;
     rules?: RegisterOptions;
     dependencies?: string[];
+    single?: boolean;
 }
 
 interface IData {
@@ -127,7 +128,13 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
                 <FormItem>
                     <FormLabel>{label}</FormLabel>
                     <MultiSelect
-                        selected={field.value}
+                        selected={
+                            Array.isArray(field.value)
+                                ? field.value
+                                : field.value
+                                ? [field.value]
+                                : []
+                        }
                         options={stateData.rows}
                         {...rest}
                         {...field}

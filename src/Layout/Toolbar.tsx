@@ -365,6 +365,7 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                                     variant={
                                         openFilters ? "outline" : "default"
                                     }
+                                    disabled
                                 >
                                     <MagnifyingGlassIcon />
                                 </Button>

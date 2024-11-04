@@ -26,7 +26,7 @@ const PageConsoles = () => {
             {
                 id: "select",
                 header: ({ table }) => (
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <Checkbox
                             checked={
                                 table.getIsAllPageRowsSelected() ||
@@ -56,7 +56,7 @@ const PageConsoles = () => {
                 accessorKey: "id",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -64,6 +64,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("id")}
                                 {column.getIsSorted() === "desc" ? (
@@ -85,7 +86,7 @@ const PageConsoles = () => {
                 accessorKey: "name",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -93,6 +94,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("name")}
                                 {column.getIsSorted() === "desc" ? (
@@ -114,7 +116,7 @@ const PageConsoles = () => {
                 accessorKey: "ean",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -122,6 +124,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("ean")}
                                 {column.getIsSorted() === "desc" ? (
@@ -143,7 +146,7 @@ const PageConsoles = () => {
                 accessorKey: "specialEdition",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -151,6 +154,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("specialEdition")}
                                 {column.getIsSorted() === "desc" ? (
@@ -169,10 +173,10 @@ const PageConsoles = () => {
                 ),
             },
             {
-                accessorKey: "storageId",
+                accessorKey: "storage",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -180,6 +184,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("storage")}
                                 {column.getIsSorted() === "desc" ? (
@@ -194,7 +199,7 @@ const PageConsoles = () => {
                     );
                 },
                 cell: ({ row }) => {
-                    const rowValue = (row.getValue("storageId") as any[])
+                    const rowValue = (row.getValue("storage") as any[])
                         ?.map((r) => r?.name)
                         ?.join(", ");
                     return <div className="capitalize">{rowValue}</div>;
@@ -204,7 +209,7 @@ const PageConsoles = () => {
                 accessorKey: "releaseYear",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -212,6 +217,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("releaseYear")}
                                 {column.getIsSorted() === "desc" ? (
@@ -236,7 +242,7 @@ const PageConsoles = () => {
                 accessorKey: "createdAt",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -244,6 +250,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("createdAt")}
                                 {column.getIsSorted() === "desc" ? (
@@ -272,7 +279,7 @@ const PageConsoles = () => {
                 accessorKey: "updatedAt",
                 header: ({ column }) => {
                     return (
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <Button
                                 variant="ghost"
                                 onClick={() =>
@@ -280,6 +287,7 @@ const PageConsoles = () => {
                                         column.getIsSorted() == "asc"
                                     )
                                 }
+                                className="pl-0"
                             >
                                 {t("updatedAt")}
                                 {column.getIsSorted() === "desc" ? (

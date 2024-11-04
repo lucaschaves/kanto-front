@@ -106,19 +106,15 @@ export const PageQuotationsSearchCreateOrEdit = () => {
                         name="quantity"
                         readOnly
                     />
-                    <FInputLabel
-                        label={t("game")}
-                        name="gameId.name"
-                        readOnly
-                    />
+                    <FInputLabel label={t("game")} name="game.name" readOnly />
                     <FInputLabel
                         label={t("console")}
-                        name="consolesId.name"
+                        name="consoles.name"
                         readOnly
                     />
                     <FInputLabel
                         label={t("question")}
-                        name="questionId.question"
+                        name="question.question"
                         readOnly
                     />
                     <FormField

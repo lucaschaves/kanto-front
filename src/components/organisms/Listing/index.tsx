@@ -27,6 +27,7 @@ interface IPropsListing<T> {
     canDelete?: boolean;
     canExportCsv?: boolean;
     canImportCsv?: boolean;
+    canImportCatalog?: boolean;
     canExportTemplateCsv?: boolean;
     canStatus?: boolean;
     urlDelete?: string;
@@ -128,7 +129,7 @@ export function Listing<T>(props: IPropsListing<T>) {
                                 arrayName?.forEach((a: any) => {
                                     const column = createColumn({
                                         name: a.name,
-                                        title: capitalize(t(a.name)) as any,
+                                        title: t(`PV ${capitalize(a.name)}`),
                                         type: "currency",
                                     });
                                     columnsAt.push(column);
@@ -176,7 +177,7 @@ export function Listing<T>(props: IPropsListing<T>) {
         ) {
             const filters = decodeSearchParams(location.search);
             getData({
-                pagination: { limit: 10, skip: 0 },
+                pagination: { limit: 20, skip: 0 },
                 sort: { field: "id", order: "ASC" },
                 filters,
             });
@@ -185,7 +186,7 @@ export function Listing<T>(props: IPropsListing<T>) {
             !location.pathname.includes("new")
         ) {
             getData({
-                pagination: { limit: 10, skip: 0 },
+                pagination: { limit: 20, skip: 0 },
                 sort: { field: "id", order: "ASC" },
                 filters: {},
             });

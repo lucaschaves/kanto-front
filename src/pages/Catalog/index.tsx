@@ -28,24 +28,19 @@ const PageCatalogs = () => {
                 field: "name",
             },
             {
-                name: "regionId",
+                name: "region",
                 title: t("region"),
                 type: "object",
                 field: "name",
             },
             {
                 name: "pvCost",
-                title: t("cost"),
-                type: "currency",
-            },
-            {
-                name: "pvProfit",
-                title: t("profit"),
+                title: t("PV Custo"),
                 type: "currency",
             },
             {
                 name: "pvMercadoLivre",
-                title: t("Mercado Livre"),
+                title: t("PV Mercado Livre"),
                 type: "currency",
             },
             {
@@ -130,7 +125,7 @@ const PageCatalogs = () => {
         <>
             <Listing
                 columns={stateColumns}
-                index={1}
+                index={2}
                 columnsHidden={{
                     id: false,
                     gameConversation: false,
@@ -149,6 +144,7 @@ const PageCatalogs = () => {
                     updatedAt: false,
                 }}
                 columnsDynamic={["payments"]}
+                canImportCatalog
             />
             <Outlet />
         </>

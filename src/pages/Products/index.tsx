@@ -128,21 +128,20 @@ const PageProducts = ({ index }: { index: number }) => {
             { name: "sku", title: t("sku") },
             { name: "name", title: t("name") },
             {
-                name: "catalogId",
-                title: t("catalogId"),
-                type: "array",
+                name: "catalog",
+                title: t("catalog"),
+                type: "object",
                 field: "type",
             },
-
             { name: "status", title: t("status") },
             {
                 name: "pvCost",
-                title: t("cost"),
+                title: t("PV Custo"),
                 type: "currency",
             },
             {
                 name: "pvMercadoLivre",
-                title: t("Mercado Livre"),
+                title: t("PV Mercado Livre"),
                 type: "currency",
             },
             { name: "salesPlatform", title: t("salesPlatform") },
