@@ -29,7 +29,7 @@ export const PageProductCreateOrEdit = () => {
     const refForm = useRef<IBaseFormRef>(null);
 
     const [stateFindCatalog, setFindCatalog] = useState<any>({});
-    const [stateLoading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [fieldsPayments] = useState<string[]>([]);
     const [file, setFile] = useState<{ url: string; file?: any }>({
         url: "",

@@ -46,7 +46,7 @@ export const PageCatalogCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const [stateLoading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [stateType, setType] = useState("");
     const [file, setFile] = useState<{ url: string; file?: any }>({
         url: "",
