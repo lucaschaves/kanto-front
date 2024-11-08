@@ -270,7 +270,7 @@ export const appRoutes = () => {
                         element:
                             s.name === "games" ? (
                                 <PageGames />
-                            ) : s.name === "accesories" ? (
+                            ) : s.name === "accessories" ? (
                                 <PageAccessories />
                             ) : s.name === "consoles" ? (
                                 <PageConsoles />
@@ -286,7 +286,7 @@ export const appRoutes = () => {
                                 element:
                                     s.name === "games" ? (
                                         <PageGameCreateOrEdit />
-                                    ) : s.name === "accesories" ? (
+                                    ) : s.name === "accessories" ? (
                                         <PageAccessoryCreateOrEdit />
                                     ) : s.name === "consoles" ? (
                                         <PageConsoleCreateOrEdit />
@@ -302,7 +302,7 @@ export const appRoutes = () => {
                                 element:
                                     s.name === "games" ? (
                                         <PageGameCreateOrEdit />
-                                    ) : s.name === "accesories" ? (
+                                    ) : s.name === "accessories" ? (
                                         <PageAccessoryCreateOrEdit />
                                     ) : s.name === "consoles" ? (
                                         <PageConsoleCreateOrEdit />

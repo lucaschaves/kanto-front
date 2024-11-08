@@ -19,6 +19,7 @@ interface IFSelectLabelMultiApiProps extends InputProps {
     rules?: RegisterOptions;
     dependencies?: string[];
     single?: boolean;
+    onEffect?: (value: any) => void;
 }
 
 interface IData {
@@ -37,6 +38,7 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
         rules,
         className,
         dependencies = [],
+        onEffect = () => ({}),
         ...rest
     } = props;
 
@@ -138,6 +140,10 @@ const FSelectLabelMultiApi = (props: IFSelectLabelMultiApiProps) => {
                         options={stateData.rows}
                         {...rest}
                         {...field}
+                        onChange={(e) => {
+                            field.onChange(e);
+                            onEffect(e);
+                        }}
                         open={stateOpen}
                         toggle={setOpen}
                         moreOptions={() => getItems({ more: true })}

@@ -1,5 +1,4 @@
-import { Checkbox, DataTable, IOnRefresh, IRefDataTable } from "@/components";
-import { useDynamicRefs } from "@/hooks";
+import { Checkbox, DataTable, IOnRefresh } from "@/components";
 import { deleteApi, getApi } from "@/services";
 import {
     capitalize,
@@ -31,6 +30,7 @@ interface IPropsListing<T> {
     canExportTemplateCsv?: boolean;
     canStatus?: boolean;
     urlDelete?: string;
+    canColumns?: boolean;
     canApprove?: boolean;
 }
 
@@ -72,8 +72,6 @@ export function Listing<T>(props: IPropsListing<T>) {
         urlDelete,
         ...rest
     } = props;
-
-    const [getRef] = useDynamicRefs();
 
     const location = useLocation();
 
@@ -191,10 +189,10 @@ export function Listing<T>(props: IPropsListing<T>) {
                 filters: {},
             });
         }
-        if (columnsHidden) {
-            const refDataTable = getRef<IRefDataTable>(formActual);
-            refDataTable.current?.hiddeColumns(columnsHidden);
-        }
+        // if (columnsHidden) {
+        // const refDataTable = getRef<IRefDataTable>(formActual);
+        // refDataTable.current?.hiddeColumns(columnsHidden);
+        // }
     }, [location.pathname, location.search]);
 
     return (

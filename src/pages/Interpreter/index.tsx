@@ -10,6 +10,7 @@ import {
     Separator,
     Spinner,
 } from "@/components";
+import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import {
     CaretDownIcon,
@@ -17,7 +18,7 @@ import {
     CaretUpIcon,
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRef, useState } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
@@ -30,7 +31,7 @@ interface IItem {
 
 const PageInterpreter = () => {
     const refForm = useRef<IBaseFormRef>(null);
-
+    const [, setRef] = useDynamicRefs();
     const { t } = useTranslation();
 
     const location = useLocation();
@@ -39,6 +40,7 @@ const PageInterpreter = () => {
     const [stateLoading, setLoading] = useState(false);
     const [stateOptionsSheets, setOptionsSheets] = useState<IItem[]>([]);
     const [stateOptionsColumns, setOptionsColumns] = useState<IItem[]>([]);
+    const [stateNameUp, setNameUp] = useState("");
     const [file, setFile] = useState<{ url: string; file: any }>({
         file: null,
         url: "",
@@ -138,7 +140,6 @@ const PageInterpreter = () => {
         total: 0,
         rows: [],
     });
-    // const [stateXLSX, setXLSX] = useState<any>(null);
     const [stateWorkbook, setWoorkbook] = useState<{
         [sheet: string]: XLSX.WorkSheet;
     } | null>(null);
@@ -149,18 +150,63 @@ const PageInterpreter = () => {
             const sheetsWork = XLSX.utils.sheet_to_json(
                 stateWorkbook[sheetName]
             );
-            const dataByColumn = sheetsWork
-                .map((d: any) => String(d[column])?.toLowerCase())
-                .filter((d, i, s) => s.indexOf(d) === i)
-                .filter((d) => d != "undefined")
-                .filter((d) => !!d)
-                .sort();
-
-            // setXLSX(dataByColumn.map((d) => ({ name: d })));
-            setData({
-                total: dataByColumn.length,
-                rows: dataByColumn.map((d) => ({ id: d, name: d })),
-            });
+            setNameUp("");
+            if (column === "NOME") {
+                if (sheetName === "Jogos") {
+                    setNameUp("jogo");
+                    const dataRows = sheetsWork.map((d: any) => {
+                        return {
+                            anoDeLancamento: d["ANO DE LANÇAMENTO"],
+                            classificacaoIndicativa:
+                                d["CLASSIFICAÇÃO INDICATIVA"],
+                            console: d["CONSOLE"],
+                            desenvolvedora: d["DESENVOLVEDORA"],
+                            editora: d["EDITORA"],
+                            genero: d["GÊNERO"],
+                            nome: d["NOME"],
+                            name: d["NOME"],
+                            id: d["NOME"],
+                            numeroDeJogadores: d["NUMERO DE JOGADORES"],
+                            ean: d["EAN"],
+                        };
+                    });
+                    setData({
+                        total: dataRows.length,
+                        rows: dataRows,
+                    });
+                } else if (sheetName === "Consoles") {
+                    setNameUp("console");
+                    const dataRows = sheetsWork.map((d: any) => {
+                        return {
+                            anoDeLancamento: d["ANO DE LANÇAMENTO"],
+                            armazenamento: d["Armazenamento"],
+                            cor: d["COR"],
+                            edicaoEspecial: d["Edição Especial"],
+                            marca: d["MARCA"],
+                            modelo: d["MODELO"],
+                            nome: d["NOME"],
+                            name: d["NOME"],
+                            id: d["NOME"],
+                            tipoDeConsole: d["TIPO DE CONSOLE"],
+                        };
+                    });
+                    setData({
+                        total: dataRows.length,
+                        rows: dataRows,
+                    });
+                }
+            } else {
+                const dataByColumn = sheetsWork
+                    .map((d: any) => String(d[column])?.toLowerCase())
+                    .filter((d, i, s) => s.indexOf(d) === i)
+                    .filter((d) => d != "undefined")
+                    .filter((d) => !!d)
+                    .sort();
+                setData({
+                    total: dataByColumn.length,
+                    rows: dataByColumn.map((d) => ({ id: d, name: d })),
+                });
+            }
         }
     };
 
@@ -199,6 +245,15 @@ const PageInterpreter = () => {
             },
         });
     };
+
+    useImperativeHandle(
+        setRef("interpreterSheet"),
+        () => ({
+            getItems: () => stateData,
+            getName: () => stateNameUp,
+        }),
+        [stateData, stateNameUp]
+    );
 
     // const handleDownload = async () => {
     //     const worksheet = XLSX.utils.json_to_sheet(stateXLSX);

@@ -5,7 +5,6 @@ import {
     BaseForm,
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
@@ -74,9 +73,7 @@ const Layout = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const [stateNotifications, setNotifications] = useState<INotification[]>(
-        []
-    );
+    const [stateNotifications] = useState<INotification[]>([]);
     const [stateUser, setUser] = useState<string | null>(null);
     const [stateLoading, setLoading] = useState(false);
     const [stateOpenSidebar, setOpenSidebar] = useState(false);
@@ -117,12 +114,12 @@ const Layout = () => {
     };
 
     const getNotifications = async () => {
-        const { success, data } = await getApi({
-            url: `/notifications`,
-        });
-        if (success) {
-            setNotifications(data.rows);
-        }
+        // const { success, data } = await getApi({
+        //     url: `/notifications`,
+        // });
+        // if (success) {
+        //     setNotifications(data.rows);
+        // }
     };
 
     const getLinkFav = () => {
@@ -211,9 +208,12 @@ const Layout = () => {
                             <Breadcrumb>
                                 <BreadcrumbList>
                                     <BreadcrumbItem>
-                                        <BreadcrumbLink href={linkFav}>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(linkFav)}
+                                        >
                                             {t("home")}
-                                        </BreadcrumbLink>
+                                        </button>
                                     </BreadcrumbItem>
                                     {location.pathname
                                         .split("/")
@@ -229,11 +229,14 @@ const Layout = () => {
                                                 <Fragment key={item}>
                                                     <BreadcrumbSeparator />
                                                     <BreadcrumbItem>
-                                                        <BreadcrumbLink
-                                                            href={item}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                navigate(item)
+                                                            }
                                                         >
                                                             {t(item)}
-                                                        </BreadcrumbLink>
+                                                        </button>
                                                     </BreadcrumbItem>
                                                 </Fragment>
                                             ) : (

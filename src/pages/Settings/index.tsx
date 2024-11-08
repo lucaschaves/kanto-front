@@ -6,7 +6,7 @@ import { FilterSettings } from "./filter";
 const PageSettings = () => {
     return (
         <>
-            <Listing index={2} />
+            <Listing index={2} canColumns={false} />
             <Outlet />
         </>
     );

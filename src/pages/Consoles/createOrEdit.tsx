@@ -56,7 +56,7 @@ const PageConsoleCreateOrEdit = () => {
     };
 
     const onSubmit = async (data: FieldValues) => {
-        let newData = data;
+        let newData: any = {}; //data;
 
         newData["tagsDefault"] = "";
         if (data.consoleWorking) newData.tagsDefault += `consoleWorking,`;
@@ -67,15 +67,20 @@ const PageConsoleCreateOrEdit = () => {
         if (data.consolePackaging) newData.tagsDefault += `consolePackaging,`;
         if (data.consoleComplete) newData.tagsDefault += `consoleComplete,`;
 
-        delete newData.consoleWorking;
-        delete newData.consoleUnlocked;
-        delete newData.consoleTypeUnlocked;
-        delete newData.consoleSealed;
-        delete newData.consolePackaging;
-        delete newData.consoleComplete;
-
-        if (newData?.releaseYear)
-            newData.releaseYear = [Number(newData.releaseYear)];
+        newData = {
+            ...newData,
+            name: data?.name,
+            ean: data?.ean,
+            color: data?.color?.length ? data?.color[0]?.id : undefined,
+            brand: data?.brand?.length ? data?.brand[0]?.id : undefined,
+            model: data?.model?.length ? data?.model[0]?.id : undefined,
+            typeOfConsole: data?.typeOfConsole?.length
+                ? data?.typeOfConsole[0]?.id
+                : undefined,
+            storage: data?.storage?.length ? data?.storage[0]?.id : undefined,
+            releaseYear: data?.releaseYear,
+            specialEdition: data?.specialEdition,
+        };
 
         if (isEdit) {
             const { success, data: dataResp } = await putApi({
@@ -161,12 +166,18 @@ const PageConsoleCreateOrEdit = () => {
                     label={t("name")}
                     name="name"
                     disabled={stateLoading}
-                    className="col-span-2"
                 />
                 <FInputLabel
                     label={t("ean")}
                     name="ean"
                     disabled={stateLoading}
+                />
+                <FSelectLabelMultiApi
+                    label={t("plataform")}
+                    name="plataform"
+                    url="/plataforms"
+                    disabled={stateLoading}
+                    single
                 />
             </GroupForm>
             <GroupForm
@@ -241,36 +252,35 @@ const PageConsoleCreateOrEdit = () => {
                     name="color"
                     url="/colors"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("brand")}
                     name="brand"
                     url="/brands"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("model")}
                     name="model"
                     url="/models"
                     disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("typeOfConsole")}
                     name="typeOfConsole"
                     url="/typesofconsoles"
                     disabled={stateLoading}
-                />
-                <FSelectLabelMultiApi
-                    label={t("plataform")}
-                    name="plataform"
-                    url="/plataforms"
-                    disabled={stateLoading}
+                    single
                 />
                 <FSelectLabelMultiApi
                     label={t("storage")}
                     name="storage"
                     url="/storages"
                     disabled={stateLoading}
+                    single
                 />
                 <FCheckboxLabel
                     label={t("specialEdition")}

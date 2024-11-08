@@ -53,7 +53,7 @@ const PageGameCreateOrEdit = () => {
     };
 
     const onSubmit = async (data: FieldValues) => {
-        let newData = data;
+        let newData: any = {}; //data;
 
         newData["tagsDefault"] = "";
         if (data.conservation) newData.tagsDefault += `conservation,`;
@@ -64,12 +64,29 @@ const PageGameCreateOrEdit = () => {
         if (data.gamePackaging) newData.tagsDefault += `gamePackaging,`;
         if (data.gameManual) newData.tagsDefault += `gameManual,`;
 
-        delete newData.conservation;
-        delete newData.gameWorking;
-        delete newData.gameSealed;
-        delete newData.gamePackagingRental;
-        delete newData.gamePackaging;
-        delete newData.gameManual;
+        newData = {
+            ...newData,
+            name: data?.name,
+            ean: data?.ean,
+            releaseYear: data?.releaseYear,
+            specialEdition: data?.specialEdition,
+            plataform: data?.plataform?.length
+                ? data?.plataform[0]?.id
+                : undefined,
+            developer: data?.developer?.length
+                ? data?.developer[0]?.id
+                : undefined,
+            publisher: data?.publisher?.length
+                ? data?.publisher[0]?.id
+                : undefined,
+            gender: data?.gender?.length ? data?.gender[0]?.id : undefined,
+            parentalRating: data?.parentalRating?.length
+                ? data?.parentalRating[0]?.id
+                : undefined,
+            numberOfPlayer: data?.numberOfPlayer?.length
+                ? data?.numberOfPlayer[0]?.id
+                : undefined,
+        };
 
         if (isEdit) {
             const { success, data: dataResp } = await putApi({
@@ -107,7 +124,7 @@ const PageGameCreateOrEdit = () => {
             }
             delete data.images;
 
-            let newData = data;
+            let newData: any = data;
             if (data?.tagsDefault) {
                 data.tagsDefault.split(",").forEach((key: string) => {
                     newData = {
@@ -117,6 +134,7 @@ const PageGameCreateOrEdit = () => {
                 });
             }
             delete newData.tagsDefault;
+
             refForm.current?.reset(newData);
         }
         setLoading(false);
@@ -150,12 +168,18 @@ const PageGameCreateOrEdit = () => {
                     label={t("name")}
                     name="name"
                     disabled={stateLoading}
-                    className="col-span-2"
                 />
                 <FInputLabel
                     label={t("ean")}
                     name="ean"
                     disabled={stateLoading}
+                />
+                <FSelectLabelMultiApi
+                    label={t("plataform")}
+                    name="plataform"
+                    url="/plataforms"
+                    disabled={stateLoading}
+                    single
                 />
             </GroupForm>
             <GroupForm
@@ -238,13 +262,7 @@ const PageGameCreateOrEdit = () => {
                     }}
                     type="number"
                 />
-                <FSelectLabelMultiApi
-                    label={t("plataform")}
-                    name="plataform"
-                    url="/plataforms"
-                    disabled={stateLoading}
-                    single
-                />
+
                 <FSelectLabelMultiApi
                     label={t("developer")}
                     name="developer"

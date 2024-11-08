@@ -9,6 +9,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FSelectLabelMultiApi,
     FSelectLabelSingleApi,
     GroupForm,
     IBaseFormRef,
@@ -27,6 +28,7 @@ import {
 } from "@/components";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
+import { messageError } from "@/utils";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues, useFieldArray } from "react-hook-form";
@@ -45,6 +47,12 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
 
     const handleAdd = () => {
         const values = getValues();
+        if (!values?.catalog?.id) {
+            messageError({
+                message: "É necessário informar o catálogo",
+            });
+            return;
+        }
         append({
             comments: values?.comments,
             quantity: values?.quantity || 1,
@@ -52,7 +60,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
             name: values?.name,
             pvCost: values?.pvCost,
             pvMercadoLivre: values?.pvMercadoLivre,
-            pvProfit: values?.pvProfit,
             plataform: values?.catalog?.catalog?.plataform,
             catalogId: values?.catalog?.id,
         });
@@ -78,7 +85,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
     //     onChangeValue("reviewComments", item.reviewComments);
     //     onChangeValue("pvCost", item.pvCost);
     //     onChangeValue("pvMercadoLivre", item.pvMercadoLivre);
-    //     onChangeValue("pvProfit", item.pvProfit);
     //     onChangeValue("plataform", item.catalog?.plataform);
     // };
 
@@ -91,7 +97,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("reviewComments", null);
         onChangeValue("pvCost", null);
         onChangeValue("pvMercadoLivre", null);
-        onChangeValue("pvProfit", null);
         onChangeValue("plataform", null);
     };
 
@@ -170,7 +175,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                         onChangeValue("name", val?.name);
                         onChangeValue("pvMercadoLivre", val?.pvMercadoLivre);
                         onChangeValue("pvCost", val?.pvCost);
-                        onChangeValue("pvProfit", val?.pvProfit);
                     }}
                     // disabled={!stateType}
                     // className={cn(
@@ -189,11 +193,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                 <FInputLabel
                     label={t("quantity")}
                     name="quantity"
-                    disabled={!stateFindCatalog?.type}
-                />
-                <FInputLabel
-                    label={t("profit")}
-                    name="pvProfit"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
@@ -259,9 +258,8 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                             <TableHead>Catálogo</TableHead>
                             <TableHead>Plataforma</TableHead>
                             <TableHead>Quantidade</TableHead>
-                            <TableHead>Custo</TableHead>
+                            <TableHead>Custo de estoque</TableHead>
                             <TableHead>PV ML</TableHead>
-                            <TableHead>PV Profit</TableHead>
                             <TableHead>Comentários</TableHead>
                             {/* <TableHead></TableHead> */}
                             <TableHead></TableHead>
@@ -287,9 +285,6 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         {RSValue.format(
                                             field?.pvMercadoLivre || 0
                                         )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {RSValue.format(field?.pvProfit || 0)}
                                     </TableCell>
                                     <TableCell>{field?.comments}</TableCell>
                                     {/* <TableCell>
@@ -333,10 +328,33 @@ export const PageQuotationsFormCreateOrEdit = () => {
     };
 
     const onSubmit = async (data: FieldValues) => {
+        if (!data?.provider?.name) {
+            messageError({
+                message: "É necessário informar um nome",
+            });
+            return;
+        }
+        if (!data?.quotationSearch.length) {
+            messageError({
+                message: "É necessário ter pelo menos um item",
+            });
+            return;
+        }
+        let newData = data;
+        if (newData?.quotationHistory?.paymentMethodId?.length) {
+            newData = {
+                ...newData,
+                quotationHistory: {
+                    ...newData?.quotationHistory,
+                    paymentMethodId:
+                        newData?.quotationHistory?.paymentMethodId[0],
+                },
+            };
+        }
         if (isEdit) {
             const { success } = await putApi({
                 url: `/quotationsform/${searchParams.get("id")}`,
-                body: data,
+                body: newData,
             });
             if (success) {
                 onClose();
@@ -344,7 +362,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
         } else {
             const { success } = await postApi({
                 url: "/quotationsform",
-                body: data,
+                body: newData,
             });
             if (success) {
                 onClose();
@@ -473,9 +491,11 @@ export const PageQuotationsFormCreateOrEdit = () => {
                             label="Retornou"
                             name="quotationHistory.returned"
                         />
-                        <FInputLabel
+                        <FSelectLabelMultiApi
                             label="Método de pagamento"
                             name="quotationHistory.paymentMethodId"
+                            url="/paymentmethods"
+                            single
                         />
                         <FInputDatePicker
                             label={t("completionDate")}

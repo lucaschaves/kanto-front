@@ -51,6 +51,7 @@ export const Sidebar = (props: IPropsSidebar) => {
     const { applyRules, favorites, user, refreshFavorites } = useAuth();
 
     const [stateOpen, setOpen] = useState("");
+    const [stateOpenPopov, setOpenPopov] = useState("");
 
     const handleFav = async (item: any) => {
         const { success } = await postApi({
@@ -156,7 +157,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                         return <Fragment key={v.id}></Fragment>;
                     })}
                 {favorites.data.length >= 5 ? (
-                    <Popover>
+                    <Popover
+                        onOpenChange={(p) => setOpenPopov(p ? "fav" : "")}
+                        open={stateOpenPopov === "fav"}
+                    >
                         <PopoverTrigger asChild>
                             <Button size="icon" variant="default">
                                 <StarFilledIcon />
@@ -183,9 +187,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                     "gap-2",
                                                     "justify-between"
                                                 )}
-                                                onClick={() =>
-                                                    navigate(findModule.link)
-                                                }
+                                                onClick={() => {
+                                                    navigate(findModule.link);
+                                                    setOpenPopov("");
+                                                }}
                                                 variant={
                                                     findModule.link ==
                                                     location.pathname
@@ -225,7 +230,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                         {v.Icon}
                     </Button>
                 ))}
-                <Popover>
+                <Popover
+                    onOpenChange={(p) => setOpenPopov(p ? "products" : "")}
+                    open={stateOpenPopov === "products"}
+                >
                     <PopoverTrigger asChild>
                         <Button
                             size="icon"
@@ -257,7 +265,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                     "gap-2",
                                     "justify-between"
                                 )}
-                                onClick={() => navigate(v.link)}
+                                onClick={() => {
+                                    navigate(v.link);
+                                    setOpenPopov("");
+                                }}
                                 variant={
                                     v.link == location.pathname
                                         ? "outline"
@@ -272,7 +283,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                         ))}
                     </PopoverContent>
                 </Popover>
-                <Popover>
+                <Popover
+                    onOpenChange={(p) => setOpenPopov(p ? "quotations" : "")}
+                    open={stateOpenPopov === "quotations"}
+                >
                     <PopoverTrigger asChild>
                         <Button
                             size="icon"
@@ -304,7 +318,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                     "gap-2",
                                     "justify-between"
                                 )}
-                                onClick={() => navigate(v.link)}
+                                onClick={() => {
+                                    navigate(v.link);
+                                    setOpenPopov("");
+                                }}
                                 variant={
                                     v.link == location.pathname
                                         ? "outline"
@@ -319,7 +336,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                         ))}
                     </PopoverContent>
                 </Popover>
-                <Popover>
+                <Popover
+                    onOpenChange={(p) => setOpenPopov(p ? "factory" : "")}
+                    open={stateOpenPopov === "factory"}
+                >
                     <PopoverTrigger asChild>
                         <Button
                             size="icon"
@@ -351,7 +371,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                     "gap-2",
                                     "justify-between"
                                 )}
-                                onClick={() => navigate(v.link)}
+                                onClick={() => {
+                                    navigate(v.link);
+                                    setOpenPopov("");
+                                }}
                                 variant={
                                     v.link == location.pathname
                                         ? "outline"
@@ -373,7 +396,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                 >
                     <DashboardIcon />
                 </Button>
-                <Popover>
+                <Popover
+                    onOpenChange={(p) => setOpenPopov(p ? "settings" : "")}
+                    open={stateOpenPopov === "settings"}
+                >
                     <PopoverTrigger asChild>
                         <Button
                             size="icon"
@@ -405,7 +431,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                     "gap-2",
                                     "justify-between"
                                 )}
-                                onClick={() => navigate(v.link)}
+                                onClick={() => {
+                                    navigate(v.link);
+                                    setOpenPopov("");
+                                }}
                                 variant={
                                     v.link == location.pathname
                                         ? "outline"
@@ -687,9 +716,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                             "justify-center",
                                                             "lg:justify-between"
                                                         )}
-                                                        onClick={() =>
-                                                            navigate(s.link)
-                                                        }
+                                                        onClick={() => {
+                                                            setOpen("");
+                                                            navigate(s.link);
+                                                        }}
                                                         variant={
                                                             s.link ==
                                                             location.pathname
@@ -740,9 +770,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                         "justify-center",
                                                         "lg:justify-between"
                                                     )}
-                                                    onClick={() =>
-                                                        navigate(s.link)
-                                                    }
+                                                    onClick={() => {
+                                                        setOpen("");
+                                                        navigate(s.link);
+                                                    }}
                                                     variant={
                                                         s.link ==
                                                         location.pathname
@@ -840,9 +871,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                             "justify-center",
                                                             "lg:justify-between"
                                                         )}
-                                                        onClick={() =>
-                                                            navigate(s.link)
-                                                        }
+                                                        onClick={() => {
+                                                            setOpen("");
+                                                            navigate(s.link);
+                                                        }}
                                                         variant={
                                                             s.link ==
                                                             location.pathname
@@ -893,9 +925,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                         "justify-center",
                                                         "lg:justify-between"
                                                     )}
-                                                    onClick={() =>
-                                                        navigate(s.link)
-                                                    }
+                                                    onClick={() => {
+                                                        setOpen("");
+                                                        navigate(s.link);
+                                                    }}
                                                     variant={
                                                         s.link ==
                                                         location.pathname
@@ -1025,9 +1058,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                             "justify-center",
                                                             "lg:justify-between"
                                                         )}
-                                                        onClick={() =>
-                                                            navigate(s.link)
-                                                        }
+                                                        onClick={() => {
+                                                            setOpen("");
+                                                            navigate(s.link);
+                                                        }}
                                                         variant={
                                                             s.link ==
                                                             location.pathname
@@ -1078,9 +1112,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                                         "justify-center",
                                                         "lg:justify-between"
                                                     )}
-                                                    onClick={() =>
-                                                        navigate(s.link)
-                                                    }
+                                                    onClick={() => {
+                                                        setOpen("");
+                                                        navigate(s.link);
+                                                    }}
                                                     variant={
                                                         s.link ==
                                                         location.pathname

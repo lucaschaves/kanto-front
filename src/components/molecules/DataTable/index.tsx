@@ -55,6 +55,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components";
+import {
+    CONSTANT_COLUMNS_ORDER,
+    CONSTANT_COLUMNS_VIEW,
+    CONSTANT_NUMBER_ROWS,
+} from "@/constants";
 import { useDynamicRefs, usePagination, useSorting } from "@/hooks";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
@@ -332,9 +337,19 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const refFile = useRef<HTMLInputElement>(null);
     const refFileCatalog = useRef<HTMLInputElement>(null);
 
-    const [stateLimit, setLimit] = useState(limit?.toString() || 20);
+    const [stateLimit, setLimit] = useState(() => {
+        const numberRows = JSON.parse(
+            window.localStorage.getItem(CONSTANT_NUMBER_ROWS) || "{}"
+        );
+        if (numberRows && numberRows[name]) {
+            try {
+                return Number(numberRows[name]);
+            } catch (err) {}
+        }
+        return limit?.toString() || 20;
+    });
     const [stateFilterDefault, setFilterDefault] = useState({
-        filter: (columns[2] as any)?.accessorKey || "id",
+        filter: "id",
         value: "",
     });
 
@@ -356,12 +371,35 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         right: [],
     });
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-        createdAt: false,
-        updatedAt: false,
-        ...columnsHidden,
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+        () => {
+            const oldsCols = JSON.parse(
+                window.localStorage.getItem(CONSTANT_COLUMNS_VIEW) || "{}"
+            );
+            if (oldsCols && oldsCols[name]) {
+                try {
+                    return oldsCols[name];
+                } catch (err) {}
+            }
+            return {
+                createdAt: false,
+                updatedAt: false,
+                ...columnsHidden,
+                select: true,
+            };
+        }
+    );
+    const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(() => {
+        const oldsCols = JSON.parse(
+            window.localStorage.getItem(CONSTANT_COLUMNS_ORDER) || "{}"
+        );
+        if (oldsCols && oldsCols[name]) {
+            try {
+                return oldsCols[name];
+            } catch (err) {}
+        }
+        return [];
     });
-    const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [stateRowFocus, setRowFocus] = useState<any>({});
     const [stateQuestionSold, setQuestionSold] = useState({
@@ -393,7 +431,24 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
+        onColumnVisibilityChange: (e: any) => {
+            const oldsCols = JSON.parse(
+                window.localStorage.getItem(CONSTANT_COLUMNS_VIEW) || "{}"
+            );
+            const changeCol = e();
+            window.localStorage.setItem(
+                CONSTANT_COLUMNS_VIEW,
+                JSON.stringify({
+                    ...oldsCols,
+                    [name]: {
+                        ...columnVisibility,
+                        ...changeCol,
+                        select: true,
+                    },
+                })
+            );
+            setColumnVisibility(e);
+        },
         onRowSelectionChange: setRowSelection,
         onColumnPinningChange: setColumnPinning,
         manualFiltering: !!limit ? false : true,
@@ -706,6 +761,16 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     };
 
     const hiddeColumns = (hiddenCols: VisibilityState) => {
+        const oldsCols = JSON.parse(
+            window.localStorage.getItem(CONSTANT_COLUMNS_VIEW) || "{}"
+        );
+        window.localStorage.setItem(
+            CONSTANT_COLUMNS_VIEW,
+            JSON.stringify({
+                ...oldsCols,
+                [name]: hiddenCols,
+            })
+        );
         setColumnVisibility(hiddenCols);
     };
 
@@ -758,7 +823,35 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
     const onChangeOrderColumns = (columnsOr: any[]) => {
         const idsCols = columnsOr.map((c) => c.id);
-        setColumnOrder(idsCols);
+        const oldsCols = JSON.parse(
+            window.localStorage.getItem(CONSTANT_COLUMNS_ORDER) || "{}"
+        );
+        window.localStorage.setItem(
+            CONSTANT_COLUMNS_ORDER,
+            JSON.stringify({
+                ...oldsCols,
+                [name]: ["select", ...idsCols],
+            })
+        );
+        setColumnOrder(["select", ...idsCols]);
+    };
+
+    const getItemsDrop = () => {
+        const itemsCan = table
+            .getAllColumns()
+            .filter((column) => column.getCanHide())
+            .filter((column) => column.id !== "select");
+        const newItemsDrop: any[] = [];
+        if (columnOrder.length) {
+            columnOrder.forEach((col) => {
+                const findCan = itemsCan.find((c) => c.id === col);
+                if (findCan) {
+                    newItemsDrop.push(findCan);
+                }
+            });
+            return newItemsDrop;
+        }
+        return itemsCan;
     };
 
     useEffect(() => {
@@ -814,7 +907,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 <div
                     className={cn(
                         "flex",
-                        // "flex-col",
                         "sm:flex-row",
                         "items-center",
                         "py-4",
@@ -840,7 +932,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                 setFilterDefault({ filter: e, value: "" })
                             }
                             value={stateFilterDefault.filter}
-                            disabled={name !== "catalogs"}
                         >
                             <SelectTrigger className="w-auto sm:w-auto max-w-48">
                                 <SelectValue placeholder={`${t("filter")} `} />
@@ -851,12 +942,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                     {table
                                         .getAllColumns()
                                         .filter((column) => column.getCanHide())
-                                        .filter(
-                                            (column) =>
-                                                ![
-                                                    "createdAt",
-                                                    "updatedAt",
-                                                ].includes(column.id)
+                                        // .filter(
+                                        //     (column) =>
+                                        //         ![
+                                        //             "createdAt",
+                                        //             "updatedAt",
+                                        //             "select",
+                                        //         ].includes(column.id)
+                                        // )
+                                        .filter((column) =>
+                                            ["id", "name", "factory"].includes(
+                                                column.id
+                                            )
                                         )
                                         .map((column) => {
                                             return (
@@ -864,9 +961,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                     key={column.id}
                                                     className="capitalize"
                                                     value={column.id}
-                                                    disabled={
-                                                        column.id !== "factory"
-                                                    }
                                                 >
                                                     {t(column.id)}
                                                 </SelectItem>
@@ -877,7 +971,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         </Select>
                         <Input
                             placeholder="buscar..."
-                            disabled={name !== "catalogs"}
                             value={stateFilterDefault.value}
                             onChange={(e) =>
                                 setFilterDefault((p) => ({
@@ -908,10 +1001,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                     >
                         {canColumns ? (
                             <DropdownMenuDragInDrop
-                                items={table
-                                    .getAllColumns()
-                                    .filter((column) => column.getCanHide())
-                                    .filter((column) => column.id !== "select")}
+                                items={getItemsDrop()}
                                 onChangeColumns={onChangeOrderColumns}
                             />
                         ) : (
@@ -1607,7 +1697,21 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         {table.getFilteredRowModel().rows.length}{" "}
                         {t("selectedLines")}
                         <Select
-                            onValueChange={(e) => setLimit(e?.toString())}
+                            onValueChange={(e) => {
+                                const oldLimits = JSON.parse(
+                                    window.localStorage.getItem(
+                                        CONSTANT_NUMBER_ROWS
+                                    ) || "{}"
+                                );
+                                window.localStorage.setItem(
+                                    CONSTANT_NUMBER_ROWS,
+                                    JSON.stringify({
+                                        ...oldLimits,
+                                        [name]: e?.toString(),
+                                    })
+                                );
+                                setLimit(e?.toString());
+                            }}
                             value={stateLimit?.toString()}
                         >
                             <SelectTrigger className="w-[100px]">
@@ -1630,7 +1734,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             {t("total")} {total} -
                         </span>
                         <span className="text-sm text-muted-foreground">
-                            {t("page")} {skip / limitPage}
+                            {t("page")} {skip / limitPage + 1}
                         </span>
                         <Button
                             variant="outline"

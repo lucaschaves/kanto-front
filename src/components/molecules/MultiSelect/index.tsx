@@ -145,9 +145,10 @@ function MultiSelect({
                         autoComplete="off"
                     />
                 </div>
+
                 <Command className={className}>
                     <CommandEmpty>{t("noItemFound")}.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
+                    <CommandGroup className="overflow-y-auto max-h-64">
                         {loading && options.length === 0 ? (
                             <>
                                 <CommandItem>

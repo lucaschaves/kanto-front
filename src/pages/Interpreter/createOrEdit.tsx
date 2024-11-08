@@ -1,5 +1,6 @@
 import { Modal } from "@/Layout/Modal";
 import { FSelectLabel, IBaseFormRef } from "@/components";
+import { useDynamicRefs } from "@/hooks";
 import { modulesFactory } from "@/routes/modules";
 import { postApi } from "@/services";
 import { messageError, messageSuccess, sleep } from "@/utils";
@@ -12,6 +13,8 @@ const PageInterpreterCreateOrEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
+
+    const [getRef] = useDynamicRefs();
 
     const refForm = useRef<IBaseFormRef>(null);
 
@@ -26,15 +29,30 @@ const PageInterpreterCreateOrEdit = () => {
         const { table } = data;
         setDisabled(true);
         try {
-            const dataIds: any[] = stateIds?.map((id: any) => ({ name: id }));
-            if (dataIds?.length) {
+            const refInterpreter = getRef<any>("interpreterSheet");
+            const nameInterpreter = refInterpreter?.current?.getName();
+            let dataImport: any[] = [];
+            let countSend = 500;
+            if (["jogo", "console"].includes(nameInterpreter)) {
+                const dataAll = refInterpreter?.current?.getItems();
+                dataImport = dataAll?.rows;
+                countSend = 200;
+            } else {
+                const dataIds: any[] = stateIds?.map((id: any) => ({
+                    name: id,
+                }));
+                dataImport = dataIds;
+            }
+            if (dataImport?.length) {
                 let successAll = true;
-                const count = Math.ceil(dataIds.length / 1000);
+
+                // const count = 1
+                const count = Math.ceil(dataImport.length / countSend);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
-                    const element = dataIds.slice(
+                    const element = dataImport.slice(
                         indexCount,
-                        indexCount + 1000
+                        indexCount + countSend
                     );
                     const { success } = await postApi({
                         url: table,
@@ -42,13 +60,12 @@ const PageInterpreterCreateOrEdit = () => {
                             data: element,
                         },
                     });
-                    indexCount += 1000;
+                    indexCount += countSend;
                     if (!success) {
                         successAll = false;
                     }
                     await sleep(500);
                 }
-
                 if (successAll) {
                     messageSuccess({ message: "Importado com sucesso" });
                     onClose();

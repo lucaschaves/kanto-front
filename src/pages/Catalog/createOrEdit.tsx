@@ -4,6 +4,7 @@ import {
     FCheckboxLabel,
     FInputLabel,
     FSelectLabel,
+    FSelectLabelMultiApi,
     FSelectLabelSingleApi,
     GroupForm,
     IBaseFormRef,
@@ -20,7 +21,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 export const dataItemsType = [
     {
         id: "game",
-        name: "Game",
+        name: "Jogo",
     },
     {
         id: "console",
@@ -73,10 +74,20 @@ export const PageCatalogCreateOrEdit = () => {
     };
 
     const onSubmit = async (data: FieldValues) => {
+        let newData = data;
+        newData = {
+            ...data,
+            factory: data?.factory
+                ? Array.isArray(data?.factory)
+                    ? data?.factory[0]
+                    : data?.factory
+                : undefined,
+        };
+
         if (isEdit) {
             const { success, data: dataResp } = await putApi({
                 url: `/catalog/${searchParams.get("id")}`,
-                body: data,
+                body: newData,
             });
             if (success) {
                 if (file?.file) onUploadImage(dataResp?.id);
@@ -85,7 +96,7 @@ export const PageCatalogCreateOrEdit = () => {
         } else {
             const { success, data: dataResp } = await postApi({
                 url: "/catalog",
-                body: data,
+                body: newData,
             });
             if (success) {
                 if (file?.file) onUploadImage(dataResp?.id);
@@ -121,6 +132,13 @@ export const PageCatalogCreateOrEdit = () => {
             });
             delete newData.payments;
             delete newData.images;
+            newData = {
+                ...newData,
+                conservation: newData?.conservation
+                    ? String(newData?.conservation)
+                    : null,
+            };
+
             refForm.current?.reset(newData);
             setType(newData.type);
             setLoading(false);
@@ -165,11 +183,17 @@ export const PageCatalogCreateOrEdit = () => {
                     onEffect={(e) => setType(e)}
                 />
                 <FSelectLabelSingleApi
+                    label={t("plataform")}
+                    name="plataform"
+                    url="/plataforms"
+                />
+                <FSelectLabelMultiApi
                     label={t("factory")}
                     name="factory"
                     url="/catalogs/factory"
-                    dependencies={["type"]}
+                    dependencies={["type", "plataform.id"]}
                     onEffect={(e) => onEffectFactory(e?.tagsDefault)}
+                    single
                 />
                 <FSelectLabelSingleApi
                     label={t("region")}
@@ -246,8 +270,8 @@ export const PageCatalogCreateOrEdit = () => {
                         name="gameWorking"
                     />
                     <FSelectLabel
-                        label={t("gameConversation")}
-                        name="gameConversation"
+                        label={t("conservation")}
+                        name="conservation"
                         items={[
                             {
                                 id: "1",
@@ -288,11 +312,15 @@ export const PageCatalogCreateOrEdit = () => {
                 )}
             >
                 <FInputLabel
-                    label={t("price")}
+                    label={t("pvMercadoLivre")}
                     name="pvMercadoLivre"
                     type="currency"
                 />
-                <FInputLabel label={t("cost")} name="pvCost" type="currency" />
+                <FInputLabel
+                    label={t("pvCost")}
+                    name="pvCost"
+                    type="currency"
+                />
             </GroupForm>
             <GroupForm
                 title={t("images")}

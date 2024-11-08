@@ -34,7 +34,7 @@ const PageGames = () => {
             {
                 name: "plataform",
                 title: t("plataform"),
-                type: "array",
+                type: "object",
                 field: "name",
             },
             {

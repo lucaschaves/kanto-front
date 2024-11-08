@@ -136,7 +136,7 @@ const PageProducts = ({ index }: { index: number }) => {
             { name: "status", title: t("status") },
             {
                 name: "pvCost",
-                title: t("PV Custo"),
+                title: t("Custo de estoque"),
                 type: "currency",
             },
             {

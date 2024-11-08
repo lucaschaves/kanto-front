@@ -13,6 +13,7 @@ import {
     SelectValue,
 } from "@/components";
 import { RegisterOptions, useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 interface IItem {
     id: string;
@@ -38,7 +39,7 @@ const FSelectLabel = (props: IFSelectLabelProps) => {
         onEffect = () => ({}),
         ...rest
     } = props;
-
+    const { t } = useTranslation();
     const { control } = useFormContext();
 
     return (
@@ -67,7 +68,7 @@ const FSelectLabel = (props: IFSelectLabelProps) => {
                         <SelectContent>
                             {items.map((item) => (
                                 <SelectItem key={item.id} value={item.id}>
-                                    {item.name}
+                                    {t(item.name)}
                                 </SelectItem>
                             ))}
                         </SelectContent>

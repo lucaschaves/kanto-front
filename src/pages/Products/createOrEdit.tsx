@@ -101,8 +101,23 @@ export const PageProductCreateOrEdit = () => {
                     }?token=${window.sessionStorage.getItem(CONSTANT_TOKEN)}`,
                 });
             }
+
             delete data.images;
-            refForm.current?.reset(data);
+            let newData = data;
+            setFindCatalog({
+                type: data?.catalog?.type,
+                region: data?.catalog?.region ? [data?.catalog?.region] : null,
+                plataform: data?.plataform ? [data?.plataform] : null,
+                factory: data?.factory ? [data?.factory] : null,
+            });
+            newData = {
+                ...newData,
+                catalog: {
+                    ...newData?.catalog,
+                    name: newData?.name,
+                },
+            };
+            refForm.current?.reset(newData);
         }
         setLoading(false);
     };
@@ -122,17 +137,13 @@ export const PageProductCreateOrEdit = () => {
             onSubmit={onSubmit}
             title={`${isEdit ? t("edit") : t("add")} produto`}
         >
-            {isEdit ? (
-                <></>
-            ) : (
-                <SearchCatalog
-                    onChange={(n, v) => {
-                        setFindCatalog((prev: any) => ({ ...prev, [n]: v }));
-                        onCleanCatalog();
-                    }}
-                    value={stateFindCatalog}
-                />
-            )}
+            <SearchCatalog
+                onChange={(n, v) => {
+                    setFindCatalog((prev: any) => ({ ...prev, [n]: v }));
+                    onCleanCatalog();
+                }}
+                value={stateFindCatalog}
+            />
             <GroupForm
                 title={t("general")}
                 className={cn(
@@ -146,98 +157,95 @@ export const PageProductCreateOrEdit = () => {
                     "px-3"
                 )}
             >
-                {isEdit ? (
-                    <></>
-                ) : (
-                    <FSelectLabelSingleApi
-                        defControl={refForm.current?.control}
-                        className="col-span-2"
-                        label={t("catalog")}
-                        name="catalog"
-                        url="/catalogs/fields"
-                        dependenciesValue={{
-                            type: stateFindCatalog?.type,
-                            plataform: stateFindCatalog?.plataform
-                                ?.map((d: any) => d?.id)
-                                .join(","),
-                            region: stateFindCatalog?.region
-                                ?.map((d: any) => d?.id)
-                                .join(","),
-                            factory: stateFindCatalog?.factory
-                                ?.map((d: any) => d?.id)
-                                .join(","),
-                        }}
-                        // dependencies={[
-                        //     "consoleComplete",
-                        //     "conservation",
-                        //     "consolePackaging",
-                        //     "consoleSealed",
-                        //     "consoleTypeUnlocked",
-                        //     "consoleWorking",
-                        //     "consoleUnlocked",
-                        //     "gameManual",
-                        //     "gamePackaging",
-                        //     "gamePackagingRental",
-                        //     "gameSealed",
-                        //     "gameWorking",
-                        // ]}
-                        keyValue={["catalog.name"]}
-                        // addLinkCrud={
-                        //     refForm.current?.watch("catalog")
-                        //         ? ""
-                        //         : "/factory/consoles/new"
-                        // }
-                        onEffect={(val) => {
-                            refForm.current?.setValue("name", val?.name);
-                            // refForm.current?.setValue("pvMercadoLivre", val?.pvMercadoLivre);
-                            // refForm.current?.setValue("pvCost", val?.pvCost);
-                            // refForm.current?.setValue("pvProfit", val?.pvProfit);
-                        }}
-                        // disabled={!stateType}
-                        // className={cn(
-                        //     "col-span-1",
-                        //     "sm:col-span-2",
-                        //     "md:col-span-3"
-                        // )}
-                        disabled={!stateFindCatalog?.type}
-                    />
-                )}
-                {isEdit ? (
-                    <>
-                        <FInputLabel
-                            label={t("catalog")}
-                            name="catalog.id"
-                            disabled
-                        />
-                        <FInputLabel
-                            label={t("type")}
-                            name="catalog.type"
-                            disabled
-                        />
-                    </>
-                ) : (
-                    <></>
-                )}
+                <FSelectLabelSingleApi
+                    defControl={refForm.current?.control}
+                    className="col-span-2"
+                    label={t("catalog")}
+                    name="catalog"
+                    url="/catalogs/fields"
+                    dependenciesValue={{
+                        type: stateFindCatalog?.type,
+                        plataform: stateFindCatalog?.plataform
+                            ?.map((d: any) => d?.id)
+                            .join(","),
+                        region: stateFindCatalog?.region
+                            ?.map((d: any) => d?.id)
+                            .join(","),
+                        factory: stateFindCatalog?.factory
+                            ?.map((d: any) => d?.id)
+                            .join(","),
+                    }}
+                    // dependencies={[
+                    //     "consoleComplete",
+                    //     "conservation",
+                    //     "consolePackaging",
+                    //     "consoleSealed",
+                    //     "consoleTypeUnlocked",
+                    //     "consoleWorking",
+                    //     "consoleUnlocked",
+                    //     "gameManual",
+                    //     "gamePackaging",
+                    //     "gamePackagingRental",
+                    //     "gameSealed",
+                    //     "gameWorking",
+                    // ]}
+                    keyValue={["catalog.name"]}
+                    // addLinkCrud={
+                    //     refForm.current?.watch("catalog")
+                    //         ? ""
+                    //         : "/factory/consoles/new"
+                    // }
+                    onEffect={(val) => {
+                        refForm.current?.setValue("name", val?.name);
+                        // refForm.current?.setValue("pvMercadoLivre", val?.pvMercadoLivre);
+                        // refForm.current?.setValue("pvCost", val?.pvCost);
+                    }}
+                    // disabled={!stateType}
+                    // className={cn(
+                    //     "col-span-1",
+                    //     "sm:col-span-2",
+                    //     "md:col-span-3"
+                    // )}
+                    disabled={!stateFindCatalog?.type}
+                />
                 <FInputLabel
                     label={t("sku")}
                     name="sku"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
                     label={t("name")}
                     name="name"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                     className={cn("col-span-1", "sm:col-span-2")}
                 />
                 <FInputLabel
                     label={t("addressInStock")}
                     name="addressInStock"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
-                <FInputLabel
+                <FSelectLabel
                     label={t("Plataforma de venda")}
                     name="salesPlatform"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    items={[
+                        {
+                            id: "mercado livre",
+                            name: "Mercado Livre",
+                        },
+                        {
+                            id: "amazon",
+                            name: "Amazon",
+                        },
+                        {
+                            id: "site",
+                            name: "Site",
+                        },
+                        {
+                            id: "shoppe",
+                            name: "Shoppe",
+                        },
+                    ]}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FSelectLabel
                     label={t("status")}
@@ -283,28 +291,32 @@ export const PageProductCreateOrEdit = () => {
                             id: "estoque",
                             name: "Estoque",
                         },
+                        {
+                            id: "vendido",
+                            name: "Vendido",
+                        },
                     ]}
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FInputDatePicker
                     label={t("receiptDate")}
                     name="receiptDate"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FInputDatePicker
                     label={t("announcementDate")}
                     name="announcementDate"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FInputDatePicker
                     label={t("dateEntryInStock")}
                     name="dateEntryInStock"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
                 <FInputDatePicker
                     label={t("dateSale")}
                     name="dateSale"
-                    disabled={isEdit ? false : !stateFindCatalog?.type}
+                    disabled={!stateFindCatalog?.type}
                 />
             </GroupForm>
             <GroupForm
@@ -319,15 +331,14 @@ export const PageProductCreateOrEdit = () => {
                     "px-3"
                 )}
             >
-                <FInputLabel label={t("cost")} name="pvCost" type="currency" />
                 <FInputLabel
-                    label={t("pvMercadoLivre")}
-                    name="pvMercadoLivre"
+                    label={t("pvCost")}
+                    name="pvCost"
                     type="currency"
                 />
                 <FInputLabel
-                    label={t("profit")}
-                    name="pvProfit"
+                    label={t("pvMercadoLivre")}
+                    name="pvMercadoLivre"
                     type="currency"
                 />
                 {fieldsPayments?.map((k: any) => (

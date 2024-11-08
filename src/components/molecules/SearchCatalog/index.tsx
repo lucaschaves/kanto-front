@@ -135,7 +135,7 @@ export const SearchCatalog = (props: IPropsSearchCatalog) => {
                                 htmlFor="consoleComplete"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                                {t("consoleComplete")}
+                                {t(d)}
                             </label>
                         </div>
                     ))}
@@ -159,7 +159,7 @@ export const SearchCatalog = (props: IPropsSearchCatalog) => {
                                 htmlFor="consoleComplete"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                                {t("consoleComplete")}
+                                {t(d)}
                             </label>
                         </div>
                     ))}

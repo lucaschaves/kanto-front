@@ -35,7 +35,7 @@ const PageCatalogs = () => {
             },
             {
                 name: "pvCost",
-                title: t("PV Custo"),
+                title: t("pvCost"),
                 type: "currency",
             },
             {

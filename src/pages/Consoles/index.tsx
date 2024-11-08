@@ -1,11 +1,6 @@
-import { Button, Checkbox, Listing } from "@/components";
-import {
-    CaretDownIcon,
-    CaretSortIcon,
-    CaretUpIcon,
-} from "@radix-ui/react-icons";
+import { Listing } from "@/components";
+import { createColumn } from "@/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
@@ -22,297 +17,69 @@ const PageConsoles = () => {
     const { t } = useTranslation();
 
     const [stateColumns] = useState<ColumnDef<IConsole>[]>(() => {
-        return [
+        const columns: any[] = [];
+        const colsDef = [
+            { name: "select", title: "Select" },
+            { name: "id", title: t("id") },
+            { name: "name", title: t("name") },
+            { name: "ean", title: t("ean") },
             {
-                id: "select",
-                header: ({ table }) => (
-                    <div className="flex items-start">
-                        <Checkbox
-                            checked={
-                                table.getIsAllPageRowsSelected() ||
-                                (table.getIsSomePageRowsSelected() &&
-                                    "indeterminate")
-                            }
-                            onCheckedChange={(value) =>
-                                table.toggleAllPageRowsSelected(!!value)
-                            }
-                            aria-label="Select all"
-                        />
-                    </div>
-                ),
-                cell: ({ row }) => (
-                    <Checkbox
-                        checked={row.getIsSelected()}
-                        onCheckedChange={(value) => row.toggleSelected(!!value)}
-                        aria-label="Select row"
-                    />
-                ),
-                enableSorting: false,
-                enableHiding: false,
-                size: 50,
-                minSize: 50,
+                name: "specialEdition",
+                title: t("specialEdition"),
+                type: "boolean",
             },
             {
-                accessorKey: "id",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("id")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => (
-                    <div className="capitalize">{row.getValue("id")}</div>
-                ),
+                name: "plataform",
+                title: t("plataform"),
+                type: "object",
+                field: "name",
             },
             {
-                accessorKey: "name",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("name")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => (
-                    <div className="capitalize">{row.getValue("name")}</div>
-                ),
+                name: "color",
+                title: t("color"),
+                type: "object",
+                field: "name",
             },
             {
-                accessorKey: "ean",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("ean")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => (
-                    <div className="capitalize">{row.getValue("ean")}</div>
-                ),
+                name: "model",
+                title: t("model"),
+                type: "object",
+                field: "name",
             },
             {
-                accessorKey: "specialEdition",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("specialEdition")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => (
-                    <Checkbox checked={row.getValue("specialEdition")} />
-                ),
+                name: "typeOfConsole",
+                title: t("typeOfConsole"),
+                type: "object",
+                field: "name",
             },
             {
-                accessorKey: "storage",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("storage")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => {
-                    const rowValue = (row.getValue("storage") as any[])
-                        ?.map((r) => r?.name)
-                        ?.join(", ");
-                    return <div className="capitalize">{rowValue}</div>;
-                },
+                name: "storage",
+                title: t("storage"),
+                type: "object",
+                field: "name",
             },
+            { name: "releaseYear", title: t("releaseYear") },
             {
-                accessorKey: "releaseYear",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("releaseYear")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => {
-                    const rowValue = (row.getValue("releaseYear") as any[])
-                        ?.map((r) => r)
-                        ?.join(", ");
-                    return <div className="capitalize">{rowValue}</div>;
-                },
+                name: "brand",
+                title: t("brand"),
+                type: "object",
+                field: "name",
             },
-            {
-                accessorKey: "createdAt",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("createdAt")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => {
-                    const value = row.getValue("createdAt") as any;
-                    return (
-                        <div>
-                            {value
-                                ? format(new Date(value), "dd/MM/yyyy HH:mm:ss")
-                                : "-"}
-                        </div>
-                    );
-                },
-            },
-            {
-                accessorKey: "updatedAt",
-                header: ({ column }) => {
-                    return (
-                        <div className="flex items-start">
-                            <Button
-                                variant="ghost"
-                                onClick={() =>
-                                    column.toggleSorting(
-                                        column.getIsSorted() == "asc"
-                                    )
-                                }
-                                className="pl-0"
-                            >
-                                {t("updatedAt")}
-                                {column.getIsSorted() === "desc" ? (
-                                    <CaretDownIcon className="ml-2 h-4 w-4" />
-                                ) : column.getIsSorted() === "asc" ? (
-                                    <CaretUpIcon className="ml-2 h-4 w-4" />
-                                ) : (
-                                    <CaretSortIcon className="ml-2 h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    );
-                },
-                cell: ({ row }) => {
-                    const value = row.getValue("updatedAt") as any;
-                    return (
-                        <div>
-                            {value
-                                ? format(new Date(value), "dd/MM/yyyy HH:mm:ss")
-                                : "-"}
-                        </div>
-                    );
-                },
-            },
+            { name: "tagsDefault", title: t("tagsDefault") },
+            { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
+            { name: "createdAt", title: t("createdAt"), type: "datetime" },
         ];
+        colsDef.forEach((col) => {
+            columns.push(
+                createColumn({
+                    name: col.name,
+                    title: col.title,
+                    type: col?.type as any,
+                    field: col?.field,
+                })
+            );
+        });
+        return columns;
     });
 
     return (

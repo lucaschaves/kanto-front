@@ -179,6 +179,11 @@ export const modulesFactory = [
         link: "/factory/typesofconsoles",
         Icon: <HomeIcon />,
     },
+    {
+        name: "paymentmethods",
+        link: "/factory/paymentmethods",
+        Icon: <HomeIcon />,
+    },
 ];
 
 export const modulesQuotations = [
