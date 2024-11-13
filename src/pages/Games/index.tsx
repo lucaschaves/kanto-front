@@ -28,8 +28,8 @@ const PageGames = () => {
         const columns: any[] = [];
         const colsDef = [
             { name: "select", title: "Select" },
-            { name: "id", title: t("id") },
-            { name: "name", title: t("name") },
+            { name: "id", title: t("id"), enableSorting: true },
+            { name: "name", title: t("name"), enableSorting: true },
             { name: "ean", title: t("ean") },
             {
                 name: "plataform",
@@ -78,6 +78,7 @@ const PageGames = () => {
                     title: col.title,
                     type: col?.type as any,
                     field: col?.field,
+                    enableSorting: col?.enableSorting,
                 })
             );
         });

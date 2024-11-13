@@ -53,6 +53,7 @@ const PageQuotationsForms = () => {
                     title: col.title,
                     type: col?.type as any,
                     // capitalize: col.capitalize,
+                    // enableSorting: col?.enableSorting,
                 })
             );
         });

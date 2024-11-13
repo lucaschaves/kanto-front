@@ -60,7 +60,7 @@ import {
     CONSTANT_COLUMNS_VIEW,
     CONSTANT_NUMBER_ROWS,
 } from "@/constants";
-import { useDynamicRefs, usePagination, useSorting } from "@/hooks";
+import { useDynamicRefs, useSorting } from "@/hooks";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import {
@@ -113,7 +113,12 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import {
+    useLocation,
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
 
 interface IPagination {
     skip: number;
@@ -328,6 +333,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const { t } = useTranslation();
     const { openToolbar } = useOutletContext<IPropsOutletContext>();
 
@@ -337,7 +344,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const refFile = useRef<HTMLInputElement>(null);
     const refFileCatalog = useRef<HTMLInputElement>(null);
 
-    const [stateLimit, setLimit] = useState(() => {
+    const [stateLimit, setLimit] = useState<number>(() => {
         const numberRows = JSON.parse(
             window.localStorage.getItem(CONSTANT_NUMBER_ROWS) || "{}"
         );
@@ -346,20 +353,28 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 return Number(numberRows[name]);
             } catch (err) {}
         }
-        return limit?.toString() || 20;
+        return limit || 20;
     });
     const [stateFilterDefault, setFilterDefault] = useState({
         filter: "id",
         value: "",
     });
 
-    const {
-        limit: limitPage,
-        onPaginationChange,
-        skip,
-        pagination,
-    } = usePagination({ limit: Number(stateLimit) });
-    const { sorting, onSortingChange, field, order } = useSorting();
+    const skip = searchParams?.get("page")
+        ? Number(searchParams?.get("page")) * stateLimit
+        : 0;
+    // const {
+    //     limit: limitPage,
+    //     onPaginationChange,
+    //     skip,
+    //     pagination,
+    // } = usePagination({
+    //     limit: Number(stateLimit),
+    //     page: searchParams?.get("page"),
+    // });
+    const { sorting, onSortingChange, field, order } = useSorting({
+        columns,
+    });
 
     const [stateHistory, setHistory] = useState<IHistory>({
         show: false,
@@ -411,13 +426,17 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const handleSort = (propsV: SetStateAction<SortingState>) => {
         onSortingChange(propsV);
         const defPagination = {
-            pagination: { skip: 0, limit: limitPage },
+            pagination: { skip, limit: stateLimit },
             sort: { field, order },
         };
-        onPaginationChange({
-            pageSize: defPagination.pagination.limit,
-            pageIndex: defPagination.pagination.skip,
+        setSearchParams({
+            page: (skip / stateLimit)?.toString(),
         });
+        // onPaginationChange({
+        //     pageSize: defPagination.pagination.limit,
+        //     pageIndex: defPagination.pagination.skip,
+        // });
+
         onRefresh(defPagination);
     };
 
@@ -426,7 +445,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         columns,
         onSortingChange: handleSort,
         onColumnFiltersChange: setColumnFilters,
-        onPaginationChange,
+        // onPaginationChange,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -461,7 +480,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
             columnVisibility,
             rowSelection,
             columnPinning,
-            pagination,
+            // pagination,
             columnOrder,
         },
     });
@@ -504,7 +523,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
     const handleRefresh = (filters?: any) => {
         onRefresh({
-            pagination: { skip, limit: limitPage },
+            pagination: { skip, limit: stateLimit },
             sort: { field, order },
             filters,
         });
@@ -859,27 +878,42 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
             refInit.current = false;
             return;
         }
+
+        setSearchParams({ page: (skip / stateLimit)?.toString() });
         onRefresh({
-            pagination: { skip, limit: limitPage },
+            pagination: { skip, limit: stateLimit },
             sort: { field, order },
         });
-    }, [skip]);
+    }, []);
+
+    useEffect(() => {
+        // if (refInit.current) {
+        //     refInit.current = false;
+        //     return;
+        // }
+
+        setSearchParams({ page: (skip / stateLimit)?.toString() });
+        // onRefresh({
+        //     pagination: { skip, limit: limitPage },
+        //     sort: { field, order },
+        // });
+    }, [location.pathname]);
 
     useEffect(() => {
         if (refInit.current) {
             refInit.current = false;
             return;
         }
-        if (stateLimit != limitPage) {
-            onPaginationChange({
-                pageSize: Number(stateLimit),
-                pageIndex: 0,
-            });
-            onRefresh({
-                pagination: { skip: 0, limit: Number(stateLimit) },
-                sort: { field, order },
-            });
-        }
+        // if (stateLimit != limitPage) {
+        //     onPaginationChange({
+        //         pageSize: Number(stateLimit),
+        //         pageIndex: 0,
+        //     });
+        //     onRefresh({
+        //         pagination: { skip, limit: Number(stateLimit) },
+        //         sort: { field, order },
+        //     });
+        // }
     }, [stateLimit]);
 
     useImperativeHandle(
@@ -1710,7 +1744,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         [name]: e?.toString(),
                                     })
                                 );
-                                setLimit(e?.toString());
+                                setLimit(Number(e));
                             }}
                             value={stateLimit?.toString()}
                         >
@@ -1734,7 +1768,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             {t("total")} {total} -
                         </span>
                         <span className="text-sm text-muted-foreground">
-                            {t("page")} {skip / limitPage + 1}
+                            {t("page")} {skip / stateLimit + 1}
                         </span>
                         <Button
                             variant="outline"
@@ -1749,8 +1783,16 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
+                            onClick={() => {
+                                setSearchParams({
+                                    page: (
+                                        Number(searchParams.get("page") || 0) +
+                                        1
+                                    )?.toString(),
+                                });
+                                // table.nextPage()
+                            }}
+                            // disabled={!table.getCanNextPage()}
                         >
                             {t("next")}
                         </Button>

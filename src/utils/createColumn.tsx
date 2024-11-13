@@ -79,7 +79,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
         field,
         subType = "text",
         fieldCompare,
-        enableSorting = true,
+        enableSorting = false,
         enableHiding = true,
         capitalize = true,
     } = props;
@@ -121,18 +121,25 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
             return (
                 <Button
                     variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() == "asc")
-                    }
+                    onClick={() => {
+                        enableSorting &&
+                            column.toggleSorting(column.getIsSorted() == "asc");
+                    }}
                     className="pl-0"
                 >
                     {title}
-                    {column.getIsSorted() === "desc" ? (
-                        <CaretDownIcon className="ml-2 h-4 w-4" />
-                    ) : column.getIsSorted() === "asc" ? (
-                        <CaretUpIcon className="ml-2 h-4 w-4" />
+                    {enableSorting ? (
+                        <>
+                            {column.getIsSorted() === "desc" ? (
+                                <CaretDownIcon className="ml-2 h-4 w-4" />
+                            ) : column.getIsSorted() === "asc" ? (
+                                <CaretUpIcon className="ml-2 h-4 w-4" />
+                            ) : (
+                                <CaretSortIcon className="ml-2 h-4 w-4" />
+                            )}
+                        </>
                     ) : (
-                        <CaretSortIcon className="ml-2 h-4 w-4" />
+                        <></>
                     )}
                 </Button>
             );

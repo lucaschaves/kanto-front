@@ -2,13 +2,14 @@ import { PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
 
 interface IPagination {
-    limit?: number;
+    limit?: number | null;
+    page?: string | null;
 }
 
 export function usePagination(props: IPagination) {
     const [pagination, setPagination] = useState<PaginationState>({
-        pageSize: props.limit ?? 10,
-        pageIndex: 0,
+        pageSize: props?.limit || 10,
+        pageIndex: props?.page ? Number(props.page) : 0,
     });
 
     const { pageSize, pageIndex } = pagination;

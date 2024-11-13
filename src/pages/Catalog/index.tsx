@@ -19,13 +19,14 @@ const PageCatalogs = () => {
         const columns: any[] = [];
         const colsDef: ICreateColumn[] = [
             { name: "select", title: "Select" },
-            { name: "id", title: t("id") },
+            { name: "id", title: t("id"), enableSorting: true },
             { name: "type", title: t("type") },
             {
                 name: "factory",
                 title: t("factory"),
                 type: "object",
                 field: "name",
+                enableSorting: true,
             },
             {
                 name: "region",

@@ -124,9 +124,9 @@ const PageProducts = ({ index }: { index: number }) => {
         const columns: any[] = [];
         const colsDef: ICreateColumn[] = [
             { name: "select", title: "Select" },
-            { name: "id", title: t("id") },
+            { name: "id", title: t("id"), enableSorting: true },
             { name: "sku", title: t("sku") },
-            { name: "name", title: t("name") },
+            { name: "name", title: t("name"), enableSorting: true },
             {
                 name: "catalog",
                 title: t("catalog"),
