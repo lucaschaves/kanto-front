@@ -138,11 +138,13 @@ const PageProducts = ({ index }: { index: number }) => {
                 name: "pvCost",
                 title: t("Custo de estoque"),
                 type: "currency",
+                typeFilter: "number",
             },
             {
                 name: "pvMercadoLivre",
                 title: t("PV Mercado Livre"),
                 type: "currency",
+                typeFilter: "number",
             },
             { name: "salesPlatform", title: t("salesPlatform") },
             { name: "inventoryCost", title: t("inventoryCost") },
@@ -151,16 +153,38 @@ const PageProducts = ({ index }: { index: number }) => {
                 name: "announcementDate",
                 title: t("announcementDate"),
                 type: "datetime",
+                typeFilter: "date",
             },
             {
                 name: "dateEntryInStock",
                 title: t("dateEntryInStock"),
                 type: "datetime",
+                typeFilter: "date",
             },
-            { name: "dateSale", title: t("dateSale"), type: "datetime" },
-            { name: "receiptDate", title: t("receiptDate"), type: "datetime" },
-            { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
-            { name: "createdAt", title: t("createdAt"), type: "datetime" },
+            {
+                name: "dateSale",
+                title: t("dateSale"),
+                type: "datetime",
+                typeFilter: "date",
+            },
+            {
+                name: "receiptDate",
+                title: t("receiptDate"),
+                type: "datetime",
+                typeFilter: "date",
+            },
+            {
+                name: "updatedAt",
+                title: t("updatedAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
+            {
+                name: "createdAt",
+                title: t("createdAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
         ];
         colsDef.forEach((col) => {
             columns.push(
@@ -171,6 +195,7 @@ const PageProducts = ({ index }: { index: number }) => {
                     field: col?.field,
                     enableHiding: col?.enableHiding,
                     enableSorting: col?.enableSorting,
+                    typeFilter: col?.typeFilter,
                 })
             );
         });

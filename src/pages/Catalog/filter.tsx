@@ -5,29 +5,53 @@ import {
     FButtonSubmit,
     FCheckboxLabel,
     FInputLabel,
+    FSelectLabelMultiApi,
     GroupForm,
     IBaseFormRef,
-    ScrollArea,
 } from "@/components";
 import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import { decodeSearchParams, encodeSearchParams, sleep } from "@/utils";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 export const FilterCatalogs = () => {
     const [getRef, setRef] = useDynamicRefs();
 
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
     const { t } = useTranslation();
 
     const onSubmit = async (data: any) => {
+        let newSearch = {
+            page: searchParams?.get("page") || 0,
+            // filter_factory: data?.filter_factory,
+            filter_regions: data?.filter_regions
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_pvCost_start: data?.filter_pvCost_start,
+            filter_pvCost_end: data?.filter_pvCost_end,
+            filter_pvMercadoLivre_start: data?.filter_pvMercadoLivre_start,
+            filter_pvMercadoLivre_end: data?.filter_pvMercadoLivre_end,
+            filter_conservation: data?.filter_conservation,
+            filter_gameManual: data?.filter_gameManual,
+            filter_gamePackaging: data?.filter_gamePackaging,
+            filter_gamePackagingRental: data?.filter_gamePackagingRental,
+            filter_gameSealed: data?.filter_gameSealed,
+            filter_gameWorking: data?.filter_gameWorking,
+            filter_consoleSealed: data?.filter_consoleSealed,
+            filter_consoleWorking: data?.filter_consoleWorking,
+            filter_consolePackaging: data?.filter_consolePackaging,
+            filter_consoleComplete: data?.filter_consoleComplete,
+            filter_consoleUnlocked: data?.filter_consoleUnlocked,
+            filter_consoleTypeUnlocked: data?.filter_consoleTypeUnlocked,
+        };
         navigate(
             {
                 pathname: location.pathname,
-                search: encodeSearchParams(data),
+                search: encodeSearchParams(newSearch),
             },
             {}
         );
@@ -57,128 +81,116 @@ export const FilterCatalogs = () => {
             <div className={cn("w-full", "mb-2", "p-2")}>
                 <h2 className="font-semibold">Filtros</h2>
             </div>
-            <ScrollArea
+            <div
                 className={cn(
                     "w-full",
                     "h-full",
                     "max-h-[calc(100vh-140px)]",
-                    "p-2",
                     "flex",
                     "flex-col",
-                    "gap-y-4"
+                    "overflow-auto",
+                    "p-2",
+                    "gap-1"
                 )}
             >
-                <GroupForm
-                    title={t("prices")}
-                    className={cn(
-                        "w-full",
-                        "grid",
-                        "grid-cols-1",
-                        "sm:grid-cols-2",
-                        "gap-1",
-                        "sm:gap-2"
-                    )}
-                >
+                {/* <FInputLabel label={t("factory")} name="filter_factory" /> */}
+                <FSelectLabelMultiApi
+                    url="/regions"
+                    label={t("regions")}
+                    name="filter_regions"
+                />
+                <div className="flex items-center justify-between gap-2">
                     <FInputLabel
-                        label={t("moneyMin")}
-                        name="filter_priceMoney_min"
-                        type="number"
-                        placeholder="mínimo"
+                        label={t("costStart")}
+                        name="filter_pvCost_start"
+                        type="currency"
                     />
                     <FInputLabel
-                        label={t("moneyMax")}
-                        name="filter_priceMoney_max"
-                        type="number"
-                        placeholder="máximo"
+                        label={t("costEnd")}
+                        name="filter_pvCost_end"
+                        type="currency"
+                    />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                    <FInputLabel
+                        label={t("mercadoLivreStart")}
+                        name="filter_pvMercadoLivre_start"
+                        type="currency"
                     />
                     <FInputLabel
-                        label={t("storeCreditMin")}
-                        name="filter_priceInStoreCredit_min"
-                        type="number"
+                        label={t("mercadoLivreEnd")}
+                        name="filter_pvMercadoLivre_end"
+                        type="currency"
                     />
-                    <FInputLabel
-                        label={t("storeCreditMax")}
-                        name="filter_priceInStoreCredit_max"
-                        type="number"
-                    />
-                </GroupForm>
-                <GroupForm
-                    title={t("games")}
-                    className={cn(
-                        "w-full",
-                        "grid",
-                        "grid-cols-1",
-                        // "sm:grid-cols-2",
-                        "gap-1",
-                        "sm:gap-2"
-                    )}
-                >
-                    <FInputLabel
-                        label={t("type")}
-                        name="filter_type"
-                        // className="col-span-2"
-                    />
+                </div>
+                <FInputLabel
+                    label={t("conservation")}
+                    name="filter_conservation"
+                    type="number"
+                />
+                <GroupForm title={t("games")} className="flex flex-wrap gap-2">
                     <FCheckboxLabel
-                        label={t("gameConversation")}
-                        name="filter_gameConversation"
-                    />
-                    <FCheckboxLabel
+                        row
                         label={t("gameManual")}
                         name="filter_gameManual"
                     />
                     <FCheckboxLabel
+                        row
                         label={t("gamePackaging")}
                         name="filter_gamePackaging"
                     />
                     <FCheckboxLabel
+                        row
                         label={t("gamePackagingRental")}
                         name="filter_gamePackagingRental"
                     />
                     <FCheckboxLabel
+                        row
                         label={t("gameSealed")}
                         name="filter_gameSealed"
                     />
                     <FCheckboxLabel
+                        row
                         label={t("gameWorking")}
                         name="filter_gameWorking"
                     />
                 </GroupForm>
                 <GroupForm
                     title={t("consoles")}
-                    className={cn(
-                        "w-full",
-                        "grid",
-                        "grid-cols-1",
-                        "gap-1",
-                        "sm:gap-2"
-                    )}
+                    className="flex flex-wrap gap-2"
                 >
                     <FCheckboxLabel
-                        label={t("consoleComplete")}
-                        name="filter_consoleComplete"
-                    />
-                    <FCheckboxLabel
-                        label={t("consolePackaging")}
-                        name="filter_consolePackaging"
-                    />
-                    <FCheckboxLabel
+                        row
                         label={t("consoleSealed")}
                         name="filter_consoleSealed"
                     />
                     <FCheckboxLabel
-                        label={t("consoleTypeUnlocked")}
-                        name="filter_consoleTypeUnlocked"
+                        row
+                        label={t("consoleWorking")}
+                        name="filter_consoleWorking"
                     />
                     <FCheckboxLabel
+                        row
+                        label={t("consolePackaging")}
+                        name="filter_consolePackaging"
+                    />
+                    <FCheckboxLabel
+                        row
+                        label={t("consoleComplete")}
+                        name="filter_consoleComplete"
+                    />
+                    <FCheckboxLabel
+                        row
                         label={t("consoleUnlocked")}
                         name="filter_consoleUnlocked"
                     />
                     <FCheckboxLabel
-                        label={t("consoleWorking")}
-                        name="filter_consoleWorking"
+                        row
+                        label={t("consoleTypeUnlocked")}
+                        name="filter_consoleTypeUnlocked"
                     />
                 </GroupForm>
-            </ScrollArea>
+            </div>
             <div
                 className={cn(
                     "flex",

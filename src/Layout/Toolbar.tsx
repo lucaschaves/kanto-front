@@ -12,6 +12,8 @@ import {
 import { cn } from "@/lib";
 import {
     FilterCatalogs,
+    FilterConsoles,
+    FilterGames,
     FilterProducts,
     FilterQuestions,
     FilterQuestionsGroups,
@@ -343,14 +345,42 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                 )}
             >
                 {[
+                    // "questions",
+                    // "questionsgroups",
+                    // "quotationssearchs",
                     "products",
+                    "productslist",
                     "catalogs",
-                    "questions",
-                    "questionsgroups",
                     "quotationsforms",
-                    "quotationssearchs",
-                ].includes(formActual) ||
-                location.pathname.includes("factory") ? (
+                    "games",
+                    "consoles",
+                    "productsprocessing",
+                    "productsreceiving",
+                    "productsrepair",
+                    "productsdisposal",
+                    "productsloan",
+                    "productslost",
+                    "productspart",
+                    "productsexchange",
+                    "productsgift",
+                    "productstest",
+                    "productssold",
+                    "paymentmethods",
+                    "typesofconsoles",
+                    "plataforms",
+                    "developers",
+                    "regions",
+                    "publishers",
+                    "parentalratings",
+                    "numberofplayers",
+                    "generous",
+                    "models",
+                    "brands",
+                    "colors",
+                    "storages",
+                    "accessories",
+                    "extras",
+                ].includes(formActual) ? (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -365,7 +395,6 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                                     variant={
                                         openFilters ? "outline" : "default"
                                     }
-                                    disabled
                                 >
                                     <MagnifyingGlassIcon />
                                 </Button>
@@ -393,9 +422,27 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                     <FilterCatalogs />
                 ) : ["quotationsforms"].includes(fields) ? (
                     <FilterQuotationsForms />
+                ) : ["games"].includes(fields) ? (
+                    <FilterGames />
+                ) : ["consoles"].includes(fields) ? (
+                    <FilterConsoles />
                 ) : ["quotationssearchs"].includes(fields) ? (
                     <FilterQuotationsSearchs />
-                ) : ["products"].includes(fields) ? (
+                ) : [
+                      "products",
+                      "productslist",
+                      "productsprocessing",
+                      "productsreceiving",
+                      "productsrepair",
+                      "productsdisposal",
+                      "productsloan",
+                      "productslost",
+                      "productspart",
+                      "productsexchange",
+                      "productsgift",
+                      "productstest",
+                      "productssold",
+                  ].includes(fields) ? (
                     <FilterProducts />
                 ) : ["questions"].includes(fields) ? (
                     <FilterQuestions />

@@ -5,7 +5,6 @@ import {
     CaretSortIcon,
     CaretUpIcon,
 } from "@radix-ui/react-icons";
-import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Square, SquareCheck } from "lucide-react";
 import { resolveKeyObj } from "./resolveKeyObj";
@@ -32,6 +31,7 @@ export interface ICreateColumn {
     enableSorting?: boolean;
     enableHiding?: boolean;
     capitalize?: boolean;
+    typeFilter?: string;
 }
 
 const formatValueByType = (props: { type: ITypeColumn; value: any }): any => {
@@ -71,7 +71,7 @@ const formatValueByType = (props: { type: ITypeColumn; value: any }): any => {
     return value;
 };
 
-const createColumn = (props: ICreateColumn): ColumnDef<any> => {
+const createColumn = (props: ICreateColumn): any => {
     const {
         name,
         title,
@@ -82,12 +82,13 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
         enableSorting = false,
         enableHiding = true,
         capitalize = true,
+        typeFilter = "text",
     } = props;
 
     if (name === "select") {
         return {
             id: name,
-            header: ({ table }) => (
+            header: ({ table }: any) => (
                 <div className="flex items-center">
                     <Checkbox
                         checked={
@@ -102,7 +103,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                     />
                 </div>
             ),
-            cell: ({ row }) => (
+            cell: ({ row }: any) => (
                 <Checkbox
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -113,11 +114,12 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
             enableHiding: false,
             size: 50,
             minSize: 50,
+            typeFilter,
         };
     }
     return {
         accessorKey: name,
-        header: ({ column }) => {
+        header: ({ column }: any) => {
             return (
                 <Button
                     variant="ghost"
@@ -144,7 +146,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
                 </Button>
             );
         },
-        cell: ({ row }) => {
+        cell: ({ row }: any) => {
             if (type === "calc") {
                 const valueDef = row.original[field || ""];
                 const valueAct = resolveKeyObj(
@@ -234,6 +236,7 @@ const createColumn = (props: ICreateColumn): ColumnDef<any> => {
         },
         enableSorting,
         enableHiding,
+        typeFilter,
     };
 };
 

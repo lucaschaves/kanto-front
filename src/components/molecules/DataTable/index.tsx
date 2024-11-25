@@ -13,6 +13,7 @@ import {
     AvatarFallback,
     AvatarImage,
     Button,
+    Calendar,
     Carousel,
     CarouselContent,
     CarouselItem,
@@ -72,8 +73,10 @@ import {
     sleep,
 } from "@/utils";
 import {
+    CalendarIcon,
     CheckCircledIcon,
     ChevronDownIcon,
+    Cross2Icon,
     DoubleArrowDownIcon,
     DownloadIcon,
     DragHandleDots2Icon,
@@ -107,6 +110,7 @@ import Papa from "papaparse";
 import {
     CSSProperties,
     SetStateAction,
+    useCallback,
     useEffect,
     useImperativeHandle,
     useRef,
@@ -355,10 +359,14 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         }
         return limit || 20;
     });
-    const [stateFilterDefault, setFilterDefault] = useState({
+    const [stateFilterDefault, setFilterDefault] = useState<{
+        filter: string;
+        value: any;
+    }>({
         filter: "id",
         value: "",
     });
+    const [stateFilterType, setFilterType] = useState("number");
 
     const skip = searchParams?.get("page")
         ? Number(searchParams?.get("page")) * stateLimit
@@ -429,14 +437,10 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
             pagination: { skip, limit: stateLimit },
             sort: { field, order },
         };
-        setSearchParams({
-            page: (skip / stateLimit)?.toString(),
+        setSearchParams((prev) => {
+            prev.set("page", (skip / stateLimit)?.toString());
+            return prev;
         });
-        // onPaginationChange({
-        //     pageSize: defPagination.pagination.limit,
-        //     pageIndex: defPagination.pagination.skip,
-        // });
-
         onRefresh(defPagination);
     };
 
@@ -873,31 +877,41 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         return itemsCan;
     };
 
+    const getTypeFilter = useCallback(
+        (f: string) => {
+            const findColumns: any = columns?.find(
+                (c: any) => c.accessorKey === f
+            );
+            if (findColumns?.typeFilter) {
+                setFilterType(findColumns.typeFilter);
+            } else {
+                setFilterType("text");
+            }
+        },
+        [columns]
+    );
+
     useEffect(() => {
         if (refInit.current) {
             refInit.current = false;
             return;
         }
-
-        setSearchParams({ page: (skip / stateLimit)?.toString() });
+        setSearchParams((prev) => {
+            prev.set("page", (skip / stateLimit)?.toString());
+            return prev;
+        });
         onRefresh({
             pagination: { skip, limit: stateLimit },
             sort: { field, order },
         });
     }, []);
 
-    useEffect(() => {
-        // if (refInit.current) {
-        //     refInit.current = false;
-        //     return;
-        // }
-
-        setSearchParams({ page: (skip / stateLimit)?.toString() });
-        // onRefresh({
-        //     pagination: { skip, limit: limitPage },
-        //     sort: { field, order },
-        // });
-    }, [location.pathname]);
+    // useEffect(() => {
+    //     setSearchParams((prev) => {
+    //         prev.set("page", (skip / stateLimit)?.toString());
+    //         return prev;
+    //     });
+    // }, [location.pathname]);
 
     useEffect(() => {
         if (refInit.current) {
@@ -962,9 +976,10 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         )}
                     >
                         <Select
-                            onValueChange={(e) =>
-                                setFilterDefault({ filter: e, value: "" })
-                            }
+                            onValueChange={(e) => {
+                                setFilterDefault({ filter: e, value: "" });
+                                getTypeFilter(e);
+                            }}
                             value={stateFilterDefault.filter}
                         >
                             <SelectTrigger className="w-auto sm:w-auto max-w-48">
@@ -976,50 +991,143 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                     {table
                                         .getAllColumns()
                                         .filter((column) => column.getCanHide())
-                                        // .filter(
-                                        //     (column) =>
-                                        //         ![
-                                        //             "createdAt",
-                                        //             "updatedAt",
-                                        //             "select",
-                                        //         ].includes(column.id)
-                                        // )
-                                        .filter((column) =>
-                                            ["id", "name", "factory"].includes(
-                                                column.id
-                                            )
+                                        .filter(
+                                            (column) =>
+                                                ![
+                                                    "type",
+                                                    "factory",
+                                                    "tagsDefault",
+                                                    "select",
+                                                ].includes(column.id)
                                         )
-                                        .map((column) => {
-                                            return (
-                                                <SelectItem
-                                                    key={column.id}
-                                                    className="capitalize"
-                                                    value={column.id}
-                                                >
-                                                    {t(column.id)}
-                                                </SelectItem>
-                                            );
-                                        })}
+                                        .map((column) => (
+                                            <SelectItem
+                                                key={column.id}
+                                                className="capitalize"
+                                                value={column.id}
+                                            >
+                                                {t(column.id)}
+                                            </SelectItem>
+                                        ))}
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <Input
-                            placeholder="buscar..."
-                            value={stateFilterDefault.value}
-                            onChange={(e) =>
-                                setFilterDefault((p) => ({
-                                    ...p,
-                                    value: e.target.value,
-                                }))
-                            }
-                            onKeyDown={(e) => {
-                                if (e.keyCode === 13) {
-                                    navigate(
-                                        `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
-                                    );
+
+                        {["number"].includes(stateFilterType) ? (
+                            <Input
+                                placeholder="buscar..."
+                                value={stateFilterDefault.value}
+                                onChange={(e) =>
+                                    setFilterDefault((p) => ({
+                                        ...p,
+                                        value: e.target.value,
+                                    }))
                                 }
+                                onKeyDown={(e) => {
+                                    if (e.keyCode === 13) {
+                                        navigate(
+                                            `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
+                                        );
+                                    }
+                                }}
+                                type="number"
+                            />
+                        ) : ["boolean"].includes(stateFilterType) ? (
+                            <Checkbox
+                                checked={stateFilterDefault.value}
+                                onCheckedChange={(e) => {
+                                    setFilterDefault((p) => ({
+                                        ...p,
+                                        value: e,
+                                    }));
+                                    navigate(
+                                        `${location.pathname}?filter_${stateFilterDefault.filter}=${e}`
+                                    );
+                                }}
+                            />
+                        ) : ["date"].includes(stateFilterType) ? (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !stateFilterDefault.value &&
+                                                "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {stateFilterDefault.value ? (
+                                            <>
+                                                {format(
+                                                    stateFilterDefault.value,
+                                                    "dd LLL, y",
+                                                    {
+                                                        locale: ptBR,
+                                                    }
+                                                )}
+                                            </>
+                                        ) : (
+                                            <span>Selecione a data</span>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    className="w-auto p-0"
+                                    align="start"
+                                >
+                                    <Calendar
+                                        initialFocus
+                                        selected={stateFilterDefault.value}
+                                        onSelect={(e: any) => {
+                                            setFilterDefault((prev) => ({
+                                                ...prev,
+                                                value: e,
+                                            }));
+                                            navigate(
+                                                `${location.pathname}?filter_${
+                                                    stateFilterDefault.filter
+                                                }=${format(e, "yyyy-MM-dd")}`
+                                            );
+                                        }}
+                                        mode="single"
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        ) : (
+                            <Input
+                                placeholder="buscar..."
+                                value={stateFilterDefault.value}
+                                onChange={(e) =>
+                                    setFilterDefault((p) => ({
+                                        ...p,
+                                        value: e.target.value,
+                                    }))
+                                }
+                                onKeyDown={(e) => {
+                                    if (e.keyCode === 13) {
+                                        navigate(
+                                            `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
+                                        );
+                                    }
+                                }}
+                            />
+                        )}
+                        <Button
+                            size="icon"
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setFilterDefault((prev) => ({
+                                    ...prev,
+                                    value: "",
+                                }));
+                                navigate(location.pathname);
                             }}
-                        />
+                            className="min-w-10"
+                        >
+                            <Cross2Icon />
+                        </Button>
                     </div>
                     <div
                         className={cn(
@@ -1774,9 +1882,21 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                table.previousPage();
+                                setSearchParams((prev) => {
+                                    prev.set(
+                                        "page",
+                                        (
+                                            Number(
+                                                searchParams.get("page") || 1
+                                            ) - 1
+                                        )?.toString()
+                                    );
+                                    return prev;
+                                });
                             }}
-                            disabled={!table.getCanPreviousPage()}
+                            disabled={
+                                Number(searchParams.get("page") || 0) === 0
+                            }
                         >
                             {t("back")}
                         </Button>
@@ -1784,15 +1904,23 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                setSearchParams({
-                                    page: (
-                                        Number(searchParams.get("page") || 0) +
-                                        1
-                                    )?.toString(),
+                                setSearchParams((prev) => {
+                                    prev.set(
+                                        "page",
+                                        (
+                                            Number(
+                                                searchParams.get("page") || 0
+                                            ) + 1
+                                        )?.toString()
+                                    );
+                                    return prev;
                                 });
-                                // table.nextPage()
                             }}
-                            // disabled={!table.getCanNextPage()}
+                            disabled={
+                                (Number(searchParams.get("page") || 0) + 1) *
+                                    stateLimit >=
+                                total
+                            }
                         >
                             {t("next")}
                         </Button>

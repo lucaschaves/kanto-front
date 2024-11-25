@@ -3,8 +3,10 @@ import {
     BaseForm,
     Button,
     FButtonSubmit,
+    FCheckboxLabel,
     FInputDatePickerRange,
     FInputLabel,
+    FSelectLabelMultiApi,
     IBaseFormRef,
 } from "@/components";
 import { useDynamicRefs } from "@/hooks";
@@ -14,7 +16,7 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-export const FilterQuotationsForms = () => {
+export const FilterConsoles = () => {
     const [getRef, setRef] = useDynamicRefs();
 
     const navigate = useNavigate();
@@ -26,11 +28,32 @@ export const FilterQuotationsForms = () => {
     const onSubmit = async (data: any) => {
         let newSearch = {
             page: searchParams?.get("page") || 0,
-            filter_providerName: data?.filter_providerName,
-            filter_providerEmail: data?.filter_providerEmail,
-            filter_providerAddress: data?.filter_providerAddress,
-            filter_providerPhone: data?.filter_providerPhone,
-            providerOriginContact: data?.providerOriginContact,
+            filter_name: data?.filter_name,
+            filter_ean: data?.filter_ean,
+            filter_specialEdition: data?.filter_specialEdition
+                ? Boolean(data.filter_specialEdition)
+                : undefined,
+            filter_plataforms: data?.filter_plataforms
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_colors: data?.filter_colors
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_models: data?.filter_models
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_releaseYear_start: data?.filter_releaseYear_start,
+            filter_releaseYear_end: data?.filter_releaseYear_end,
+            filter_typesOfConsoles: data?.filter_typesOfConsoles
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_storages: data?.filter_storages
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+            filter_brands: data?.filter_brands
+                ?.map((d: { id: string }) => d?.id)
+                .join("-"),
+
             filter_updatedAt_from: data?.filter_updatedAt?.from
                 ? format(data.filter_updatedAt.from, "yyyy-MM-dd")
                 : undefined,
@@ -89,16 +112,55 @@ export const FilterQuotationsForms = () => {
                     "gap-1"
                 )}
             >
-                <FInputLabel label={t("name")} name="filter_providerName" />
-                <FInputLabel label={t("email")} name="filter_providerEmail" />
-                <FInputLabel
-                    label={t("Endereço")}
-                    name="filter_providerAddress"
+                <FInputLabel label={t("name")} name="filter_name" />
+                <FInputLabel label={t("ean")} name="filter_ean" />
+                <FCheckboxLabel
+                    label={t("specialEdition")}
+                    name="filter_specialEdition"
                 />
-                <FInputLabel label={t("phone")} name="filter_providerPhone" />
-                <FInputLabel
-                    label={t("providerOriginContact")}
-                    name="providerOriginContact"
+                <FSelectLabelMultiApi
+                    url="/plataforms"
+                    label={t("plataforms")}
+                    name="filter_plataforms"
+                />
+                <FSelectLabelMultiApi
+                    url="/colors"
+                    label={t("colors")}
+                    name="filter_colors"
+                />
+                <FSelectLabelMultiApi
+                    url="/models"
+                    label={t("models")}
+                    name="filter_models"
+                />
+                <FSelectLabelMultiApi
+                    url="/typesofconsoles"
+                    label={t("typesOfConsoles")}
+                    name="filter_typesOfConsoles"
+                />
+                <FSelectLabelMultiApi
+                    url="/storages"
+                    label={t("storages")}
+                    name="filter_storages"
+                />
+                <div className="flex items-center justify-between gap-2">
+                    <FInputLabel
+                        label={t("yearStart")}
+                        name="filter_releaseYear_start"
+                        type="number"
+                        placeholder="1990"
+                    />
+                    <FInputLabel
+                        label={t("yearEnd")}
+                        name="filter_releaseYear_end"
+                        type="number"
+                        placeholder={format(new Date(), "yyyy")}
+                    />
+                </div>
+                <FSelectLabelMultiApi
+                    url="/brands"
+                    label={t("brands")}
+                    name="filter_brands"
                 />
                 <FInputDatePickerRange
                     label={t("updatedAt")}

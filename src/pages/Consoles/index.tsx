@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 import { PageConsoleCreateOrEdit } from "./createOrEdit";
+import { FilterConsoles } from "./filter";
 
 type IConsole = {
     id: number;
@@ -27,6 +28,7 @@ const PageConsoles = () => {
                 name: "specialEdition",
                 title: t("specialEdition"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "plataform",
@@ -59,7 +61,11 @@ const PageConsoles = () => {
                 type: "object",
                 field: "name",
             },
-            { name: "releaseYear", title: t("releaseYear") },
+            {
+                name: "releaseYear",
+                title: t("releaseYear"),
+                typeFilter: "number",
+            },
             {
                 name: "brand",
                 title: t("brand"),
@@ -67,8 +73,18 @@ const PageConsoles = () => {
                 field: "name",
             },
             { name: "tagsDefault", title: t("tagsDefault") },
-            { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
-            { name: "createdAt", title: t("createdAt"), type: "datetime" },
+            {
+                name: "updatedAt",
+                title: t("updatedAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
+            {
+                name: "createdAt",
+                title: t("createdAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
         ];
         colsDef.forEach((col) => {
             columns.push({
@@ -78,6 +94,7 @@ const PageConsoles = () => {
                     type: col?.type as any,
                     field: col?.field,
                     enableSorting: col?.enableSorting,
+                    typeFilter: col?.typeFilter,
                 }),
                 filter: col.filter,
             });
@@ -93,4 +110,4 @@ const PageConsoles = () => {
     );
 };
 
-export { PageConsoleCreateOrEdit, PageConsoles };
+export { FilterConsoles, PageConsoleCreateOrEdit, PageConsoles };

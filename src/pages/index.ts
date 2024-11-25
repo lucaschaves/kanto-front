@@ -1,5 +1,6 @@
 export * from "./Accessories";
 export * from "./Catalog";
+export * from "./Consoles";
 export * from "./Cotacao";
 export * from "./CotacaoHello";
 export * from "./Dashboard";

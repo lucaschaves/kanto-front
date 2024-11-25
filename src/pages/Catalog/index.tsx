@@ -38,74 +38,97 @@ const PageCatalogs = () => {
                 name: "pvCost",
                 title: t("pvCost"),
                 type: "currency",
+                typeFilter: "number",
             },
             {
                 name: "pvMercadoLivre",
                 title: t("PV Mercado Livre"),
                 type: "currency",
+                typeFilter: "number",
             },
             {
-                name: "gameConversation",
-                title: t("gameConversation"),
-                type: "boolean",
+                name: "conservation",
+                title: t("conservation"),
+                typeFilter: "number",
             },
             {
                 name: "gameManual",
                 title: t("gameManual"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "gamePackaging",
                 title: t("gamePackaging"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "gamePackagingRental",
                 title: t("gamePackagingRental"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "gameSealed",
                 title: t("gameSealed"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "gameWorking",
                 title: t("gameWorking"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consoleComplete",
                 title: t("consoleComplete"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consolePackaging",
                 title: t("consolePackaging"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consoleSealed",
                 title: t("consoleSealed"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consoleTypeUnlocked",
                 title: t("consoleTypeUnlocked"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consoleUnlocked",
                 title: t("consoleUnlocked"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
             {
                 name: "consoleWorking",
                 title: t("consoleWorking"),
                 type: "boolean",
+                typeFilter: "boolean",
             },
-            { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
-            { name: "createdAt", title: t("createdAt"), type: "datetime" },
+            {
+                name: "updatedAt",
+                title: t("updatedAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
+            {
+                name: "createdAt",
+                title: t("createdAt"),
+                type: "datetime",
+                typeFilter: "date",
+            },
         ];
         colsDef.forEach((col) => {
             columns.push(
@@ -116,6 +139,7 @@ const PageCatalogs = () => {
                     field: col?.field,
                     enableHiding: col?.enableHiding,
                     enableSorting: col?.enableSorting,
+                    typeFilter: col?.typeFilter,
                 })
             );
         });

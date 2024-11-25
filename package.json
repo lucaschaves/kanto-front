@@ -1,7 +1,7 @@
 {
     "name": "front",
     "private": true,
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -57,6 +57,7 @@
         "recharts": "^2.12.7",
         "tailwind-merge": "^2.2.2",
         "tailwindcss-animate": "^1.0.7",
+        "uuid": "^11.0.3",
         "xlsx": "^0.18.5",
         "zod": "^3.23.6"
     },

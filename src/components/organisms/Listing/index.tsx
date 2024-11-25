@@ -120,7 +120,10 @@ export function Listing<T>(props: IPropsListing<T>) {
                             title: t(key) as any,
                             enableSorting: enableSortingArr.includes(key),
                         });
-                        columnsAt.push(column);
+                        columnsAt.push({
+                            ...column,
+                            typeFilter: "text",
+                        });
                     });
                 }
                 setColumns([columnId as any, ...columnsAt]);
@@ -143,7 +146,10 @@ export function Listing<T>(props: IPropsListing<T>) {
                                         enableSorting:
                                             enableSortingArr.includes(key),
                                     });
-                                    columnsAt.push(column);
+                                    columnsAt.push({
+                                        ...column,
+                                        typeFilter: "text",
+                                    });
                                 });
                             }
                         });

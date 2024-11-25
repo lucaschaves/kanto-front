@@ -16,6 +16,7 @@ import { capitalize } from "@/utils";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { KeyboardEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { v4 as uuidv4 } from "uuid";
 
 interface IItem {
     id: string;
@@ -165,7 +166,7 @@ function MultiSelect({
                             <>
                                 {options.map((option) => (
                                     <CommandItem
-                                        key={option.id}
+                                        key={`multi-${uuidv4()}-${option.id}`}
                                         onSelect={() => {
                                             if (single) {
                                                 onChange([option]);

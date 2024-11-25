@@ -5,6 +5,7 @@ export * from "./FInputDatePickerRange";
 export * from "./FInputLabel";
 export * from "./FSelectLabel";
 export * from "./FSelectLabelApi";
+export * from "./FSelectLabelMulti";
 export * from "./FSelectLabelMultiApi";
 export * from "./FSelectLabelSingleApi";
 export * from "./Listing";

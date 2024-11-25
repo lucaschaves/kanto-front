@@ -21,7 +21,6 @@ const PageQuotationsForms = () => {
         const colsDef = [
             { name: "select", title: "Select" },
             { name: "id", title: t("id") },
-
             {
                 name: "providerName",
                 title: t("name"),
