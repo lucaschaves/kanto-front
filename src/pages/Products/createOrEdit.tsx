@@ -9,7 +9,7 @@ import {
     IBaseFormRef,
     SearchCatalog,
 } from "@/components";
-import { CONSTANT_TOKEN } from "@/constants";
+import { CONSTANT_TOKEN, STATUS_ENUM } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { capitalize, getAmbientURL } from "@/utils";
@@ -130,6 +130,8 @@ export const PageProductCreateOrEdit = () => {
         if (isEdit) getData();
     }, []);
 
+    const disabledField = !stateFindCatalog?.factory;
+
     return (
         <Modal
             ref={refForm}
@@ -175,20 +177,20 @@ export const PageProductCreateOrEdit = () => {
                             ?.map((d: any) => d?.id)
                             .join(","),
                     }}
-                    // dependencies={[
-                    //     "consoleComplete",
-                    //     "conservation",
-                    //     "consolePackaging",
-                    //     "consoleSealed",
-                    //     "consoleTypeUnlocked",
-                    //     "consoleWorking",
-                    //     "consoleUnlocked",
-                    //     "gameManual",
-                    //     "gamePackaging",
-                    //     "gamePackagingRental",
-                    //     "gameSealed",
-                    //     "gameWorking",
-                    // ]}
+                    dependencies={[
+                        "consoleComplete",
+                        "conservation",
+                        "consolePackaging",
+                        "consoleSealed",
+                        "consoleTypeUnlocked",
+                        "consoleWorking",
+                        "consoleUnlocked",
+                        "gameManual",
+                        "gamePackaging",
+                        "gamePackagingRental",
+                        "gameSealed",
+                        "gameWorking",
+                    ]}
                     keyValue={["catalog.name"]}
                     // addLinkCrud={
                     //     refForm.current?.watch("catalog")
@@ -197,32 +199,29 @@ export const PageProductCreateOrEdit = () => {
                     // }
                     onEffect={(val) => {
                         refForm.current?.setValue("name", val?.name);
-                        // refForm.current?.setValue("pvMercadoLivre", val?.pvMercadoLivre);
-                        // refForm.current?.setValue("pvCost", val?.pvCost);
+                        refForm.current?.setValue(
+                            "pvMercadoLivre",
+                            val?.pvMercadoLivre
+                        );
+                        refForm.current?.setValue("pvCost", val?.pvCost);
                     }}
-                    // disabled={!stateType}
-                    // className={cn(
-                    //     "col-span-1",
-                    //     "sm:col-span-2",
-                    //     "md:col-span-3"
-                    // )}
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FInputLabel
                     label={t("sku")}
                     name="sku"
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FInputLabel
                     label={t("name")}
                     name="name"
-                    disabled={!stateFindCatalog?.type}
-                    className={cn("col-span-1", "sm:col-span-2")}
+                    disabled={disabledField}
+                    className={cn("col-span-1", "sm:col-span-3")}
                 />
                 <FInputLabel
                     label={t("addressInStock")}
                     name="addressInStock"
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FSelectLabel
                     label={t("Plataforma de venda")}
@@ -245,78 +244,78 @@ export const PageProductCreateOrEdit = () => {
                             name: "Shoppe",
                         },
                     ]}
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FSelectLabel
                     label={t("status")}
                     name="status"
-                    items={[
-                        {
-                            id: "presente",
-                            name: "Presente",
-                        },
-                        {
-                            id: "permuta",
-                            name: "Permuta",
-                        },
-                        {
-                            id: "peça",
-                            name: "Peça",
-                        },
-                        {
-                            id: "processamento",
-                            name: "Processamento",
-                        },
-                        {
-                            id: "descarte",
-                            name: "Descarte",
-                        },
-                        {
-                            id: "testando",
-                            name: "Testando",
-                        },
-                        {
-                            id: "emprestimo",
-                            name: "Empréstimo",
-                        },
-                        {
-                            id: "conserto",
-                            name: "Conserto",
-                        },
-                        {
-                            id: "recebimento",
-                            name: "Recebimento",
-                        },
-                        {
-                            id: "estoque",
-                            name: "Estoque",
-                        },
-                        {
-                            id: "vendido",
-                            name: "Vendido",
-                        },
-                    ]}
-                    disabled={!stateFindCatalog?.type}
+                    items={STATUS_ENUM}
+                    disabled={disabledField}
                 />
                 <FInputDatePicker
                     label={t("receiptDate")}
                     name="receiptDate"
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FInputDatePicker
-                    label={t("announcementDate")}
-                    name="announcementDate"
-                    disabled={!stateFindCatalog?.type}
+                    label={t("dateAnnouncement")}
+                    name="dateAnnouncement"
+                    disabled={disabledField}
                 />
                 <FInputDatePicker
                     label={t("dateEntryInStock")}
                     name="dateEntryInStock"
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
                 />
                 <FInputDatePicker
                     label={t("dateSale")}
                     name="dateSale"
-                    disabled={!stateFindCatalog?.type}
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateDiscard")}
+                    name="dateDiscard"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateExchange")}
+                    name="dateExchange"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateLoan")}
+                    name="dateLoan"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateLoss")}
+                    name="dateLoss"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("datePart")}
+                    name="datePart"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("datePresent")}
+                    name="datePresent"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateProcessing")}
+                    name="dateProcessing"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateRepair")}
+                    name="dateRepair"
+                    disabled={disabledField}
+                />
+                <FInputDatePicker
+                    label={t("dateTest")}
+                    name="dateTest"
+                    disabled={disabledField}
                 />
             </GroupForm>
             <GroupForm
@@ -335,11 +334,13 @@ export const PageProductCreateOrEdit = () => {
                     label={t("pvCost")}
                     name="pvCost"
                     type="currency"
+                    disabled={disabledField}
                 />
                 <FInputLabel
                     label={t("pvMercadoLivre")}
                     name="pvMercadoLivre"
                     type="currency"
+                    disabled={disabledField}
                 />
                 {fieldsPayments?.map((k: any) => (
                     <FInputLabel
@@ -347,13 +348,15 @@ export const PageProductCreateOrEdit = () => {
                         label={capitalize(t(k.name))}
                         name={k.name}
                         type="currency"
+                        disabled={disabledField}
                     />
                 ))}
-                <FInputLabel
+                {/* <FInputLabel
                     label={t("pvFinal")}
                     name="pvFinal"
                     type="currency"
-                />
+                    disabled={disabledField}
+                /> */}
             </GroupForm>
             <GroupForm
                 title={t("images")}
@@ -387,11 +390,7 @@ export const PageProductCreateOrEdit = () => {
                     >
                         {t("image")}
                     </label>
-                    <Dropzone
-                        onChange={setFile}
-                        // disabled={stateLoading}
-                        disabled
-                    />
+                    <Dropzone onChange={setFile} disabled={disabledField} />
                 </div>
                 {file?.url ? (
                     <div className="flex flex-col space-y-2">

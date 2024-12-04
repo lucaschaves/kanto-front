@@ -60,6 +60,7 @@ import {
     CONSTANT_COLUMNS_ORDER,
     CONSTANT_COLUMNS_VIEW,
     CONSTANT_NUMBER_ROWS,
+    STATUS_ENUM,
 } from "@/constants";
 import { useDynamicRefs, useSorting } from "@/hooks";
 import { cn } from "@/lib";
@@ -371,15 +372,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const skip = searchParams?.get("page")
         ? Number(searchParams?.get("page")) * stateLimit
         : 0;
-    // const {
-    //     limit: limitPage,
-    //     onPaginationChange,
-    //     skip,
-    //     pagination,
-    // } = usePagination({
-    //     limit: Number(stateLimit),
-    //     page: searchParams?.get("page"),
-    // });
     const { sorting, onSortingChange, field, order } = useSorting({
         columns,
     });
@@ -426,6 +418,11 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [stateRowFocus, setRowFocus] = useState<any>({});
     const [stateQuestionSold, setQuestionSold] = useState({
+        show: false,
+        value: "",
+        ids: [] as any[],
+    });
+    const [stateQuestionStock, setQuestionStock] = useState({
         show: false,
         value: "",
         ids: [] as any[],
@@ -748,6 +745,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
         if (st === "vendido") {
             setQuestionSold({ show: true, value: "", ids: idsState });
+        } else if (st === "estoque") {
+            setQuestionStock({ show: true, value: "", ids: idsState });
         } else {
             const { success } = await putApi({
                 url: urlMethod || name,
@@ -776,6 +775,24 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
         if (success) {
             setQuestionSold({ show: false, value: "", ids: [] });
+            messageSuccess({
+                message: "Status alterado com sucesso",
+            });
+            handleRefresh();
+        }
+    };
+
+    const handleStatusStock = async () => {
+        const { success } = await putApi({
+            url: urlMethod || name,
+            body: {
+                ids: stateQuestionStock.ids,
+                status: "estoque",
+                addressInStock: stateQuestionStock.value,
+            },
+        });
+        if (success) {
+            setQuestionStock({ show: false, value: "", ids: [] });
             messageSuccess({
                 message: "Status alterado com sucesso",
             });
@@ -906,28 +923,11 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
     }, []);
 
-    // useEffect(() => {
-    //     setSearchParams((prev) => {
-    //         prev.set("page", (skip / stateLimit)?.toString());
-    //         return prev;
-    //     });
-    // }, [location.pathname]);
-
     useEffect(() => {
         if (refInit.current) {
             refInit.current = false;
             return;
         }
-        // if (stateLimit != limitPage) {
-        //     onPaginationChange({
-        //         pageSize: Number(stateLimit),
-        //         pageIndex: 0,
-        //     });
-        //     onRefresh({
-        //         pagination: { skip, limit: Number(stateLimit) },
-        //         sort: { field, order },
-        //     });
-        // }
     }, [stateLimit]);
 
     useImperativeHandle(
@@ -1308,109 +1308,49 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         </span>
                                         <Separator className="w-full" />
                                         <div className="flex flex-col">
-                                            {[
-                                                {
-                                                    status: "recebimento",
-                                                    link: [
-                                                        "/productsreceiving",
-                                                        "/productsprocessing",
-                                                        "/products/productssold",
-                                                        "/products/productsrepair",
-                                                        "/products/productstest",
-                                                        "/products/productsdisposal",
-                                                        "/products/productslost",
-                                                        "/products/productspart",
-                                                        "/products/productsexchange",
-                                                        "/products/productsgift",
-                                                    ],
-                                                },
-                                                {
-                                                    status: "processamento",
-                                                    link: [
-                                                        "/productsprocessing",
-                                                    ],
-                                                },
-                                                {
-                                                    status: "vendido",
-                                                    link: ["/productssold"],
-                                                },
-                                                {
-                                                    status: "conserto",
-                                                    link: ["/productsrepair"],
-                                                },
-                                                {
-                                                    status: "teste",
-                                                    link: ["/productstest"],
-                                                },
-                                                {
-                                                    status: "descarte",
-                                                    link: ["/productsdisposal"],
-                                                },
-                                                {
-                                                    status: "perdido",
-                                                    link: ["/productslost"],
-                                                },
-                                                {
-                                                    status: "peça",
-                                                    link: ["/productspart"],
-                                                },
-                                                {
-                                                    status: "permuta",
-                                                    link: ["/productsexchange"],
-                                                },
-                                                {
-                                                    status: "presente",
-                                                    link: ["/productsgift"],
-                                                },
-                                            ]
-                                                .filter((v) => {
-                                                    if (
-                                                        !v.link.includes(
-                                                            location.pathname
-                                                        )
-                                                    ) {
-                                                        return v;
-                                                    }
-                                                })
-                                                .map((v) => (
-                                                    <Button
-                                                        key={v.status}
-                                                        className={cn(
-                                                            "w-auto",
-                                                            "px-4",
-                                                            "py-2",
-                                                            "gap-2",
-                                                            "justify-between"
-                                                        )}
-                                                        onClick={() => {
-                                                            const rowsIds =
-                                                                table
-                                                                    .getSelectedRowModel()
-                                                                    .rows.map(
-                                                                        (
-                                                                            r: any
-                                                                        ) =>
-                                                                            r
-                                                                                .original
-                                                                                .id
-                                                                    );
-                                                            handleActionStatus(
-                                                                v.status,
-                                                                rowsIds
+                                            {STATUS_ENUM.filter((v) => {
+                                                if (
+                                                    !v.link.includes(
+                                                        location.pathname
+                                                    )
+                                                ) {
+                                                    return v;
+                                                }
+                                            }).map((v) => (
+                                                <Button
+                                                    key={v.id}
+                                                    className={cn(
+                                                        "w-auto",
+                                                        "px-4",
+                                                        "py-2",
+                                                        "gap-2",
+                                                        "justify-between"
+                                                    )}
+                                                    onClick={() => {
+                                                        const rowsIds = table
+                                                            .getSelectedRowModel()
+                                                            .rows.map(
+                                                                (r: any) =>
+                                                                    r.original
+                                                                        .id
                                                             );
-                                                        }}
-                                                        variant="ghost"
+                                                        handleActionStatus(
+                                                            v.id,
+                                                            rowsIds
+                                                        );
+                                                    }}
+                                                    variant="ghost"
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "flex-1",
+                                                            "text-left"
+                                                        )}
                                                     >
-                                                        <span
-                                                            className={cn(
-                                                                "flex-1",
-                                                                "text-left"
-                                                            )}
-                                                        >
-                                                            {t(v.status)}
-                                                        </span>
-                                                    </Button>
-                                                ))}
+                                                        {t(v.name)}
+                                                    </span>
+                                                </Button>
+                                            ))}
                                         </div>
                                     </PopoverContent>
                                 </Popover>
@@ -1839,7 +1779,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         {table.getFilteredRowModel().rows.length}{" "}
                         {t("selectedLines")}
                         <Select
-                            onValueChange={(e) => {
+                            onValueChange={async (e) => {
                                 const oldLimits = JSON.parse(
                                     window.localStorage.getItem(
                                         CONSTANT_NUMBER_ROWS
@@ -1853,6 +1793,14 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                     })
                                 );
                                 setLimit(Number(e));
+                                await sleep(300);
+                                onRefresh({
+                                    pagination: {
+                                        skip,
+                                        limit: Number(e),
+                                    },
+                                    sort: { field, order },
+                                });
                             }}
                             value={stateLimit?.toString()}
                         >
@@ -2164,6 +2112,69 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             <Button
                                 variant="default"
                                 onClick={handleStatusSold}
+                                type="button"
+                            >
+                                Confirmar
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={stateQuestionStock.show}
+                onOpenChange={(p) =>
+                    setQuestionStock((prev) => ({
+                        ...prev,
+                        show: p,
+                        value: "",
+                    }))
+                }
+                modal
+            >
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>{t("stock")}</DialogTitle>
+                    </DialogHeader>
+                    <div
+                        className={cn(
+                            "flex",
+                            "flex-col",
+                            "gap-4",
+                            "max-w-sm",
+                            "items-center"
+                        )}
+                    >
+                        <Separator />
+                        <div className="flex flex-col w-full gap-4">
+                            <span>Informe o endereço de estoque</span>
+                            <Input
+                                value={stateQuestionStock.value}
+                                onChange={(e) =>
+                                    setQuestionStock((prev) => ({
+                                        ...prev,
+                                        value: e.target.value,
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="flex items-center w-full justify-between">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                    setQuestionStock({
+                                        show: false,
+                                        value: "",
+                                        ids: [],
+                                    })
+                                }
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="default"
+                                onClick={handleStatusStock}
                                 type="button"
                             >
                                 Confirmar

@@ -24,7 +24,6 @@ import {
 import { modulesAll, modulesProducts } from "@/routes/modules";
 import { deleteApi, postApi } from "@/services";
 import {
-    DashboardIcon,
     FileTextIcon,
     HomeIcon,
     StarFilledIcon,
@@ -389,13 +388,6 @@ export const Sidebar = (props: IPropsSidebar) => {
                         ))}
                     </PopoverContent>
                 </Popover>
-                <Button
-                    size="icon"
-                    onClick={() => navigate("/")}
-                    variant={"/" == location.pathname ? "outline" : "default"}
-                >
-                    <DashboardIcon />
-                </Button>
                 <Popover
                     onOpenChange={(p) => setOpenPopov(p ? "settings" : "")}
                     open={stateOpenPopov === "settings"}
@@ -963,38 +955,6 @@ export const Sidebar = (props: IPropsSidebar) => {
                                     })}
                                 </AccordionContent>
                             </AccordionItem>
-                            <Button
-                                className={cn(
-                                    "p-0",
-                                    "sm:w-9",
-                                    "lg:w-full",
-                                    "lg:px-4",
-                                    "lg:py-2",
-                                    "gap-2",
-                                    "justify-center",
-                                    "lg:justify-between"
-                                )}
-                                onClick={() => navigate("/")}
-                                variant={
-                                    "/" == location.pathname
-                                        ? "outline"
-                                        : "default"
-                                }
-                                data-rule-component="rule"
-                                data-rule-component-id="dashboard"
-                            >
-                                <DashboardIcon />
-                                <span
-                                    className={cn(
-                                        "flex-1",
-                                        "text-left",
-                                        "hidden",
-                                        "lg:block"
-                                    )}
-                                >
-                                    {t("dashboard")}
-                                </span>
-                            </Button>
                             <AccordionItem
                                 value="settings"
                                 className="border-none"

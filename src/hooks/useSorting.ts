@@ -8,10 +8,10 @@ interface IPropsUseSorting {
 }
 
 export function useSorting(props: IPropsUseSorting) {
-    const { initialField = "id", initialOrder = "DESC", columns } = props;
+    const { initialField = "id", initialOrder = "asc", columns } = props;
 
     const [sorting, setSorting] = useState<SortingState>([
-        { id: initialField, desc: initialOrder === "DESC" },
+        { id: initialField, desc: initialOrder === "asc" },
     ]);
 
     let findField = columns?.find(
@@ -27,8 +27,8 @@ export function useSorting(props: IPropsUseSorting) {
         order: !sorting.length
             ? initialOrder
             : sorting[0].desc
-            ? "DESC"
-            : "ASC",
+            ? "desc"
+            : "asc",
         field: findField, // sorting.length ? sorting[0].id : initialField,
     };
 }

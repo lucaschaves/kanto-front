@@ -30,15 +30,7 @@ const messageError = ({ message, elapsed = "0ms" }: IMessage) => {
     };
 };
 
-const messageWarn = ({
-    message,
-    // status,
-    // hash,
-    // component,
-    // tagId,
-    // elapsed,
-    data,
-}: IMessage) => {
+const messageWarn = ({ message, data }: IMessage) => {
     try {
         console.warn("error post message: ", message);
         toast.warn(message);
@@ -52,15 +44,7 @@ const messageWarn = ({
     };
 };
 
-const messageSuccess = ({
-    message,
-    // status,
-    // hash,
-    // component,
-    // tagId,
-    // elapsed,
-    data,
-}: IMessage) => {
+const messageSuccess = ({ message, data }: IMessage) => {
     try {
         console.info("success post message: ", message);
         toast.success(message);
@@ -74,15 +58,7 @@ const messageSuccess = ({
     };
 };
 
-const messageInfo = ({
-    message,
-    // status,
-    // hash,
-    // component,
-    // tagId,
-    // elapsed,
-    data,
-}: IMessage) => {
+const messageInfo = ({ message, data }: IMessage) => {
     try {
         console.info("info post message: ", message);
         toast.info(message);

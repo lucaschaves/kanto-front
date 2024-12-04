@@ -1,3 +1,4 @@
+import { cn } from "@/lib";
 import { getApi } from "@/services";
 import { capitalize } from "@/utils";
 import { useEffect, useState } from "react";
@@ -116,7 +117,7 @@ const SelectLabelMultiApi = (props: ISelectLabelMultiApiProps) => {
     }, [stateOpen]);
 
     return (
-        <div className="space-y-2 w-full">
+        <div className={cn("space-y-2 w-full", className)}>
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 {label}
             </label>

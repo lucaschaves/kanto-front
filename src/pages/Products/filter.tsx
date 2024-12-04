@@ -8,6 +8,7 @@ import {
     FSelectLabelMulti,
     IBaseFormRef,
 } from "@/components";
+import { STATUS_ENUM } from "@/constants";
 import { useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import {
@@ -45,11 +46,11 @@ export const FilterProducts = () => {
             filter_pvCost_end: data?.filter_pvCost_end,
             filter_pvMercadoLivre_start: data?.filter_pvMercadoLivre_start,
             filter_pvMercadoLivre_end: data?.filter_pvMercadoLivre_end,
-            filter_announcementDate_from: data?.filter_announcementDate?.from
-                ? format(data.filter_announcementDate.from, "yyyy-MM-dd")
+            filter_dateAnnouncement_from: data?.filter_dateAnnouncement?.from
+                ? format(data.filter_dateAnnouncement.from, "yyyy-MM-dd")
                 : undefined,
-            filter_announcementDate_to: data?.filter_announcementDate?.to
-                ? format(data.filter_announcementDate.to, "yyyy-MM-dd")
+            filter_dateAnnouncement_to: data?.filter_dateAnnouncement?.to
+                ? format(data.filter_dateAnnouncement.to, "yyyy-MM-dd")
                 : undefined,
             filter_dateEntryInStock_from: data?.filter_dateEntryInStock?.from
                 ? format(data.filter_dateEntryInStock.from, "yyyy-MM-dd")
@@ -103,7 +104,7 @@ export const FilterProducts = () => {
         const refForm = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
         refForm.current?.reset({});
     };
-    console.log("formActual", formActual);
+
     return (
         <BaseForm
             onSubmit={onSubmit}
@@ -134,52 +135,7 @@ export const FilterProducts = () => {
                         <FSelectLabelMulti
                             label={t("status")}
                             name="filter_status"
-                            items={[
-                                {
-                                    id: "presente",
-                                    name: "Presente",
-                                },
-                                {
-                                    id: "permuta",
-                                    name: "Permuta",
-                                },
-                                {
-                                    id: "peça",
-                                    name: "Peça",
-                                },
-                                {
-                                    id: "processamento",
-                                    name: "Processamento",
-                                },
-                                {
-                                    id: "descarte",
-                                    name: "Descarte",
-                                },
-                                {
-                                    id: "testando",
-                                    name: "Testando",
-                                },
-                                {
-                                    id: "emprestimo",
-                                    name: "Empréstimo",
-                                },
-                                {
-                                    id: "conserto",
-                                    name: "Conserto",
-                                },
-                                {
-                                    id: "recebimento",
-                                    name: "Recebimento",
-                                },
-                                {
-                                    id: "estoque",
-                                    name: "Estoque",
-                                },
-                                {
-                                    id: "vendido",
-                                    name: "Vendido",
-                                },
-                            ]}
+                            items={STATUS_ENUM}
                         />
                     </>
                 ) : (
@@ -210,8 +166,8 @@ export const FilterProducts = () => {
                     />
                 </div>
                 <FInputDatePickerRange
-                    label={t("announcementDate")}
-                    name="filter_announcementDate"
+                    label={t("dateAnnouncement")}
+                    name="filter_dateAnnouncement"
                 />
                 <FInputDatePickerRange
                     label={t("dateEntryInStock")}

@@ -79,7 +79,7 @@ const createColumn = (props: ICreateColumn): any => {
         field,
         subType = "text",
         fieldCompare,
-        enableSorting = false,
+        enableSorting = true,
         enableHiding = true,
         capitalize = true,
         typeFilter = "text",

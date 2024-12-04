@@ -8,7 +8,6 @@ import {
     PageCatalogs,
     PageCotacao,
     PageCotacaoHello,
-    PageDashboard,
     PageError,
     PageExtraCreateOrEdit,
     PageExtras,
@@ -70,11 +69,6 @@ export const appRoutes = () => {
                 </RequireAuth>
             ),
             children: [
-                {
-                    path: "/",
-                    errorElement: <PageError />,
-                    element: <PageDashboard />,
-                },
                 {
                     path: "/notifications",
                     errorElement: <PageError />,

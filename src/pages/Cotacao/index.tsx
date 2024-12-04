@@ -472,13 +472,14 @@ const SegundaEtapa = ({
         nextStep();
     }
 
-    const getItemsProducts = async () => {
+    const getItemsProducts = async (search?: string) => {
         const { success, data } = await getApi({
             url: "/quotations/products",
             config: {
                 params: {
                     skip: 0,
                     limit: 100,
+                    search,
                 },
             },
         });
@@ -497,11 +498,15 @@ const SegundaEtapa = ({
         if (success) setQuestions(data.rows);
     };
 
-    const debounceSearch = useDebounce(searchProduct, 500);
+    // const debounceSearch = useDebounce(searchProduct, 500);
 
-    useEffect(() => {
-        getItemsProducts();
-    }, [debounceSearch]);
+    const onSearch = () => {
+        getItemsProducts(searchProduct);
+    };
+
+    // useEffect(() => {
+    //     getItemsProducts();
+    // }, [debounceSearch]);
 
     useEffect(() => {
         if (openProduct) getItemsProducts();
@@ -571,6 +576,13 @@ const SegundaEtapa = ({
                                                         e.target.value
                                                     )
                                                 }
+                                                onKeyDown={(e) => {
+                                                    if (e.keyCode === 13) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        onSearch();
+                                                    }
+                                                }}
                                             />
                                             <CommandList>
                                                 <CommandEmpty>
@@ -1220,18 +1232,19 @@ const PageCotacao = () => {
                 body: data,
             });
             if (successSearch) {
-                const formFile = new FormData();
-                formFile.append("image", data?.image?.file);
-                await postApi({
-                    url: `/quotation/search/upload/${dataSearch?.id}`,
-                    body: formFile,
-                    config: {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
+                if (data?.image?.file) {
+                    const formFile = new FormData();
+                    formFile.append("image", data?.image?.file);
+                    await postApi({
+                        url: `/quotation/search/upload/${dataSearch?.id}`,
+                        body: formFile,
+                        config: {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
                         },
-                    },
-                });
-
+                    });
+                }
                 const { success: successForm, data: dataForm } = await putApi({
                     url: `/quotations/form/${params.get("id")}`,
                     body: {

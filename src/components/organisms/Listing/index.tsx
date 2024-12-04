@@ -204,7 +204,7 @@ export function Listing<T>(props: IPropsListing<T>) {
             const filters = decodeSearchParams(location.search);
             getData({
                 pagination: { limit: limitPag, skip: 0 },
-                sort: { field: "id", order: "DESC" },
+                sort: { field: "id", order: "desc" },
                 filters,
             });
         } else if (
@@ -213,14 +213,10 @@ export function Listing<T>(props: IPropsListing<T>) {
         ) {
             getData({
                 pagination: { limit: limitPag, skip: 0 },
-                sort: { field: "id", order: "DESC" },
+                sort: { field: "id", order: "desc" },
                 filters: {},
             });
         }
-        // if (columnsHidden) {
-        // const refDataTable = getRef<IRefDataTable>(formActual);
-        // refDataTable.current?.hiddeColumns(columnsHidden);
-        // }
     }, [location.pathname, location.search]);
 
     return (
