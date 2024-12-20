@@ -12,7 +12,7 @@ import {
 import { CONSTANT_TOKEN, STATUS_ENUM } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { capitalize, getAmbientURL } from "@/utils";
+import { capitalize, getAmbientURL, messageError } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -67,6 +67,128 @@ export const PageProductCreateOrEdit = () => {
         };
         delete newData.catalog;
 
+        let isError = false;
+        if (!newData?.name) {
+            isError = true;
+            refForm.current?.setError("name", {
+                message: "É necessário",
+            });
+        }
+        if (!newData?.sku) {
+            isError = true;
+            refForm.current?.setError("sku", {
+                message: "É necessário",
+            });
+        }
+        if (!newData?.addressInStock) {
+            isError = true;
+            refForm.current?.setError("addressInStock", {
+                message: "É necessário",
+            });
+        }
+        if (!newData?.status) {
+            isError = true;
+            refForm.current?.setError("status", {
+                message: "É necessário",
+            });
+        }
+        if (!newData?.catalogId) {
+            isError = true;
+            refForm.current?.setError("catalog", {
+                message: "É necessário",
+            });
+        }
+        if (newData?.status) {
+            if (newData.status === "presente") {
+                if (!newData?.datePresent) {
+                    isError = true;
+                    refForm.current?.setError("datePresent", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "permuta") {
+                if (!newData?.dateExchange) {
+                    isError = true;
+                    refForm.current?.setError("dateExchange", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "peça") {
+                if (!newData?.datePart) {
+                    isError = true;
+                    refForm.current?.setError("datePart", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "processamento") {
+                if (!newData?.dateProcessing) {
+                    isError = true;
+                    refForm.current?.setError("dateProcessing", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "descarte") {
+                if (!newData?.dateDiscard) {
+                    isError = true;
+                    refForm.current?.setError("dateDiscard", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "teste") {
+                if (!newData?.dateTest) {
+                    isError = true;
+                    refForm.current?.setError("dateTest", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "emprestimo") {
+                if (!newData?.dateLoan) {
+                    isError = true;
+                    refForm.current?.setError("dateLoan", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "conserto") {
+                if (!newData?.dateRepair) {
+                    isError = true;
+                    refForm.current?.setError("dateRepair", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "recebimento") {
+                if (!newData?.dateReceipt) {
+                    isError = true;
+                    refForm.current?.setError("dateReceipt", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "estoque") {
+                if (!newData?.dateEntryInStock) {
+                    isError = true;
+                    refForm.current?.setError("dateEntryInStock", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "vendido") {
+                if (!newData?.dateSale) {
+                    isError = true;
+                    refForm.current?.setError("dateSale", {
+                        message: "É necessário",
+                    });
+                }
+            } else if (newData.status === "perdido") {
+                if (!newData?.dateLoss) {
+                    isError = true;
+                    refForm.current?.setError("dateLoss", {
+                        message: "É necessário",
+                    });
+                }
+            }
+        }
+        if (isError) {
+            messageError({ message: "É necessário preencher os campos" });
+            return;
+        }
         if (isEdit) {
             const { success, data: dataResp } = await putApi({
                 url: `/product/${searchParams.get("id")}`,
@@ -251,10 +373,88 @@ export const PageProductCreateOrEdit = () => {
                     name="status"
                     items={STATUS_ENUM}
                     disabled={disabledField}
+                    onEffect={(e) => {
+                        switch (e) {
+                            case "presente":
+                                refForm.current?.setValue(
+                                    "datePresent",
+                                    new Date()
+                                );
+                                break;
+                            case "permuta":
+                                refForm.current?.setValue(
+                                    "dateExchange",
+                                    new Date()
+                                );
+                                break;
+                            case "peça":
+                                refForm.current?.setValue(
+                                    "datePart",
+                                    new Date()
+                                );
+                                break;
+                            case "processamento":
+                                refForm.current?.setValue(
+                                    "dateProcessing",
+                                    new Date()
+                                );
+                                break;
+                            case "descarte":
+                                refForm.current?.setValue(
+                                    "dateDiscard",
+                                    new Date()
+                                );
+                                break;
+                            case "teste":
+                                refForm.current?.setValue(
+                                    "dateTest",
+                                    new Date()
+                                );
+                                break;
+                            case "emprestimo":
+                                refForm.current?.setValue(
+                                    "dateLoan",
+                                    new Date()
+                                );
+                                break;
+                            case "conserto":
+                                refForm.current?.setValue(
+                                    "dateRepair",
+                                    new Date()
+                                );
+                                break;
+                            case "recebimento":
+                                refForm.current?.setValue(
+                                    "dateReceipt",
+                                    new Date()
+                                );
+                                break;
+                            case "estoque":
+                                refForm.current?.setValue(
+                                    "dateEntryInStock",
+                                    new Date()
+                                );
+                                break;
+                            case "vendido":
+                                refForm.current?.setValue(
+                                    "dateSale",
+                                    new Date()
+                                );
+                                break;
+                            case "perdido":
+                                refForm.current?.setValue(
+                                    "dateLoss",
+                                    new Date()
+                                );
+                                break;
+                            default:
+                                break;
+                        }
+                    }}
                 />
                 <FInputDatePicker
-                    label={t("receiptDate")}
-                    name="receiptDate"
+                    label={t("dateReceipt")}
+                    name="dateReceipt"
                     disabled={disabledField}
                 />
                 <FInputDatePicker

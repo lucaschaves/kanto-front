@@ -240,10 +240,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         const rulesElements = document.querySelectorAll(
             '[data-rule-component="rule"]'
         );
-        rulesElements.forEach(() => {
-            // const datasetElement = (element as any)?.dataset;
-            // if (!rules.includes(datasetElement?.ruleComponentId))
-            // element.classList.add("hidden");
+        rulesElements.forEach((element) => {
+            const datasetElement = (element as any)?.dataset;
+            if (!rules.includes(datasetElement?.ruleComponentId)) {
+                // element.classList.add("hidden");
+            }
         });
     };
 

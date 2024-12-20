@@ -1,5 +1,4 @@
-import { IPropsOutletContext, REF_TOOLBAR } from "@/Layout";
-import { IRefToolbar, REF_TOOLBAR_FORM } from "@/Layout/Toolbar";
+import { IPropsOutletContext } from "@/Layout";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -31,7 +30,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
-    IBaseFormRef,
     Input,
     Popover,
     PopoverContent,
@@ -343,7 +341,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const { t } = useTranslation();
     const { openToolbar } = useOutletContext<IPropsOutletContext>();
 
-    const [getRef, setRef] = useDynamicRefs();
+    const [, setRef] = useDynamicRefs();
 
     const refInit = useRef(true);
     const refFile = useRef<HTMLInputElement>(null);
@@ -530,22 +528,22 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
     };
 
-    const handleFilterCell = async (propsV: any) => {
-        const refToolbar = getRef<IRefToolbar>(REF_TOOLBAR);
-        refToolbar?.current?.toggleFilters &&
-            refToolbar?.current?.toggleFilters(true);
-        await sleep(50);
-        const value =
-            typeof propsV.value === "object"
-                ? propsV.value?.map((v: any) => v?.name)?.join(",")
-                : propsV.value;
-        const refFormToolbar = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
-        refFormToolbar.current?.reset({
-            [`filter_${propsV.column}`]: value,
-        });
-        await sleep(50);
-        refFormToolbar.current?.submit();
-    };
+    // const handleFilterCell = async (propsV: any) => {
+    //     const refToolbar = getRef<IRefToolbar>(REF_TOOLBAR);
+    //     refToolbar?.current?.toggleFilters &&
+    //         refToolbar?.current?.toggleFilters(true);
+    //     await sleep(50);
+    //     const value =
+    //         typeof propsV.value === "object"
+    //             ? propsV.value?.map((v: any) => v?.name)?.join(",")
+    //             : propsV.value;
+    //     const refFormToolbar = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
+    //     refFormToolbar.current?.reset({
+    //         [`filter_${propsV.column}`]: value,
+    //     });
+    //     await sleep(50);
+    //     refFormToolbar.current?.submit();
+    // };
 
     const handleHistoryCell = async (id: string, col: string) => {
         const { success, data } = await getApi({
@@ -832,7 +830,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 dataProcuts.push({
                     name: t.game?.name,
                     status: "recebimento",
-                    receiptDate: new Date(),
+                    dateReceipt: new Date(),
                     images: t?.images,
                     catalog: 1,
                 });
@@ -840,7 +838,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 dataProcuts.push({
                     name: t.console?.name,
                     status: "recebimento",
-                    receiptDate: new Date(),
+                    dateReceipt: new Date(),
                     images: t?.images,
                     catalog: 1,
                 });
@@ -1735,7 +1733,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                                                 "changeHistory"
                                                                             )}
                                                                         </ContextMenuItem>
-                                                                        <ContextMenuItem
+                                                                        {/* <ContextMenuItem
                                                                             onClick={() =>
                                                                                 handleFilterCell(
                                                                                     {
@@ -1750,7 +1748,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                                             {t(
                                                                                 "filterByCellValue"
                                                                             )}
-                                                                        </ContextMenuItem>
+                                                                        </ContextMenuItem>*/}
                                                                     </ContextMenuContent>
                                                                 </ContextMenu>
                                                             )}

@@ -64,11 +64,11 @@ export const FilterProducts = () => {
             filter_dateSale_to: data?.filter_dateSale?.to
                 ? format(data.filter_dateSale.to, "yyyy-MM-dd")
                 : undefined,
-            filter_receiptDate_from: data?.filter_receiptDate?.from
-                ? format(data.filter_receiptDate.from, "yyyy-MM-dd")
+            filter_dateReceipt_from: data?.filter_dateReceipt?.from
+                ? format(data.filter_dateReceipt.from, "yyyy-MM-dd")
                 : undefined,
-            filter_receiptDate_to: data?.filter_receiptDate?.to
-                ? format(data.filter_receiptDate.to, "yyyy-MM-dd")
+            filter_dateReceipt_to: data?.filter_dateReceipt?.to
+                ? format(data.filter_dateReceipt.to, "yyyy-MM-dd")
                 : undefined,
             filter_updatedAt_from: data?.filter_updatedAt?.from
                 ? format(data.filter_updatedAt.from, "yyyy-MM-dd")
@@ -178,8 +178,8 @@ export const FilterProducts = () => {
                     name="filter_dateSale"
                 />
                 <FInputDatePickerRange
-                    label={t("receiptDate")}
-                    name="filter_receiptDate"
+                    label={t("dateReceipt")}
+                    name="filter_dateReceipt"
                 />
                 <FInputDatePickerRange
                     label={t("updatedAt")}

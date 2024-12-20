@@ -286,7 +286,7 @@ const PageHistoriesForms = () => {
             },
         },
         {
-            accessorKey: "receiptDate",
+            accessorKey: "dateReceipt",
             header: ({ column }) => {
                 return (
                     <Button
@@ -296,7 +296,7 @@ const PageHistoriesForms = () => {
                         }
                         className="pl-0"
                     >
-                        {t("receiptDate")}
+                        {t("dateReceipt")}
                         {column.getIsSorted() === "desc" ? (
                             <CaretDownIcon className="ml-2 h-4 w-4" />
                         ) : column.getIsSorted() === "asc" ? (
@@ -310,7 +310,7 @@ const PageHistoriesForms = () => {
             cell: ({ row }) => {
                 return (
                     <div className="capitalize">
-                        {row.getValue("receiptDate")}
+                        {row.getValue("dateReceipt")}
                     </div>
                 );
             },

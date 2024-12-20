@@ -34,7 +34,7 @@ const getHiddenColumns = (name: string): any => {
             addressInStock: false,
             inventoryCost: false,
             salesPlatform: false,
-            receiptDate: false,
+            dateReceipt: false,
             createdAt: false,
             updatedAt: false,
         };
@@ -53,7 +53,7 @@ const getHiddenColumns = (name: string): any => {
             addressInStock: false,
             inventoryCost: false,
             salesPlatform: false,
-            receiptDate: false,
+            dateReceipt: false,
             createdAt: false,
             updatedAt: false,
         };
@@ -89,7 +89,7 @@ const getHiddenColumns = (name: string): any => {
             salesPlatform: false,
             createdAt: false,
             updatedAt: false,
-            receiptDate: false,
+            dateReceipt: false,
             pvFinal: false,
         };
     }
@@ -109,7 +109,7 @@ const getHiddenColumns = (name: string): any => {
     //     addressInStock: false,
     //     inventoryCost: false,
     //     salesPlatform: false,
-    //     receiptDate: false,
+    //     dateReceipt: false,
     //     createdAt: false,
     //     updatedAt: false,
     // };
@@ -168,8 +168,8 @@ const PageProducts = ({ index }: { index: number }) => {
                 typeFilter: "date",
             },
             {
-                name: "receiptDate",
-                title: t("receiptDate"),
+                name: "dateReceipt",
+                title: t("dateReceipt"),
                 type: "datetime",
                 typeFilter: "date",
             },
@@ -218,7 +218,7 @@ const PageProducts = ({ index }: { index: number }) => {
                     dateEntryInStock: false,
                     dateSale: false,
                     inventoryCost: false,
-                    receiptDate: false,
+                    dateReceipt: false,
                     salesPlatform: false,
                     createdAt: false,
                     updatedAt: false,

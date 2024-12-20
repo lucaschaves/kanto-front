@@ -60,6 +60,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
             name: values?.name,
             pvCost: values?.pvCost,
             pvMercadoLivre: values?.pvMercadoLivre,
+            pvCredit: values?.pvCredit,
             plataform: values?.catalog?.catalog?.plataform,
             catalogId: values?.catalog?.id,
         });
@@ -70,23 +71,24 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         remove(index);
     };
 
-    // const handleEdit = (index: number) => {
-    //     const item = fields[index] as any;
+    const handleLoadItem = (index: number) => {
+        const item = fields[index] as any;
 
-    //     setFindCatalog({
-    //         type: "game",
-    //         factory: [item.game],
-    //     });
-    //     onChangeValue("catalog", item.catalog);
-    //     onChangeValue("catalogId", item.catalog?.id);
-    //     onChangeValue("name", item.name);
-    //     onChangeValue("quantity", item.quantity);
-    //     onChangeValue("comments", item.comments);
-    //     onChangeValue("reviewComments", item.reviewComments);
-    //     onChangeValue("pvCost", item.pvCost);
-    //     onChangeValue("pvMercadoLivre", item.pvMercadoLivre);
-    //     onChangeValue("plataform", item.catalog?.plataform);
-    // };
+        setFindCatalog({
+            type: "game",
+            factory: [item.game],
+        });
+        onChangeValue("catalog", item.catalog);
+        onChangeValue("catalogId", item.catalog?.id);
+        onChangeValue("name", item.name);
+        onChangeValue("quantity", item.quantity);
+        onChangeValue("comments", item.comments);
+        onChangeValue("reviewComments", item.reviewComments);
+        onChangeValue("pvCost", item.pvCost);
+        onChangeValue("pvMercadoLivre", item.pvMercadoLivre);
+        onChangeValue("pvCredit", item.pvCredit);
+        onChangeValue("plataform", item.catalog?.plataform);
+    };
 
     const onCleanCatalog = () => {
         onChangeValue("catalog", null);
@@ -97,6 +99,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("reviewComments", null);
         onChangeValue("pvCost", null);
         onChangeValue("pvMercadoLivre", null);
+        onChangeValue("pvCredit", null);
         onChangeValue("plataform", null);
     };
 
@@ -174,6 +177,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     onEffect={(val) => {
                         onChangeValue("name", val?.name);
                         onChangeValue("pvMercadoLivre", val?.pvMercadoLivre);
+                        onChangeValue("pvCredit", val?.pvCredit);
                         onChangeValue("pvCost", val?.pvCost);
                     }}
                     // disabled={!stateType}
@@ -198,6 +202,11 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                 <FInputLabel
                     label={t("pvMercadoLivre")}
                     name="pvMercadoLivre"
+                    disabled={!stateFindCatalog?.type}
+                />
+                <FInputLabel
+                    label={t("pvCredit")}
+                    name="pvCredit"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
@@ -260,6 +269,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                             <TableHead>Quantidade</TableHead>
                             <TableHead>Custo de estoque</TableHead>
                             <TableHead>PV ML</TableHead>
+                            <TableHead>PV Credito</TableHead>
                             <TableHead>Comentários</TableHead>
                             {/* <TableHead></TableHead> */}
                             <TableHead></TableHead>
@@ -272,7 +282,10 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                 currency: "BRL",
                             });
                             return (
-                                <TableRow key={field.id}>
+                                <TableRow
+                                    key={field.id}
+                                    onClick={() => handleLoadItem(i)}
+                                >
                                     <TableCell>{field?.name}</TableCell>
                                     <TableCell>{field?.plataform}</TableCell>
                                     <TableCell className="text-center">
@@ -285,6 +298,9 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         {RSValue.format(
                                             field?.pvMercadoLivre || 0
                                         )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {RSValue.format(field?.pvCredit || 0)}
                                     </TableCell>
                                     <TableCell>{field?.comments}</TableCell>
                                     {/* <TableCell>
@@ -486,6 +502,12 @@ export const PageQuotationsFormCreateOrEdit = () => {
                         <FInputLabel
                             label="Valores orçados"
                             name="quotationHistory.budgetedValues"
+                            type="currency"
+                        />
+                        <FInputLabel
+                            label="Valor crédito"
+                            name="quotationHistory.finalCredit"
+                            type="currency"
                         />
                         <FInputLabel
                             label="Retornou"
@@ -506,8 +528,8 @@ export const PageQuotationsFormCreateOrEdit = () => {
                             name="quotationHistory.openingDate"
                         />
                         <FInputDatePicker
-                            label={t("receiptDate")}
-                            name="quotationHistory.receiptDate"
+                            label={t("dateReceipt")}
+                            name="quotationHistory.dateReceipt"
                         />
                         <FCheckboxLabel
                             label={t("adjusted")}
