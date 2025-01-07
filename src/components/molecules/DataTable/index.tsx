@@ -345,7 +345,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
 
     const refInit = useRef(true);
     const refFile = useRef<HTMLInputElement>(null);
-    const refFileCatalog = useRef<HTMLInputElement>(null);
+    const refFileCatalogVendido = useRef<HTMLInputElement>(null);
+    const refFileCatalogDefault = useRef<HTMLInputElement>(null);
 
     const [stateLimit, setLimit] = useState<number>(() => {
         const numberRows = JSON.parse(
@@ -661,7 +662,10 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         }
     };
 
-    const handleImportCatalog = async (file: File) => {
+    const handleImportCatalog = async (
+        file: File,
+        typeCatalog: "vendido" | "default"
+    ) => {
         Papa.parse(file, {
             delimiter: "\t",
             header: true,
@@ -675,24 +679,48 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                     });
                 });
                 const formatData: ICatalogCsv[] = [];
+                if (typeCatalog === "vendido") {
+                    res.data.forEach((row: any) => {
+                        let dataRow: any = {};
+                        if (
+                            row["Endereço no Estoque"]?.toLowerCase() ===
+                            "vendido"
+                        ) {
+                            Object.keys(row).forEach((key: string) => {
+                                const col = formatCols.find(
+                                    (f) => f.field === key
+                                );
+                                dataRow = {
+                                    ...dataRow,
+                                    [col.fieldName]: row[col.field],
+                                };
+                            });
+                            formatData.push(dataRow);
+                        }
+                    });
+                } else {
+                    res.data.forEach((row: any) => {
+                        let dataRow: any = {};
+                        if (
+                            row["Endereço no Estoque"]?.toLowerCase() !==
+                            "vendido"
+                        ) {
+                            Object.keys(row).forEach((key: string) => {
+                                const col = formatCols.find(
+                                    (f) => f.field === key
+                                );
+                                dataRow = {
+                                    ...dataRow,
+                                    [col.fieldName]: row[col.field],
+                                };
+                            });
+                            formatData.push(dataRow);
+                        }
+                    });
+                }
 
-                res.data.forEach((row: any) => {
-                    let dataRow: any = {};
-                    if (
-                        row["Endereço no Estoque"]?.toLowerCase() === "vendido"
-                    ) {
-                        Object.keys(row).forEach((key: string) => {
-                            const col = formatCols.find((f) => f.field === key);
-                            dataRow = {
-                                ...dataRow,
-                                [col.fieldName]: row[col.field],
-                            };
-                        });
-                        formatData.push(dataRow);
-                    }
-                });
                 let successAll = true;
-                const countSend = 100;
+                const countSend = 200;
                 const count = Math.ceil(formatData.length / countSend);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
@@ -701,7 +729,10 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         indexCount + countSend
                     );
                     const { success } = await postApi({
-                        url: "/catalogs/import",
+                        url:
+                            typeCatalog == "vendido"
+                                ? "/catalogs/importvendido"
+                                : "/catalogs/importdefault",
                         body: {
                             data: element,
                         },
@@ -717,10 +748,15 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 }
             },
         });
-        if (refFileCatalog.current?.value) {
-            refFileCatalog.current.type = "text";
-            refFileCatalog.current.value = "";
-            refFileCatalog.current.type = "file";
+        if (refFileCatalogDefault.current?.value) {
+            refFileCatalogDefault.current.type = "text";
+            refFileCatalogDefault.current.value = "";
+            refFileCatalogDefault.current.type = "file";
+        }
+        if (refFileCatalogVendido.current?.value) {
+            refFileCatalogVendido.current.type = "text";
+            refFileCatalogVendido.current.value = "";
+            refFileCatalogVendido.current.type = "file";
         }
     };
 
@@ -1488,26 +1524,48 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                 <></>
                             )}
                             {canImportCatalog ? (
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() =>
-                                                    refFileCatalog.current?.click()
-                                                }
-                                                data-rule-component="rule"
-                                                data-rule-component-id={`${name}.import`}
-                                            >
-                                                <UploadIcon />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Importar</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                <>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        refFileCatalogVendido.current?.click()
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={`${name}.import`}
+                                                >
+                                                    <UploadIcon />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Importar Vendido</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        refFileCatalogDefault.current?.click()
+                                                    }
+                                                    data-rule-component="rule"
+                                                    data-rule-component-id={`${name}.import`}
+                                                >
+                                                    <UploadIcon />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Importar Outros</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </>
                             ) : (
                                 <></>
                             )}
@@ -2194,12 +2252,22 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 }}
             />
             <input
-                ref={refFileCatalog}
+                ref={refFileCatalogVendido}
                 type="file"
                 className="hidden"
                 onChange={(e) => {
                     if (e.target.files?.length) {
-                        handleImportCatalog(e.target.files[0]);
+                        handleImportCatalog(e.target.files[0], "vendido");
+                    }
+                }}
+            />
+            <input
+                ref={refFileCatalogDefault}
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                    if (e.target.files?.length) {
+                        handleImportCatalog(e.target.files[0], "default");
                     }
                 }}
             />

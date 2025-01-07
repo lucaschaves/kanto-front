@@ -36,7 +36,7 @@ const PageInterpreterCreateOrEdit = () => {
             if (["jogo", "console"].includes(nameInterpreter)) {
                 const dataAll = refInterpreter?.current?.getItems();
                 dataImport = dataAll?.rows;
-                countSend = 200;
+                countSend = 250;
             } else {
                 const dataIds: any[] = stateIds?.map((id: any) => ({
                     name: id,
