@@ -37,10 +37,10 @@ export interface ICreateColumn {
 const formatValueByType = (props: { type: ITypeColumn; value: any }): any => {
     const { type, value } = props;
     if (type === "date") {
-        return format(new Date(value), "dd/MM/yyyy");
+        return value ? format(new Date(value), "dd/MM/yyyy") : "-";
     }
     if (type === "datetime") {
-        return format(new Date(value), "dd/MM/yyyy HH:mm:ss");
+        return value ? format(new Date(value), "dd/MM/yyyy HH:mm:ss") : "-";
     }
     if (type === "email") {
         return value;

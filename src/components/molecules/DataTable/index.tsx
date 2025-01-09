@@ -683,7 +683,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                     res.data.forEach((row: any) => {
                         let dataRow: any = {};
                         if (
-                            row["Endereço no Estoque"]?.toLowerCase() ===
+                            row["Endereço no Estoque"]?.toLowerCase() !==
                             "vendido"
                         ) {
                             Object.keys(row).forEach((key: string) => {

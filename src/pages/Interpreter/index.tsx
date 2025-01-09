@@ -157,16 +157,21 @@ const PageInterpreter = () => {
                     const dataRows = sheetsWork.map((d: any) => {
                         return {
                             anoDeLancamento: d["ANO DE LANÇAMENTO"],
-                            classificacaoIndicativa:
-                                d["CLASSIFICAÇÃO INDICATIVA"],
-                            console: d["CONSOLE"],
-                            desenvolvedora: d["DESENVOLVEDORA"],
-                            editora: d["EDITORA"],
-                            genero: d["GÊNERO"],
-                            nome: d["NOME"],
-                            name: d["NOME"],
-                            id: d["NOME"],
-                            numeroDeJogadores: d["NUMERO DE JOGADORES"],
+                            classificacaoIndicativa: String(
+                                d["CLASSIFICAÇÃO INDICATIVA"]
+                            )?.toLowerCase(),
+                            console: String(d["CONSOLE"])?.toLowerCase(),
+                            desenvolvedora: String(
+                                d["DESENVOLVEDORA"]
+                            )?.toLowerCase(),
+                            editora: String(d["EDITORA"])?.toLowerCase(),
+                            genero: String(d["GÊNERO"])?.toLowerCase(),
+                            nome: String(d["NOME"])?.toLowerCase(),
+                            name: String(d["NOME"])?.toLowerCase(),
+                            id: String(d["NOME"])?.toLowerCase(),
+                            numeroDeJogadores: String(
+                                d["NUMERO DE JOGADORES"]
+                            )?.toLowerCase(),
                             ean: d["EAN"],
                         };
                     });
@@ -179,15 +184,19 @@ const PageInterpreter = () => {
                     const dataRows = sheetsWork.map((d: any) => {
                         return {
                             anoDeLancamento: d["ANO DE LANÇAMENTO"],
-                            armazenamento: d["Armazenamento"],
-                            cor: d["COR"],
+                            armazenamento: String(
+                                d["Armazenamento"]
+                            )?.toLowerCase(),
+                            cor: String(d["COR"])?.toLowerCase(),
                             edicaoEspecial: d["Edição Especial"],
-                            marca: d["MARCA"],
-                            modelo: d["MODELO"],
-                            nome: d["NOME"],
-                            name: d["NOME"],
-                            id: d["NOME"],
-                            tipoDeConsole: d["TIPO DE CONSOLE"],
+                            marca: String(d["MARCA"])?.toLowerCase(),
+                            modelo: String(d["MODELO"])?.toLowerCase(),
+                            nome: String(d["NOME"])?.toLowerCase(),
+                            name: String(d["NOME"])?.toLowerCase(),
+                            id: String(d["NOME"])?.toLowerCase(),
+                            tipoDeConsole: String(
+                                d["TIPO DE CONSOLE"]
+                            )?.toLowerCase(),
                         };
                     });
                     setData({
@@ -204,7 +213,10 @@ const PageInterpreter = () => {
                     .sort();
                 setData({
                     total: dataByColumn.length,
-                    rows: dataByColumn.map((d) => ({ id: d, name: d })),
+                    rows: dataByColumn.map((d) => ({
+                        id: String(d)?.toLowerCase(),
+                        name: String(d)?.toLowerCase(),
+                    })),
                 });
             }
         }
@@ -216,7 +228,12 @@ const PageInterpreter = () => {
         reader.onload = (event: any) => {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: "array" });
-            const sheets = workbook.SheetNames.map((s) => ({ id: s, name: s }));
+            const sheets = workbook.SheetNames.map((s) => {
+                return {
+                    id: s,
+                    name: s,
+                };
+            });
             setWoorkbook(workbook.Sheets);
             setOptionsSheets(sheets);
             setLoading(false);
@@ -244,6 +261,23 @@ const PageInterpreter = () => {
                 ids,
             },
         });
+    };
+
+    const onClean = () => {
+        setLoading(false);
+        setOptionsSheets([]);
+        setOptionsColumns([]);
+        setNameUp("");
+        setFile({
+            file: null,
+            url: "",
+        });
+        setData({
+            total: 0,
+            rows: [],
+        });
+        setWoorkbook(null);
+        refForm.current?.reset({});
     };
 
     useImperativeHandle(
@@ -318,7 +352,7 @@ const PageInterpreter = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => refForm.current?.reset({})}
+                                    onClick={onClean}
                                     disabled={stateLoading || !file.file}
                                 >
                                     {t("clean")}
