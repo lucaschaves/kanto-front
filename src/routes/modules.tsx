@@ -73,6 +73,11 @@ export const modulesProducts = [
         link: "/products/productssold",
         Icon: <CubeIcon />,
     },
+    {
+        name: "productsstock",
+        link: "/products/productsstock",
+        Icon: <CubeIcon />,
+    },
 ];
 
 export const modulesSettings = [

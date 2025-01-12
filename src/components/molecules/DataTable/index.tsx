@@ -720,8 +720,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                 }
 
                 let successAll = true;
-                const countSend = 200;
-                const count = Math.ceil(formatData.length / countSend);
+                const countSend = 100; //200;
+                const count = 2; //Math.ceil(formatData.length / countSend);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
                     const element = formatData.slice(

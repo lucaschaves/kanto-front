@@ -133,6 +133,7 @@ const PageProducts = ({ index }: { index: number }) => {
                 type: "object",
                 field: "type",
             },
+            { name: "plataform", title: t("plataform"), enableSorting: false },
             { name: "status", title: t("status") },
             {
                 name: "pvCost",

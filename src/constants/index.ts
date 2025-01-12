@@ -61,6 +61,7 @@ export const STATUS_ENUM = [
             "/products/productspart",
             "/products/productsexchange",
             "/products/productsgift",
+            "/products/productsstock",
         ],
     },
     {
@@ -77,5 +78,10 @@ export const STATUS_ENUM = [
         id: "perdido",
         name: "Perdido",
         link: ["/productslost"],
+    },
+    {
+        id: "estoque",
+        name: "Estoque",
+        link: ["/productsstock"],
     },
 ];

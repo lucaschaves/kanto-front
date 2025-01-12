@@ -365,6 +365,7 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                     "productsgift",
                     "productstest",
                     "productssold",
+                    "productsstock",
                     "paymentmethods",
                     "typesofconsoles",
                     "plataforms",
@@ -442,6 +443,7 @@ export const Toolbar = forwardRef<IRefToolbar, IPropsToolbar>((props, ref) => {
                       "productsgift",
                       "productstest",
                       "productssold",
+                      "productsstock",
                   ].includes(fields) ? (
                     <FilterProducts />
                 ) : ["questions"].includes(fields) ? (

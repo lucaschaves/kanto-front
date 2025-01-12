@@ -134,6 +134,7 @@ export default {
         productsreceiving: "Recebimento",
         productsprocessing: "Processamento",
         productssold: "Vendido",
+        productsstock: "Estoque",
         productsrepair: "Conserto",
         productsloan: "Empréstimo",
         productstest: "Teste",
