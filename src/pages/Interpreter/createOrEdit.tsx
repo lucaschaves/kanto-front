@@ -33,7 +33,11 @@ const PageInterpreterCreateOrEdit = () => {
             const nameInterpreter = refInterpreter?.current?.getName();
             let dataImport: any[] = [];
             let countSend = 500;
-            if (["jogo", "console"].includes(nameInterpreter)) {
+            if (
+                ["jogo", "console", "jogos", "consoles"].includes(
+                    nameInterpreter?.toLowerCase()
+                )
+            ) {
                 const dataAll = refInterpreter?.current?.getItems();
                 dataImport = dataAll?.rows;
                 countSend = 250;
