@@ -30,6 +30,10 @@ const PageQuotationsForms = () => {
                 title: t("email"),
             },
             {
+                name: "responsible",
+                title: t("responsible"),
+            },
+            {
                 name: "providerAddress",
                 title: t("Endereço"),
             },
@@ -41,6 +45,22 @@ const PageQuotationsForms = () => {
                 name: "providerPhone",
                 title: t("phone"),
             },
+            {
+                name: "quotationHistoryReceived",
+                title: t("received"),
+                type: "boolean",
+            },
+            {
+                name: "quotationHistoryAdjusted",
+                title: t("adjusted"),
+                type: "boolean",
+            },
+            {
+                name: "quotationHistoryFinished",
+                title: t("finished"),
+                type: "boolean",
+            },
+
             { name: "updatedAt", title: t("updatedAt"), type: "datetime" },
             { name: "createdAt", title: t("createdAt"), type: "datetime" },
         ];
@@ -68,6 +88,7 @@ const PageQuotationsForms = () => {
                 filter_name="filter_form_id"
                 // navigateForm="/quotations/quotationssearchs"
                 // canAdd={false}
+                canSendQuotation
             />
             <Outlet />
         </>

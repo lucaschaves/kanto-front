@@ -998,104 +998,105 @@ const TerceiraEtapa = ({
                     <ScrollArea
                         className={cn("bg-slate-200", "p-2", "rounded-lg")}
                     >
-                        {stateFields?.map((field: any) => {
-                            return (
-                                <div
-                                    key={field.id}
-                                    className={cn(
-                                        "flex",
-                                        "flex-col",
-                                        "gap-2",
-                                        "px-3",
-                                        "py-4",
-                                        "bg-white",
-                                        "rounded-lg",
-                                        "mb-2"
-                                    )}
-                                >
+                        {stateFields &&
+                            stateFields?.map((field: any) => {
+                                return (
                                     <div
+                                        key={field.id}
                                         className={cn(
                                             "flex",
-                                            "justify-between",
-                                            "pb-2",
-                                            "gap-1",
-                                            "relative"
+                                            "flex-col",
+                                            "gap-2",
+                                            "px-3",
+                                            "py-4",
+                                            "bg-white",
+                                            "rounded-lg",
+                                            "mb-2"
                                         )}
                                     >
-                                        <img
-                                            src={`http://localhost:4000${field?.product?.image}`}
-                                            height={100}
-                                            width={100}
-                                            className={cn(
-                                                "h-20",
-                                                "object-contain"
-                                            )}
-                                        />
                                         <div
                                             className={cn(
                                                 "flex",
-                                                "flex-1",
-                                                "items-start",
-                                                "flex-col",
-                                                "gap-2"
+                                                "justify-between",
+                                                "pb-2",
+                                                "gap-1",
+                                                "relative"
                                             )}
                                         >
-                                            <span className="font-semibold">
-                                                {field?.product?.name}
-                                            </span>
-                                            <div className="flex flex-col gap-1">
-                                                <Label>
-                                                    Quantidade de itens
-                                                </Label>
-                                                <Input
-                                                    name="quantity"
-                                                    value={field?.quantity}
-                                                    readOnly
-                                                />
+                                            <img
+                                                src={`http://localhost:4000${field?.product?.image}`}
+                                                height={100}
+                                                width={100}
+                                                className={cn(
+                                                    "h-20",
+                                                    "object-contain"
+                                                )}
+                                            />
+                                            <div
+                                                className={cn(
+                                                    "flex",
+                                                    "flex-1",
+                                                    "items-start",
+                                                    "flex-col",
+                                                    "gap-2"
+                                                )}
+                                            >
+                                                <span className="font-semibold">
+                                                    {field?.product?.name}
+                                                </span>
+                                                <div className="flex flex-col gap-1">
+                                                    <Label>
+                                                        Quantidade de itens
+                                                    </Label>
+                                                    <Input
+                                                        name="quantity"
+                                                        value={field?.quantity}
+                                                        readOnly
+                                                    />
+                                                </div>
                                             </div>
+                                            <Button
+                                                className="absolute top-0 right-0"
+                                                variant="destructive"
+                                                onClick={() =>
+                                                    handleDelete(field.id)
+                                                }
+                                            >
+                                                <TrashIcon />
+                                            </Button>
                                         </div>
-                                        <Button
-                                            className="absolute top-0 right-0"
-                                            variant="destructive"
-                                            onClick={() =>
-                                                handleDelete(field.id)
-                                            }
-                                        >
-                                            <TrashIcon />
-                                        </Button>
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <span className="font-semibold">
-                                            Condições do produto:
-                                        </span>
-                                        <p>{field?.question?.question}</p>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            "flex",
-                                            "w-full",
-                                            "justify-between"
-                                        )}
-                                    >
                                         <div className="flex flex-col gap-1">
                                             <span className="font-semibold">
-                                                Comentários:
+                                                Condições do produto:
                                             </span>
-                                            <p>{field?.comments}</p>
+                                            <p>{field?.question?.question}</p>
                                         </div>
-                                        <img
-                                            src={`http://localhost:4000${field?.product?.image}`}
-                                            height={50}
-                                            width={50}
+                                        <div
                                             className={cn(
-                                                "h-10",
-                                                "object-contain"
+                                                "flex",
+                                                "w-full",
+                                                "justify-between"
                                             )}
-                                        />
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <span className="font-semibold">
+                                                    Comentários:
+                                                </span>
+                                                <p>{field?.comments}</p>
+                                            </div>
+                                            <img
+                                                src={`http://localhost:4000${field?.product?.image}`}
+                                                height={50}
+                                                width={50}
+                                                className={cn(
+                                                    "h-10",
+                                                    "object-contain"
+                                                )}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
                     </ScrollArea>
                     <Button
                         type="button"
@@ -1227,42 +1228,47 @@ const PageCotacao = () => {
             }
         }
         if (step === "second") {
-            const { success: successSearch, data: dataSearch } = await postApi({
-                url: `/quotations/search`,
-                body: data,
-            });
-            if (successSearch) {
-                if (data?.image?.file) {
-                    const formFile = new FormData();
-                    formFile.append("image", data?.image?.file);
+            if (data?.product) {
+                const { success: successSearch, data: dataSearch } =
                     await postApi({
-                        url: `/quotation/search/upload/${dataSearch?.id}`,
-                        body: formFile,
-                        config: {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                        },
+                        url: `/quotations/search`,
+                        body: data,
                     });
-                }
-                const { success: successForm, data: dataForm } = await putApi({
-                    url: `/quotations/form/${params.get("id")}`,
-                    body: {
-                        quotationSearch: dataSearch?.id,
-                    },
-                });
-                if (successForm) {
-                    const quotationProducts = formatQuotations(dataForm);
-                    setCotacao(quotationProducts);
-                    return true;
+                if (successSearch) {
+                    if (data?.image?.file) {
+                        const formFile = new FormData();
+                        formFile.append("image", data?.image?.file);
+                        await postApi({
+                            url: `/quotation/search/upload/${dataSearch?.id}`,
+                            body: formFile,
+                            config: {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            },
+                        });
+                    }
+                    const { success: successForm, data: dataForm } =
+                        await putApi({
+                            url: `/quotations/form/${params.get("id")}`,
+                            body: {
+                                quotationSearch: dataSearch?.id,
+                            },
+                        });
+                    if (successForm) {
+                        const quotationProducts = formatQuotations(dataForm);
+                        setCotacao(quotationProducts);
+                        return true;
+                    }
                 }
             }
+            return true;
         }
         if (step === "three") {
             const { success: successCheckout, data: dataCheckout } =
                 await postApi({
                     url: `/quotation/history/${params?.get("id")}`,
-                    body: {},
+                    body: { sendEmail: true },
                 });
             if (successCheckout) {
                 setCheckout(dataCheckout);

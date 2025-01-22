@@ -9,6 +9,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FSelectLabel,
     FSelectLabelMultiApi,
     FSelectLabelSingleApi,
     GroupForm,
@@ -26,6 +27,7 @@ import {
     TabsTrigger,
     Textarea,
 } from "@/components";
+import { CONSTANT_USER } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { messageError } from "@/utils";
@@ -58,7 +60,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
             quantity: values?.quantity || 1,
             reviewComments: values?.reviewComments,
             name: values?.name,
-            pvCost: values?.pvCost,
+            pcCost: values?.pcCost,
             pvMercadoLivre: values?.pvMercadoLivre,
             pvCredit: values?.pvCredit,
             plataform: values?.catalog?.catalog?.plataform,
@@ -84,7 +86,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("quantity", item.quantity);
         onChangeValue("comments", item.comments);
         onChangeValue("reviewComments", item.reviewComments);
-        onChangeValue("pvCost", item.pvCost);
+        onChangeValue("pcCost", item.pcCost);
         onChangeValue("pvMercadoLivre", item.pvMercadoLivre);
         onChangeValue("pvCredit", item.pvCredit);
         onChangeValue("plataform", item.catalog?.plataform);
@@ -97,7 +99,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("quantity", 1);
         onChangeValue("comments", null);
         onChangeValue("reviewComments", null);
-        onChangeValue("pvCost", null);
+        onChangeValue("pcCost", null);
         onChangeValue("pvMercadoLivre", null);
         onChangeValue("pvCredit", null);
         onChangeValue("plataform", null);
@@ -178,7 +180,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                         onChangeValue("name", val?.name);
                         onChangeValue("pvMercadoLivre", val?.pvMercadoLivre);
                         onChangeValue("pvCredit", val?.pvCredit);
-                        onChangeValue("pvCost", val?.pvCost);
+                        onChangeValue("pcCost", val?.pcCost);
                     }}
                     // disabled={!stateType}
                     // className={cn(
@@ -210,8 +212,8 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
-                    label={t("pvCost")}
-                    name="pvCost"
+                    label={t("pcCost")}
+                    name="pcCost"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FormField
@@ -292,7 +294,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         {field?.quantity}
                                     </TableCell>
                                     <TableCell>
-                                        {RSValue.format(field?.pvCost || 0)}
+                                        {RSValue.format(field?.pcCost || 0)}
                                     </TableCell>
                                     <TableCell>
                                         {RSValue.format(
@@ -370,7 +372,13 @@ export const PageQuotationsFormCreateOrEdit = () => {
         if (isEdit) {
             const { success } = await putApi({
                 url: `/quotationsform/${searchParams.get("id")}`,
-                body: newData,
+                body: {
+                    ...newData,
+                    quotationHistory: {
+                        ...newData?.quotationHistory,
+                        adjusted: true,
+                    },
+                },
             });
             if (success) {
                 onClose();
@@ -392,6 +400,70 @@ export const PageQuotationsFormCreateOrEdit = () => {
         });
         if (success) {
             refForm.current?.reset(data);
+            const idUser = JSON.parse(
+                window.sessionStorage.getItem(CONSTANT_USER) || "{}"
+            )?.id;
+            await putApi({
+                url: `/quotationsform/user/${searchParams.get("id")}`,
+                body: {
+                    userId: idUser,
+                },
+            });
+        }
+    };
+
+    const onChangeTab = (value: string) => {
+        if (value === "general") {
+            const searchItems = refForm.current?.watch("quotationSearch");
+            let valuePcCost = 0;
+            let valuePcCredit = 0;
+
+            searchItems.forEach((f: any) => {
+                valuePcCost += f.pcCost;
+                valuePcCredit += f.pvCredit;
+            });
+            refForm.current?.setValue(
+                "quotationHistory.finalValue",
+                valuePcCost
+            );
+            refForm.current?.setValue(
+                "quotationHistory.budgetedValues",
+                valuePcCost
+            );
+            refForm.current?.setValue(
+                "quotationHistory.finalCredit",
+                valuePcCredit
+            );
+        }
+    };
+
+    const handleCancel = async () => {
+        await putApi({
+            url: `/quotationsform/${searchParams.get("id")}`,
+            body: {
+                quotationHistory: {
+                    finished: true,
+                    completionDate: new Date(),
+                },
+            },
+        });
+    };
+
+    const handleFinish = async () => {
+        const valuesForm = refForm.current?.getValues();
+        const { success } = await putApi({
+            url: `/quotationsform/finish/${searchParams.get("id")}`,
+            body: {
+                ...valuesForm,
+                quotationHistory: {
+                    ...valuesForm.quotationHistory,
+                    finished: true,
+                    completionDate: new Date(),
+                },
+            },
+        });
+        if (success) {
+            onClose();
         }
     };
 
@@ -411,7 +483,11 @@ export const PageQuotationsFormCreateOrEdit = () => {
                 quantity: 1,
             }}
         >
-            <Tabs defaultValue="general" className="w-full">
+            <Tabs
+                defaultValue="general"
+                className="w-full"
+                onValueChange={onChangeTab}
+            >
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="general">Geral</TabsTrigger>
                     <TabsTrigger value="items">Itens</TabsTrigger>
@@ -440,20 +516,6 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                 "md:col-span-3"
                             )}
                         />
-                    </GroupForm>
-                    <GroupForm
-                        title={t("contact")}
-                        className={cn(
-                            "w-full",
-                            "grid",
-                            "grid-cols-2",
-                            "sm:grid-cols-2",
-                            "md:grid-cols-3",
-                            "gap-1",
-                            "sm:gap-2",
-                            "px-3"
-                        )}
-                    >
                         <FInputLabel label="Telefone" name="provider.phone" />
                         <FInputLabel
                             label="Email"
@@ -470,6 +532,69 @@ export const PageQuotationsFormCreateOrEdit = () => {
                             className="col-span-2"
                         />
                     </GroupForm>
+                    <GroupForm
+                        title={t("value")}
+                        className={cn(
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "md:grid-cols-3",
+                            "gap-1",
+                            "sm:gap-2",
+                            "px-3"
+                        )}
+                    >
+                        <FInputLabel
+                            label="Valor final"
+                            name="quotationHistory.finalValue"
+                            type="currency"
+                        />
+                        <FInputLabel
+                            label="Valores orçados"
+                            name="quotationHistory.budgetedValues"
+                            type="currency"
+                        />
+                        <FInputLabel
+                            label="Valor crédito"
+                            name="quotationHistory.finalCredit"
+                            type="currency"
+                        />
+                        <FCheckboxLabel
+                            label={t("received")}
+                            name="quotationHistory.received"
+                            onEffect={() =>
+                                refForm.current?.setValue(
+                                    "quotationHistory.dateReceipt",
+                                    new Date()
+                                )
+                            }
+                        />
+                        <FSelectLabelMultiApi
+                            label="Método de pagamento"
+                            name="quotationHistory.paymentMethodId"
+                            url="/paymentmethods"
+                            single
+                        />
+                    </GroupForm>
+                    <div className="flex items-center justify-start gap-4">
+                        <Button
+                            type="button"
+                            onClick={handleCancel}
+                            variant="outline"
+                            className="max-w-32"
+                        >
+                            Cancelar cotação
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleFinish}
+                            variant="outline"
+                            className="max-w-32"
+                        >
+                            Finalizar cotação
+                        </Button>
+                    </div>
                 </TabsContent>
                 <TabsContent value="items">
                     <ItemsSearchs
@@ -494,54 +619,37 @@ export const PageQuotationsFormCreateOrEdit = () => {
                             "px-3"
                         )}
                     >
-                        <FInputLabel
-                            label="Valor final"
-                            name="quotationHistory.finalValue"
-                            type="currency"
-                        />
-                        <FInputLabel
-                            label="Valores orçados"
-                            name="quotationHistory.budgetedValues"
-                            type="currency"
-                        />
-                        <FInputLabel
-                            label="Valor crédito"
-                            name="quotationHistory.finalCredit"
-                            type="currency"
-                        />
-                        <FInputLabel
+                        <FSelectLabel
                             label="Retornou"
                             name="quotationHistory.returned"
-                        />
-                        <FSelectLabelMultiApi
-                            label="Método de pagamento"
-                            name="quotationHistory.paymentMethodId"
-                            url="/paymentmethods"
-                            single
-                        />
-                        <FInputDatePicker
-                            label={t("completionDate")}
-                            name="quotationHistory.completionDate"
-                        />
-                        <FInputDatePicker
-                            label={t("openingDate")}
-                            name="quotationHistory.openingDate"
+                            items={[
+                                {
+                                    id: "sim",
+                                    name: "Sim",
+                                },
+                                {
+                                    id: "nao",
+                                    name: "Não",
+                                },
+                                {
+                                    id: "parcial",
+                                    name: "Parcial",
+                                },
+                            ]}
                         />
                         <FInputDatePicker
                             label={t("dateReceipt")}
                             name="quotationHistory.dateReceipt"
                         />
-                        <FCheckboxLabel
-                            label={t("adjusted")}
-                            name="quotationHistory.adjusted"
+                        <FInputDatePicker
+                            label={t("completionDate")}
+                            name="quotationHistory.completionDate"
+                            disabled
                         />
-                        <FCheckboxLabel
-                            label={t("finished")}
-                            name="quotationHistory.finished"
-                        />
-                        <FCheckboxLabel
-                            label={t("received")}
-                            name="quotationHistory.received"
+                        <FInputDatePicker
+                            label={t("openingDate")}
+                            name="quotationHistory.openingDate"
+                            disabled
                         />
                     </GroupForm>
                 </TabsContent>

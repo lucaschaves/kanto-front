@@ -33,6 +33,7 @@ interface IPropsListing<T> {
     urlDelete?: string;
     canColumns?: boolean;
     canApprove?: boolean;
+    canSendQuotation?: boolean;
 }
 
 const columnId: ColumnDef<any> = {
@@ -100,13 +101,23 @@ export function Listing<T>(props: IPropsListing<T>) {
         const { success, data } = await getApi({
             url: formActual,
             config: {
-                params: {
-                    skip: skip,
-                    limit: propsV?.pagination.limit,
-                    order: propsV?.sort.field,
-                    direction: propsV?.sort.order,
-                    ...propsV?.filters,
-                },
+                params:
+                    formActual === "notifications"
+                        ? {
+                              skip: skip,
+                              limit: propsV?.pagination.limit,
+                              order: propsV?.sort.field,
+                              direction: propsV?.sort.order,
+                              all: true,
+                              ...propsV?.filters,
+                          }
+                        : {
+                              skip: skip,
+                              limit: propsV?.pagination.limit,
+                              order: propsV?.sort.field,
+                              direction: propsV?.sort.order,
+                              ...propsV?.filters,
+                          },
             },
         });
         if (success) {

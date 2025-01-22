@@ -1,5 +1,11 @@
 import { cn } from "@/lib";
-import React, { ReactNode, Ref, forwardRef, useImperativeHandle } from "react";
+import React, {
+    ReactNode,
+    Ref,
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+} from "react";
 import {
     FieldErrors,
     FieldValues,
@@ -14,6 +20,7 @@ interface IBaseFormProps {
     id?: string;
     defaultValues?: FieldValues;
     resolver?: Resolver<FieldValues, any>;
+    dirtyFields?: () => void;
     onSubmit(e: FieldValues, p: any): void;
     onError?(e: FieldValues): void;
 }
@@ -30,6 +37,7 @@ const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
         resolver,
         onSubmit,
         onError = () => ({}),
+        dirtyFields = () => ({}),
     } = props;
 
     const methods = useForm({
@@ -61,6 +69,10 @@ const BaseForm = forwardRef((props: IBaseFormProps, ref: Ref<IBaseFormRef>) => {
     const handleSubmit = async (data?: any) => {
         methods.handleSubmit(onValid, onInvalid)(data);
     };
+
+    useEffect(() => {
+        if (methods.formState.isDirty) dirtyFields();
+    }, [methods.formState.isDirty]);
 
     useImperativeHandle(
         ref,

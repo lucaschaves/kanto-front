@@ -3,6 +3,7 @@ import {
     CardStackIcon,
     CubeIcon,
     HomeIcon,
+    LockClosedIcon,
     PersonIcon,
     RocketIcon,
     TableIcon,
@@ -90,6 +91,11 @@ export const modulesSettings = [
         name: "users",
         link: "/settings/users",
         Icon: <PersonIcon />,
+    },
+    {
+        name: "permissions",
+        link: "/settings/permissions",
+        Icon: <LockClosedIcon />,
     },
     {
         name: "interpreter",

@@ -136,7 +136,7 @@ const PageProducts = ({ index }: { index: number }) => {
             { name: "plataform", title: t("plataform"), enableSorting: false },
             { name: "status", title: t("status") },
             {
-                name: "pvCost",
+                name: "pcCost",
                 title: t("Custo de estoque"),
                 type: "currency",
                 typeFilter: "number",

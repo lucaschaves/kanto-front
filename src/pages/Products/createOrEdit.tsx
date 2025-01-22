@@ -86,6 +86,12 @@ export const PageProductCreateOrEdit = () => {
                 message: "É necessário",
             });
         }
+        if (newData?.addressInStock.length < 3) {
+            isError = true;
+            refForm.current?.setError("addressInStock", {
+                message: "É necessário ter ter caracteres",
+            });
+        }
         if (!newData?.status) {
             isError = true;
             refForm.current?.setError("status", {
@@ -189,6 +195,12 @@ export const PageProductCreateOrEdit = () => {
             messageError({ message: "É necessário preencher os campos" });
             return;
         }
+        newData = {
+            ...newData,
+            sku: newData?.sku
+                ? `${newData?.sku?.split("-")[0]}${newData?.sku?.split("-")[1]}`
+                : newData?.sku,
+        };
         if (isEdit) {
             const { success, data: dataResp } = await putApi({
                 url: `/product/${searchParams.get("id")}`,
@@ -238,6 +250,12 @@ export const PageProductCreateOrEdit = () => {
                     ...newData?.catalog,
                     name: newData?.name,
                 },
+                sku: newData?.sku
+                    ? `${newData?.sku?.slice(0, 2)}-${newData?.sku?.slice(
+                          2,
+                          newData?.sku.length
+                      )}`
+                    : newData?.sku,
             };
             refForm.current?.reset(newData);
         }
@@ -325,9 +343,10 @@ export const PageProductCreateOrEdit = () => {
                             "pvMercadoLivre",
                             val?.pvMercadoLivre
                         );
-                        refForm.current?.setValue("pvCost", val?.pvCost);
+                        refForm.current?.setValue("pcCost", val?.pcCost);
                     }}
                     disabled={disabledField}
+                    navigateItem="/factory/catalogs/edit?id="
                 />
                 <FInputLabel
                     label={t("sku")}
@@ -531,8 +550,8 @@ export const PageProductCreateOrEdit = () => {
                 )}
             >
                 <FInputLabel
-                    label={t("pvCost")}
-                    name="pvCost"
+                    label={t("pcCost")}
+                    name="pcCost"
                     type="currency"
                     disabled={disabledField}
                 />

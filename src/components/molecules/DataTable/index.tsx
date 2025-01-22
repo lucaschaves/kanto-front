@@ -79,6 +79,7 @@ import {
     DoubleArrowDownIcon,
     DownloadIcon,
     DragHandleDots2Icon,
+    EnvelopeClosedIcon,
     PaperPlaneIcon,
     Pencil1Icon,
     PlusIcon,
@@ -167,6 +168,7 @@ interface IPropsDataTable<T> {
     className?: string;
     classNameTable?: string;
     canExportTemplateCsv?: boolean;
+    canSendQuotation?: boolean;
 }
 
 export interface IRefDataTable {
@@ -327,6 +329,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         canImportCatalog = false,
         canStatus = false,
         canExportTemplateCsv = false,
+        canSendQuotation = false,
         canApprove = false,
         className = "",
         classNameTable = "",
@@ -816,6 +819,26 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         }
     };
 
+    const handleSendMail = async () => {
+        if (Object.keys(stateRowFocus).length) {
+            const { success } = await postApi({
+                url: "/sendemail",
+                body: {
+                    id: stateRowFocus.id,
+                },
+            });
+            if (success) {
+                messageSuccess({
+                    message: "Cotação enviada com sucesso",
+                });
+            }
+        } else {
+            messageError({
+                message: t("selectALine"),
+            });
+        }
+    };
+
     const handleStatusStock = async () => {
         const { success } = await putApi({
             url: urlMethod || name,
@@ -1029,7 +1052,6 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                             (column) =>
                                                 ![
                                                     "type",
-                                                    "factory",
                                                     "tagsDefault",
                                                     "select",
                                                 ].includes(column.id)
@@ -1569,6 +1591,28 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             ) : (
                                 <></>
                             )}
+                            {canSendQuotation ? (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={handleSendMail}
+                                                data-rule-component="rule"
+                                                data-rule-component-id={`${name}.sendmail`}
+                                            >
+                                                <EnvelopeClosedIcon />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Enviar cotação</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1686,11 +1730,14 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 "selected"
                                             }
                                             onClick={() => handleRowClick(row)}
-                                            onDoubleClick={() =>
-                                                handleAddOrEditDialog(
-                                                    (row.original as any)?.id
-                                                )
-                                            }
+                                            onDoubleClick={() => {
+                                                if (canEdit) {
+                                                    handleAddOrEditDialog(
+                                                        (row.original as any)
+                                                            ?.id
+                                                    );
+                                                }
+                                            }}
                                             className={cn(
                                                 stateRowFocus?.id ==
                                                     (row?.original as any)?.id

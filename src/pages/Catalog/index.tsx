@@ -35,8 +35,8 @@ const PageCatalogs = () => {
                 field: "name",
             },
             {
-                name: "pvCost",
-                title: t("pvCost"),
+                name: "pcCost",
+                title: t("pcCost"),
                 type: "currency",
                 typeFilter: "number",
             },

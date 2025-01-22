@@ -13,6 +13,7 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components";
+import { CONSTANT_ROLES } from "@/constants";
 import { useAuth } from "@/context";
 import { cn } from "@/lib";
 import {
@@ -48,6 +49,10 @@ export const Sidebar = (props: IPropsSidebar) => {
     const location = useLocation();
     const { t } = useTranslation();
     const { applyRules, favorites, user, refreshFavorites } = useAuth();
+
+    const rulesKanto = JSON.parse(
+        window.sessionStorage.getItem(CONSTANT_ROLES) || "[]"
+    ) as string[];
 
     const [stateOpen, setOpen] = useState("");
     const [stateOpenPopov, setOpenPopov] = useState("");
@@ -217,230 +222,297 @@ export const Sidebar = (props: IPropsSidebar) => {
                     <></>
                 )}
                 <Separator />
-                {modulesDef.map((v) => (
-                    <Button
-                        key={v.name}
-                        size="icon"
-                        onClick={() => navigate(v.link)}
-                        variant={
-                            v.link == location.pathname ? "outline" : "default"
+                {modulesDef
+                    .filter((v) => rulesKanto.includes(`${v.name}.list`))
+                    .map((v) => (
+                        <Button
+                            key={v.name}
+                            size="icon"
+                            onClick={() => navigate(v.link)}
+                            variant={
+                                v.link == location.pathname
+                                    ? "outline"
+                                    : "default"
+                            }
+                        >
+                            {v.Icon}
+                        </Button>
+                    ))}
+                {modulesProducts.filter((v) =>
+                    rulesKanto.includes(`${v.name}.list`)
+                ).length > 0 ? (
+                    <Popover
+                        onOpenChange={(p) => setOpenPopov(p ? "products" : "")}
+                        open={stateOpenPopov === "products"}
+                    >
+                        <PopoverTrigger asChild>
+                            <Button
+                                size="icon"
+                                variant={
+                                    location.pathname.split("/")[1] ===
+                                    "products"
+                                        ? "outline"
+                                        : "default"
+                                }
+                            >
+                                <PackageSearchIcon size={15} />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className={cn(
+                                "flex",
+                                "flex-col",
+                                // "gap-2",
+                                "p-2"
+                            )}
+                            side="right"
+                        >
+                            {modulesProducts
+                                .filter((v) =>
+                                    rulesKanto.includes(`${v.name}.list`)
+                                )
+                                .map((v) => (
+                                    <Button
+                                        key={v.name}
+                                        className={cn(
+                                            "w-auto",
+                                            "px-4",
+                                            "py-2",
+                                            "gap-2",
+                                            "justify-between"
+                                        )}
+                                        onClick={() => {
+                                            navigate(v.link);
+                                            setOpenPopov("");
+                                        }}
+                                        variant={
+                                            v.link == location.pathname
+                                                ? "outline"
+                                                : "ghost"
+                                        }
+                                    >
+                                        {v.Icon}
+                                        <span
+                                            className={cn(
+                                                "flex-1",
+                                                "text-left"
+                                            )}
+                                        >
+                                            {t(v.name)}
+                                        </span>
+                                    </Button>
+                                ))}
+                        </PopoverContent>
+                    </Popover>
+                ) : (
+                    <></>
+                )}
+                {modulesQuotations.filter((v) =>
+                    rulesKanto.includes(`${v.name}.list`)
+                ).length > 0 ? (
+                    <Popover
+                        onOpenChange={(p) =>
+                            setOpenPopov(p ? "quotations" : "")
                         }
+                        open={stateOpenPopov === "quotations"}
                     >
-                        {v.Icon}
-                    </Button>
-                ))}
-                <Popover
-                    onOpenChange={(p) => setOpenPopov(p ? "products" : "")}
-                    open={stateOpenPopov === "products"}
-                >
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant={
-                                location.pathname.split("/")[1] === "products"
-                                    ? "outline"
-                                    : "default"
-                            }
-                        >
-                            <PackageSearchIcon size={15} />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className={cn(
-                            "flex",
-                            "flex-col",
-                            // "gap-2",
-                            "p-2"
-                        )}
-                        side="right"
-                    >
-                        {modulesProducts.map((v) => (
+                        <PopoverTrigger asChild>
                             <Button
-                                key={v.name}
-                                className={cn(
-                                    "w-auto",
-                                    "px-4",
-                                    "py-2",
-                                    "gap-2",
-                                    "justify-between"
-                                )}
-                                onClick={() => {
-                                    navigate(v.link);
-                                    setOpenPopov("");
-                                }}
+                                size="icon"
                                 variant={
-                                    v.link == location.pathname
+                                    location.pathname.includes("quotations")
                                         ? "outline"
-                                        : "ghost"
+                                        : "default"
                                 }
                             >
-                                {v.Icon}
-                                <span className={cn("flex-1", "text-left")}>
-                                    {t(v.name)}
-                                </span>
+                                <FileTextIcon />
                             </Button>
-                        ))}
-                    </PopoverContent>
-                </Popover>
-                <Popover
-                    onOpenChange={(p) => setOpenPopov(p ? "quotations" : "")}
-                    open={stateOpenPopov === "quotations"}
-                >
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant={
-                                location.pathname.includes("quotations")
-                                    ? "outline"
-                                    : "default"
-                            }
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className={cn(
+                                "flex",
+                                "flex-col",
+                                // "gap-2",
+                                "p-2"
+                            )}
+                            side="right"
                         >
-                            <FileTextIcon />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className={cn(
-                            "flex",
-                            "flex-col",
-                            // "gap-2",
-                            "p-2"
-                        )}
-                        side="right"
+                            {modulesQuotations
+                                .filter((v) =>
+                                    rulesKanto.includes(`${v.name}.list`)
+                                )
+                                .map((v) => (
+                                    <Button
+                                        key={v.name}
+                                        className={cn(
+                                            "w-auto",
+                                            "px-4",
+                                            "py-2",
+                                            "gap-2",
+                                            "justify-between"
+                                        )}
+                                        onClick={() => {
+                                            navigate(v.link);
+                                            setOpenPopov("");
+                                        }}
+                                        variant={
+                                            v.link == location.pathname
+                                                ? "outline"
+                                                : "ghost"
+                                        }
+                                    >
+                                        {v.Icon}
+                                        <span
+                                            className={cn(
+                                                "flex-1",
+                                                "text-left"
+                                            )}
+                                        >
+                                            {t(v.name)}
+                                        </span>
+                                    </Button>
+                                ))}
+                        </PopoverContent>
+                    </Popover>
+                ) : (
+                    <></>
+                )}
+                {modulesFactory.filter((v) =>
+                    rulesKanto.includes(`${v.name}.list`)
+                ).length > 0 ? (
+                    <Popover
+                        onOpenChange={(p) => setOpenPopov(p ? "factory" : "")}
+                        open={stateOpenPopov === "factory"}
                     >
-                        {modulesQuotations.map((v) => (
+                        <PopoverTrigger asChild>
                             <Button
-                                key={v.name}
-                                className={cn(
-                                    "w-auto",
-                                    "px-4",
-                                    "py-2",
-                                    "gap-2",
-                                    "justify-between"
-                                )}
-                                onClick={() => {
-                                    navigate(v.link);
-                                    setOpenPopov("");
-                                }}
+                                size="icon"
                                 variant={
-                                    v.link == location.pathname
+                                    location.pathname.includes("factory")
                                         ? "outline"
-                                        : "ghost"
+                                        : "default"
                                 }
                             >
-                                {v.Icon}
-                                <span className={cn("flex-1", "text-left")}>
-                                    {t(v.name)}
-                                </span>
+                                <FactoryIcon size={15} />
                             </Button>
-                        ))}
-                    </PopoverContent>
-                </Popover>
-                <Popover
-                    onOpenChange={(p) => setOpenPopov(p ? "factory" : "")}
-                    open={stateOpenPopov === "factory"}
-                >
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant={
-                                location.pathname.includes("factory")
-                                    ? "outline"
-                                    : "default"
-                            }
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className={cn(
+                                "flex",
+                                "flex-col",
+                                // "gap-2",
+                                "p-2"
+                            )}
+                            side="right"
                         >
-                            <FactoryIcon size={15} />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className={cn(
-                            "flex",
-                            "flex-col",
-                            // "gap-2",
-                            "p-2"
-                        )}
-                        side="right"
+                            {modulesFactory
+                                .filter((v) =>
+                                    rulesKanto.includes(`${v.name}.list`)
+                                )
+                                .map((v) => (
+                                    <Button
+                                        key={v.name}
+                                        className={cn(
+                                            "w-auto",
+                                            "px-4",
+                                            "py-2",
+                                            "gap-2",
+                                            "justify-between"
+                                        )}
+                                        onClick={() => {
+                                            navigate(v.link);
+                                            setOpenPopov("");
+                                        }}
+                                        variant={
+                                            v.link == location.pathname
+                                                ? "outline"
+                                                : "ghost"
+                                        }
+                                    >
+                                        {v.Icon}
+                                        <span
+                                            className={cn(
+                                                "flex-1",
+                                                "text-left"
+                                            )}
+                                        >
+                                            {t(v.name)}
+                                        </span>
+                                    </Button>
+                                ))}
+                        </PopoverContent>
+                    </Popover>
+                ) : (
+                    <></>
+                )}
+                {modulesSettings.filter((v) =>
+                    rulesKanto.includes(`${v.name}.list`)
+                ).length > 0 ? (
+                    <Popover
+                        onOpenChange={(p) => setOpenPopov(p ? "settings" : "")}
+                        open={stateOpenPopov === "settings"}
                     >
-                        {modulesFactory.map((v) => (
+                        <PopoverTrigger asChild>
                             <Button
-                                key={v.name}
-                                className={cn(
-                                    "w-auto",
-                                    "px-4",
-                                    "py-2",
-                                    "gap-2",
-                                    "justify-between"
-                                )}
-                                onClick={() => {
-                                    navigate(v.link);
-                                    setOpenPopov("");
-                                }}
+                                size="icon"
                                 variant={
-                                    v.link == location.pathname
+                                    location.pathname.includes("settings")
                                         ? "outline"
-                                        : "ghost"
+                                        : "default"
                                 }
                             >
-                                {v.Icon}
-                                <span className={cn("flex-1", "text-left")}>
-                                    {t(v.name)}
-                                </span>
+                                <SettingsIcon size={15} />
                             </Button>
-                        ))}
-                    </PopoverContent>
-                </Popover>
-                <Popover
-                    onOpenChange={(p) => setOpenPopov(p ? "settings" : "")}
-                    open={stateOpenPopov === "settings"}
-                >
-                    <PopoverTrigger asChild>
-                        <Button
-                            size="icon"
-                            variant={
-                                location.pathname.includes("settings")
-                                    ? "outline"
-                                    : "default"
-                            }
+                        </PopoverTrigger>
+                        <PopoverContent
+                            className={cn(
+                                "flex",
+                                "flex-col",
+                                // "gap-2",
+                                "p-2"
+                            )}
+                            side="right"
                         >
-                            <SettingsIcon size={15} />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className={cn(
-                            "flex",
-                            "flex-col",
-                            // "gap-2",
-                            "p-2"
-                        )}
-                        side="right"
-                    >
-                        {modulesSettings.map((v) => (
-                            <Button
-                                key={v.name}
-                                className={cn(
-                                    "w-auto",
-                                    "px-4",
-                                    "py-2",
-                                    "gap-2",
-                                    "justify-between"
-                                )}
-                                onClick={() => {
-                                    navigate(v.link);
-                                    setOpenPopov("");
-                                }}
-                                variant={
-                                    v.link == location.pathname
-                                        ? "outline"
-                                        : "ghost"
-                                }
-                            >
-                                {v.Icon}
-                                <span className={cn("flex-1", "text-left")}>
-                                    {t(v.name)}
-                                </span>
-                            </Button>
-                        ))}
-                    </PopoverContent>
-                </Popover>
+                            {modulesSettings
+                                .filter((v) =>
+                                    rulesKanto.includes(`${v.name}.list`)
+                                )
+                                .map((v) => (
+                                    <Button
+                                        key={v.name}
+                                        className={cn(
+                                            "w-auto",
+                                            "px-4",
+                                            "py-2",
+                                            "gap-2",
+                                            "justify-between"
+                                        )}
+                                        onClick={() => {
+                                            navigate(v.link);
+                                            setOpenPopov("");
+                                        }}
+                                        variant={
+                                            v.link == location.pathname
+                                                ? "outline"
+                                                : "ghost"
+                                        }
+                                    >
+                                        {v.Icon}
+                                        <span
+                                            className={cn(
+                                                "flex-1",
+                                                "text-left"
+                                            )}
+                                        >
+                                            {t(v.name)}
+                                        </span>
+                                    </Button>
+                                ))}
+                        </PopoverContent>
+                    </Popover>
+                ) : (
+                    <></>
+                )}
             </div>
 
             <Sheet open={open} onOpenChange={toggle} defaultOpen={false}>

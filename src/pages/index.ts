@@ -12,6 +12,7 @@ export * from "./Interpreter";
 export * from "./Login";
 export * from "./Notification";
 export * from "./PaymentsPv";
+export * from "./Permissions";
 export * from "./Products";
 export * from "./Questions";
 export * from "./QuestionsGroup";

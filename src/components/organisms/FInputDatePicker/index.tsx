@@ -32,6 +32,7 @@ export const FInputDatePicker = (props: IFInputDatePickerProps) => {
         description,
         rules,
         disabled,
+        className,
         // ...rest
     } = props;
 
@@ -44,7 +45,7 @@ export const FInputDatePicker = (props: IFInputDatePickerProps) => {
             rules={rules}
             disabled={disabled}
             render={({ field }) => (
-                <FormItem className="flex flex-col pt-2.5">
+                <FormItem className={cn("flex flex-col pt-2.5", className)}>
                     <FormLabel>{label}</FormLabel>
                     <Popover>
                         <PopoverTrigger asChild disabled={disabled}>

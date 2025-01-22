@@ -317,8 +317,8 @@ export const PageCatalogCreateOrEdit = () => {
                     type="currency"
                 />
                 <FInputLabel
-                    label={t("pvCost")}
-                    name="pvCost"
+                    label={t("pcCost")}
+                    name="pcCost"
                     type="currency"
                 />
             </GroupForm>

@@ -24,8 +24,6 @@ import {
     SheetContent,
     SheetHeader,
     SheetTitle,
-    ToggleGroup,
-    ToggleGroupItem,
 } from "@/components";
 import { CONSTANT_TOKEN } from "@/constants";
 import { useAuth } from "@/context";
@@ -38,11 +36,9 @@ import {
     ExitIcon,
     HamburgerMenuIcon,
     PersonIcon,
-    StarIcon,
 } from "@radix-ui/react-icons";
 import { ChevronRight, Copy } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -66,14 +62,16 @@ const Layout = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { applyRules, signout, user, favorites } = useAuth();
 
     const [, setRef] = useDynamicRefs();
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const [stateNotifications] = useState<INotification[]>([]);
+    const [stateNotifications, setNotifications] = useState<INotification[]>(
+        []
+    );
     const [stateUser, setUser] = useState<string | null>(null);
     const [stateLoading, setLoading] = useState(false);
     const [stateOpenSidebar, setOpenSidebar] = useState(false);
@@ -114,12 +112,12 @@ const Layout = () => {
     };
 
     const getNotifications = async () => {
-        // const { success, data } = await getApi({
-        //     url: `/notifications`,
-        // });
-        // if (success) {
-        //     setNotifications(data.rows);
-        // }
+        const { success, data } = await getApi({
+            url: `/notifications`,
+        });
+        if (success) {
+            setNotifications(data.rows);
+        }
     };
 
     const getLinkFav = () => {
@@ -263,8 +261,40 @@ const Layout = () => {
                         >
                             <Popover>
                                 <PopoverTrigger>
-                                    <Button variant="ghost" size="icon">
-                                        <BellIcon width={20} height={20} />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="relative"
+                                    >
+                                        <BellIcon
+                                            width={20}
+                                            height={20}
+                                            className={cn(
+                                                stateNotifications.length
+                                                    ? cn(
+                                                          "text-sky-400",
+                                                          "-rotate-12"
+                                                      )
+                                                    : ""
+                                            )}
+                                        />
+                                        {stateNotifications.length ? (
+                                            <span
+                                                className={cn(
+                                                    "absolute",
+                                                    "right-1",
+                                                    "top-2",
+                                                    "animate-bounce",
+                                                    "inline-flex",
+                                                    "rounded-full",
+                                                    "h-2",
+                                                    "w-2",
+                                                    "bg-sky-500"
+                                                )}
+                                            ></span>
+                                        ) : (
+                                            <></>
+                                        )}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="flex flex-col gap-2 p-2 max-w-60 mr-2">
@@ -278,6 +308,12 @@ const Layout = () => {
                                             variant="ghost"
                                             className="flex items-center justify-start gap-2"
                                             onClick={() => {
+                                                putApi({
+                                                    url: `/notification/${notify.id}`,
+                                                    body: {
+                                                        read: true,
+                                                    },
+                                                });
                                                 if (notify.link)
                                                     navigate(notify.link);
                                             }}
@@ -324,7 +360,7 @@ const Layout = () => {
                                         {user?.name}
                                     </Button>
                                     <Separator />
-                                    <div
+                                    {/* <div
                                         className={cn(
                                             "flex",
                                             "items-center",
@@ -356,7 +392,7 @@ const Layout = () => {
                                                 />
                                             </ToggleGroupItem>
                                         </ToggleGroup>
-                                    </div>
+                                    </div> */}
                                     <div className={cn("flex", "items-center")}>
                                         <Button
                                             type="button"

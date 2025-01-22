@@ -21,6 +21,7 @@ interface IPropsModal {
     classNameContent?: string;
     disabled?: boolean;
     defaultValues?: any;
+    dirtyFields?: () => void;
     onClose: () => void;
     onSubmit: (data: FieldValues) => void;
 }
@@ -34,6 +35,7 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
         className,
         classNameContent,
         defaultValues,
+        dirtyFields,
     } = props;
 
     const { t } = useTranslation();
@@ -56,6 +58,7 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
                     ref={ref}
                     onSubmit={onSubmit}
                     defaultValues={defaultValues}
+                    dirtyFields={dirtyFields}
                 >
                     <div
                         className={cn(

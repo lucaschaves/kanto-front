@@ -32,6 +32,7 @@ interface IFSelectLabelSingleApiProps extends InputProps {
     dependenciesValue?: any;
     addLinkCrud?: string;
     onEffect?: (value: any) => void;
+    navigateItem?: string;
 }
 
 const LIMIT = 50;
@@ -51,6 +52,7 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
         addLinkCrud,
         disabled,
         defControl,
+        navigateItem,
         ...rest
     } = props;
 
@@ -233,6 +235,7 @@ const FSelectLabelSingleApi = (props: IFSelectLabelSingleApiProps) => {
                             field.onChange(e);
                             onEffect(e);
                         }}
+                        navigateItem={navigateItem}
                     />
                     <FormMessage />
                 </FormItem>

@@ -6,6 +6,7 @@ import {
     CONSTANT_TOKEN,
     CONSTANT_USER,
 } from "@/constants";
+import { modulesAll } from "@/routes/modules";
 import { getApi, postApi } from "@/services";
 import { removeProperties } from "@/utils";
 import { createContext, useContext, useState } from "react";
@@ -136,6 +137,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 return `/${dataFav.rows[0]?.name}`;
             }
         }
+        if (dataRules.length) {
+            const routeInit = dataRules[0].split(".")[0];
+            const findRoute = modulesAll.find((p) => p.name == routeInit);
+            if (findRoute) return findRoute.link;
+        }
         return undefined;
     };
 
@@ -243,7 +249,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         rulesElements.forEach((element) => {
             const datasetElement = (element as any)?.dataset;
             if (!rules.includes(datasetElement?.ruleComponentId)) {
-                // element.classList.add("hidden");
+                element.classList.add("hidden");
             }
         });
     };

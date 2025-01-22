@@ -11,8 +11,10 @@ import {
 } from "@/components";
 import { cn } from "@/lib";
 import { capitalize } from "@/utils";
+import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 interface IItem {
     id: string;
@@ -27,6 +29,7 @@ interface SingleSelectProps {
     open: boolean;
     toggle: (open: boolean) => void;
     disabled?: boolean;
+    navigateItem?: string;
 }
 
 function SingleSelect({
@@ -37,9 +40,12 @@ function SingleSelect({
     open,
     toggle,
     disabled,
+    navigateItem,
     ...props
 }: SingleSelectProps) {
     const { t } = useTranslation();
+
+    const navigate = useNavigate();
 
     return (
         <Popover open={open} onOpenChange={toggle} {...props}>
@@ -80,23 +86,41 @@ function SingleSelect({
                     <CommandEmpty>{t("noItemFound")}.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
                         {options.map((option) => (
-                            <CommandItem
-                                key={option.id}
-                                onSelect={() => {
-                                    onChange(option);
-                                    toggle(true);
-                                }}
-                            >
-                                <Check
-                                    className={cn(
-                                        "mr-2 h-4 w-4",
-                                        selected?.id == option.id
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                    )}
-                                />
-                                {option.name}
-                            </CommandItem>
+                            <div className={cn("flex", "items-center")}>
+                                <CommandItem
+                                    key={option.id}
+                                    onSelect={() => {
+                                        onChange(option);
+                                        toggle(true);
+                                    }}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            selected?.id == option.id
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                        )}
+                                    />
+                                    {option.name}
+                                </CommandItem>
+                                {navigateItem ? (
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            navigate(
+                                                `${navigateItem}${option.id}`
+                                            );
+                                        }}
+                                        size="icon"
+                                        variant="link"
+                                    >
+                                        <Pencil1Icon />
+                                    </Button>
+                                ) : (
+                                    <></>
+                                )}
+                            </div>
                         ))}
                     </CommandGroup>
                 </Command>

@@ -1,6 +1,6 @@
 import { cn } from "@/lib";
 import { getApi } from "@/services";
-import { capitalize } from "@/utils";
+import { capitalize, sleep } from "@/utils";
 import { useEffect, useState } from "react";
 import { RegisterOptions, useFormContext } from "react-hook-form";
 import {
@@ -28,6 +28,7 @@ interface IFSelectLabelApiProps extends InputProps {
     name: string;
     url: string;
     description?: string;
+    forceRows?: boolean;
     rules?: RegisterOptions;
     dependencies?: string[];
 }
@@ -41,6 +42,7 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
         rules,
         className,
         dependencies,
+        forceRows,
         ...rest
     } = props;
 
@@ -48,8 +50,11 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
 
     const [items, setItems] = useState<IItem[]>([]);
     const [stateOpen, setOpen] = useState(false);
+    const [stateLoading, setLoading] = useState(false);
 
-    const getItems = async () => {
+    const getItems = async (delay?: number) => {
+        setLoading(true);
+        await sleep(delay || 0);
         let params = {};
         dependencies?.forEach((key) => {
             params = {
@@ -71,6 +76,7 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
                 }))
             );
         }
+        setLoading(false);
     };
 
     const disabledDependencies = () => {
@@ -86,6 +92,10 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
         if (stateOpen) getItems();
     }, [stateOpen]);
 
+    useEffect(() => {
+        if (forceRows) getItems(500);
+    }, []);
+
     return (
         <FormField
             control={control}
@@ -96,7 +106,11 @@ const FSelectLabelApi = (props: IFSelectLabelApiProps) => {
                 <FormItem className={cn("w-full", className)}>
                     <FormLabel>{label}</FormLabel>
                     <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(e) => {
+                            if (!stateLoading) {
+                                field.onChange(e);
+                            }
+                        }}
                         defaultValue={field.value}
                         open={stateOpen}
                         onOpenChange={setOpen}

@@ -39,11 +39,11 @@ export const FilterProducts = () => {
             filter_status: data?.filter_status
                 ?.map((d: { id: string }) => d?.id)
                 .join("-"),
-            filter_pvCost_start: data?.filter_pvCost_start?.replaceAll(
+            filter_pcCost_start: data?.filter_pcCost_start?.replaceAll(
                 ",",
                 "."
             ),
-            filter_pvCost_end: data?.filter_pvCost_end,
+            filter_pcCost_end: data?.filter_pcCost_end,
             filter_pvMercadoLivre_start: data?.filter_pvMercadoLivre_start,
             filter_pvMercadoLivre_end: data?.filter_pvMercadoLivre_end,
             filter_dateAnnouncement_from: data?.filter_dateAnnouncement?.from
@@ -144,12 +144,12 @@ export const FilterProducts = () => {
                 <div className="flex items-center justify-between gap-2">
                     <FInputLabel
                         label={t("costStart")}
-                        name="filter_pvCost_start"
+                        name="filter_pcCost_start"
                         type="currency"
                     />
                     <FInputLabel
                         label={t("costEnd")}
-                        name="filter_pvCost_end"
+                        name="filter_pcCost_end"
                         type="currency"
                     />
                 </div>

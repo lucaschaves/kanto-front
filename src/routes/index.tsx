@@ -22,6 +22,8 @@ import {
     PageNotifications,
     PagePaymentsPv,
     PagePaymentsPvCreateOrEdit,
+    PagePermissionCreateOrEdit,
+    PagePermissions,
     PageProductCreateOrEdit,
     PageProducts,
     PageQuestionCreateOrEdit,
@@ -238,6 +240,23 @@ export const appRoutes = () => {
                                     path: "/settings/users/edit",
                                     errorElement: <PageError />,
                                     element: <PageUserCreateOrEdit />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "/settings/permissions",
+                            errorElement: <PageError />,
+                            element: <PagePermissions />,
+                            children: [
+                                {
+                                    path: "/settings/permissions/new",
+                                    errorElement: <PageError />,
+                                    element: <PagePermissionCreateOrEdit />,
+                                },
+                                {
+                                    path: "/settings/permissions/edit",
+                                    errorElement: <PageError />,
+                                    element: <PagePermissionCreateOrEdit />,
                                 },
                             ],
                         },

@@ -1,6 +1,7 @@
 import { Modal } from "@/Layout/Modal";
 import {
     FSelectLabel,
+    FSelectLabelMultiApi,
     FSelectLabelSingleApi,
     GroupForm,
     IBaseFormRef,
@@ -28,10 +29,17 @@ export const PageQuestionsGroupCreateOrEdit = () => {
     const onClose = () => navigate(-1);
 
     const onSubmit = async (data: FieldValues) => {
+        let newData = {
+            category: data?.category ? data.category : null,
+            console: data?.console ? data.console[0] : null,
+            game: data?.game ? data.game[0] : null,
+            question: data?.question ? data.question : null,
+            type: data.type,
+        };
         if (isEdit) {
             const { success } = await putApi({
                 url: `/questionsgroup/${searchParams.get("id")}`,
-                body: data,
+                body: newData,
             });
             if (success) {
                 onClose();
@@ -39,7 +47,7 @@ export const PageQuestionsGroupCreateOrEdit = () => {
         } else {
             const { success } = await postApi({
                 url: "/questionsgroup",
-                body: data,
+                body: newData,
             });
             if (success) {
                 onClose();
@@ -86,10 +94,11 @@ export const PageQuestionsGroupCreateOrEdit = () => {
                     onEffect={(e) => setType(e)}
                 />
                 {stateType === "game" ? (
-                    <FSelectLabelSingleApi
+                    <FSelectLabelMultiApi
                         label={t("game")}
                         name="game"
                         url="/games"
+                        single
                     />
                 ) : stateType === "console" ? (
                     <FSelectLabelSingleApi
