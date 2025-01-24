@@ -2,6 +2,7 @@ import {
     ArrowBottomRightIcon,
     CardStackIcon,
     CubeIcon,
+    EnvelopeClosedIcon,
     HomeIcon,
     LockClosedIcon,
     PersonIcon,
@@ -102,6 +103,11 @@ export const modulesSettings = [
         link: "/settings/interpreter",
         Icon: <CardStackIcon />,
     },
+    {
+        name: "paymentmethods",
+        link: "/settings/paymentmethods",
+        Icon: <HomeIcon />,
+    },
 ];
 
 export const modulesFactory = [
@@ -190,11 +196,6 @@ export const modulesFactory = [
         link: "/factory/typesofconsoles",
         Icon: <HomeIcon />,
     },
-    {
-        name: "paymentmethods",
-        link: "/factory/paymentmethods",
-        Icon: <HomeIcon />,
-    },
 ];
 
 export const modulesQuotations = [
@@ -203,11 +204,11 @@ export const modulesQuotations = [
         link: "/quotations/quotationsforms",
         Icon: <ArrowBottomRightIcon />,
     },
-    // {
-    //     name: "quotationssearchs",
-    //     link: "/quotations/quotationssearchs",
-    //     Icon: <ArrowBottomRightIcon />,
-    // },
+    {
+        name: "emails",
+        link: "/quotations/emails",
+        Icon: <EnvelopeClosedIcon />,
+    },
     {
         name: "questions",
         link: "/quotations/questions",

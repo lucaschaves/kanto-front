@@ -3,6 +3,7 @@ export * from "./Catalog";
 export * from "./Consoles";
 export * from "./Cotacao";
 export * from "./CotacaoHello";
+export * from "./Emails";
 export * from "./Error";
 export * from "./Extras";
 export * from "./Fallback";

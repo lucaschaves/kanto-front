@@ -32,6 +32,7 @@ export const FInputDatePicker = (props: IFInputDatePickerProps) => {
         description,
         rules,
         disabled,
+        readOnly,
         className,
         // ...rest
     } = props;
@@ -48,7 +49,7 @@ export const FInputDatePicker = (props: IFInputDatePickerProps) => {
                 <FormItem className={cn("flex flex-col pt-2.5", className)}>
                     <FormLabel>{label}</FormLabel>
                     <Popover>
-                        <PopoverTrigger asChild disabled={disabled}>
+                        <PopoverTrigger asChild disabled={disabled || readOnly}>
                             <FormControl>
                                 <Button
                                     variant={"outline"}
@@ -56,7 +57,7 @@ export const FInputDatePicker = (props: IFInputDatePickerProps) => {
                                         "w-full pl-3 text-left font-normal",
                                         !field.value && "text-muted-foreground"
                                     )}
-                                    disabled={disabled}
+                                    disabled={disabled || readOnly}
                                 >
                                     {field.value ? (
                                         format(field.value, "PPP", {

@@ -8,6 +8,8 @@ import {
     PageCatalogs,
     PageCotacao,
     PageCotacaoHello,
+    PageEmails,
+    PageEmailsCreateOrEdit,
     PageError,
     PageExtraCreateOrEdit,
     PageExtras,
@@ -128,29 +130,6 @@ export const appRoutes = () => {
                     ],
                 },
                 {
-                    path: "/settings",
-                    errorElement: <PageError />,
-                    children: [
-                        {
-                            path: "/settings/paymentspvs",
-                            errorElement: <PageError />,
-                            element: <PagePaymentsPv />,
-                            children: [
-                                {
-                                    path: `/settings/paymentspvs/new`,
-                                    errorElement: <PageError />,
-                                    element: <PagePaymentsPvCreateOrEdit />,
-                                },
-                                {
-                                    path: `/settings/paymentspvs/edit`,
-                                    errorElement: <PageError />,
-                                    element: <PagePaymentsPvCreateOrEdit />,
-                                },
-                            ],
-                        },
-                    ],
-                },
-                {
                     path: "/products",
                     errorElement: <PageError />,
                     children: modulesProducts.map((s) => ({
@@ -227,6 +206,23 @@ export const appRoutes = () => {
                     errorElement: <PageError />,
                     children: [
                         {
+                            path: "/settings/paymentspvs",
+                            errorElement: <PageError />,
+                            element: <PagePaymentsPv />,
+                            children: [
+                                {
+                                    path: `/settings/paymentspvs/new`,
+                                    errorElement: <PageError />,
+                                    element: <PagePaymentsPvCreateOrEdit />,
+                                },
+                                {
+                                    path: `/settings/paymentspvs/edit`,
+                                    errorElement: <PageError />,
+                                    element: <PagePaymentsPvCreateOrEdit />,
+                                },
+                            ],
+                        },
+                        {
                             path: "/settings/users",
                             errorElement: <PageError />,
                             element: <PageUsers />,
@@ -269,6 +265,23 @@ export const appRoutes = () => {
                                     path: "/settings/interpreter/import",
                                     errorElement: <PageError />,
                                     element: <PageInterpreterCreateOrEdit />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "/settings/paymentmethods",
+                            errorElement: <PageError />,
+                            element: <PageSettings />,
+                            children: [
+                                {
+                                    path: "/settings/paymentmethods/new",
+                                    errorElement: <PageError />,
+                                    element: <PageSettingCreateOrEdit />,
+                                },
+                                {
+                                    path: "/settings/paymentmethods/edit",
+                                    errorElement: <PageError />,
+                                    element: <PageSettingCreateOrEdit />,
                                 },
                             ],
                         },
@@ -342,6 +355,8 @@ export const appRoutes = () => {
                             <PageQuotationsSearchs />
                         ) : ["questionsgroups"].includes(s.name) ? (
                             <PageQuestionsGroups />
+                        ) : ["emails"].includes(s.name) ? (
+                            <PageEmails />
                         ) : (
                             <PageQuestions />
                         ),
@@ -359,6 +374,8 @@ export const appRoutes = () => {
                                     <PageQuotationsSearchCreateOrEdit />
                                 ) : ["questionsgroups"].includes(s.name) ? (
                                     <PageQuestionsGroupCreateOrEdit />
+                                ) : ["emails"].includes(s.name) ? (
+                                    <PageEmailsCreateOrEdit />
                                 ) : (
                                     <PageQuestionCreateOrEdit />
                                 ),
@@ -376,6 +393,8 @@ export const appRoutes = () => {
                                     <PageQuotationsSearchCreateOrEdit />
                                 ) : ["questionsgroups"].includes(s.name) ? (
                                     <PageQuestionsGroupCreateOrEdit />
+                                ) : ["emails"].includes(s.name) ? (
+                                    <PageEmailsCreateOrEdit />
                                 ) : (
                                     <PageQuestionCreateOrEdit />
                                 ),

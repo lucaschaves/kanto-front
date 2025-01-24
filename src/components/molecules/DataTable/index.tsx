@@ -1214,6 +1214,8 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => handleRefresh()}
+                                                data-rule-component="rule"
+                                                data-rule-component-id={`${name}.list`}
                                             >
                                                 <ReloadIcon />
                                             </Button>
@@ -1451,7 +1453,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         onAction(rowsIds);
                                     }}
                                     data-rule-component="rule"
-                                    data-rule-component-id={`${name}.new`}
+                                    data-rule-component-id={`${name}.import`}
                                     className="flex gap-1"
                                 >
                                     <UploadIcon />
@@ -1483,7 +1485,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                         handleExportTemplateCSV()
                                                     }
                                                     data-rule-component="rule"
-                                                    data-rule-component-id={`${name}.exporttemplate`}
+                                                    data-rule-component-id={`${name}.template`}
                                                 >
                                                     <FileDownIcon size={15} />
                                                 </Button>
@@ -1557,7 +1559,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                         refFileCatalogVendido.current?.click()
                                                     }
                                                     data-rule-component="rule"
-                                                    data-rule-component-id={`${name}.import`}
+                                                    data-rule-component-id={`${name}.importvendido`}
                                                 >
                                                     <UploadIcon />
                                                 </Button>
@@ -1577,7 +1579,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                         refFileCatalogDefault.current?.click()
                                                     }
                                                     data-rule-component="rule"
-                                                    data-rule-component-id={`${name}.import`}
+                                                    data-rule-component-id={`${name}.importdefault`}
                                                 >
                                                     <UploadIcon />
                                                 </Button>
@@ -1600,7 +1602,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 size="icon"
                                                 onClick={handleSendMail}
                                                 data-rule-component="rule"
-                                                data-rule-component-id={`${name}.sendmail`}
+                                                data-rule-component-id={`${name}.sendemail`}
                                             >
                                                 <EnvelopeClosedIcon />
                                             </Button>

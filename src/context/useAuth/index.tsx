@@ -63,6 +63,7 @@ interface AuthContextType {
     signout: (callback: VoidFunction) => void;
     applyRules: () => void;
     refreshFavorites: () => void;
+    refreshRules: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -98,6 +99,21 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data: [], user: "" };
     });
 
+    const refreshRules = async (id?: string) => {
+        const { success, data: dataRules } = await getApi({
+            url: `/permissiongroup/${id || user?.permissionsId}`,
+        });
+        if (success) {
+            window.sessionStorage.setItem(
+                CONSTANT_ROLES,
+                JSON.stringify(dataRules)
+            );
+            setRules(dataRules);
+            return dataRules;
+        }
+        return [];
+    };
+
     const signPersist = async (data: any) => {
         const objUser = {
             ...data,
@@ -109,16 +125,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             JSON.stringify(removeProperties(objUser, "token"))
         );
         window.sessionStorage.setItem(CONSTANT_LANGUAGE, "pt");
-        const { success, data: dataRules } = await getApi({
-            url: `/permissiongroup/${objUser?.permissionsId}`,
-        });
-        if (success) {
-            window.sessionStorage.setItem(
-                CONSTANT_ROLES,
-                JSON.stringify(dataRules)
-            );
-            setRules(dataRules);
-        }
+        const dataRules = await refreshRules(objUser?.permissionsId);
         const { success: successFav, data: dataFav } = await getApi({
             url: "/favorites",
             config: {
@@ -266,6 +273,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user?.token,
         favorites,
         refreshFavorites,
+        refreshRules,
     };
 
     return (

@@ -79,9 +79,4 @@ export const STATUS_ENUM = [
         name: "Perdido",
         link: ["/productslost"],
     },
-    {
-        id: "estoque",
-        name: "Estoque",
-        link: ["/productsstock"],
-    },
 ];

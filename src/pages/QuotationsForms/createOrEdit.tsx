@@ -62,7 +62,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
             name: values?.name,
             pcCost: values?.pcCost,
             pvMercadoLivre: values?.pvMercadoLivre,
-            pvCredit: values?.pvCredit,
+            pcCredit: values?.pcCredit,
             plataform: values?.catalog?.catalog?.plataform,
             catalogId: values?.catalog?.id,
         });
@@ -88,7 +88,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("reviewComments", item.reviewComments);
         onChangeValue("pcCost", item.pcCost);
         onChangeValue("pvMercadoLivre", item.pvMercadoLivre);
-        onChangeValue("pvCredit", item.pvCredit);
+        onChangeValue("pcCredit", item.pcCredit);
         onChangeValue("plataform", item.catalog?.plataform);
     };
 
@@ -101,7 +101,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onChangeValue("reviewComments", null);
         onChangeValue("pcCost", null);
         onChangeValue("pvMercadoLivre", null);
-        onChangeValue("pvCredit", null);
+        onChangeValue("pcCredit", null);
         onChangeValue("plataform", null);
     };
 
@@ -179,7 +179,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     onEffect={(val) => {
                         onChangeValue("name", val?.name);
                         onChangeValue("pvMercadoLivre", val?.pvMercadoLivre);
-                        onChangeValue("pvCredit", val?.pvCredit);
+                        onChangeValue("pcCredit", val?.pcCredit);
                         onChangeValue("pcCost", val?.pcCost);
                     }}
                     // disabled={!stateType}
@@ -207,8 +207,8 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
-                    label={t("pvCredit")}
-                    name="pvCredit"
+                    label={t("pcCredit")}
+                    name="pcCredit"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
@@ -302,7 +302,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        {RSValue.format(field?.pvCredit || 0)}
+                                        {RSValue.format(field?.pcCredit || 0)}
                                     </TableCell>
                                     <TableCell>{field?.comments}</TableCell>
                                     {/* <TableCell>
@@ -372,13 +372,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
         if (isEdit) {
             const { success } = await putApi({
                 url: `/quotationsform/${searchParams.get("id")}`,
-                body: {
-                    ...newData,
-                    quotationHistory: {
-                        ...newData?.quotationHistory,
-                        adjusted: true,
-                    },
-                },
+                body: newData,
             });
             if (success) {
                 onClose();
@@ -420,7 +414,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
 
             searchItems.forEach((f: any) => {
                 valuePcCost += f.pcCost;
-                valuePcCredit += f.pvCredit;
+                valuePcCredit += f.pcCredit;
             });
             refForm.current?.setValue(
                 "quotationHistory.finalValue",
@@ -443,6 +437,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
             body: {
                 quotationHistory: {
                     finished: true,
+                    canceled: true,
                     completionDate: new Date(),
                 },
             },
@@ -451,19 +446,28 @@ export const PageQuotationsFormCreateOrEdit = () => {
 
     const handleFinish = async () => {
         const valuesForm = refForm.current?.getValues();
-        const { success } = await putApi({
-            url: `/quotationsform/finish/${searchParams.get("id")}`,
-            body: {
-                ...valuesForm,
-                quotationHistory: {
-                    ...valuesForm.quotationHistory,
-                    finished: true,
-                    completionDate: new Date(),
+
+        if (valuesForm?.quotationHistory?.received) {
+            const { success } = await putApi({
+                url: `/quotationsform/finish/${searchParams.get("id")}`,
+                body: {
+                    ...valuesForm,
+                    quotationHistory: {
+                        ...valuesForm.quotationHistory,
+                        finished: true,
+                        completionDate: new Date(),
+                        returned:
+                            valuesForm?.quotationHistory?.returned || "nao",
+                    },
                 },
-            },
-        });
-        if (success) {
-            onClose();
+            });
+            if (success) {
+                onClose();
+            }
+        } else {
+            messageError({
+                message: "É necessário ter recebido os itens",
+            });
         }
     };
 
@@ -578,22 +582,28 @@ export const PageQuotationsFormCreateOrEdit = () => {
                         />
                     </GroupForm>
                     <div className="flex items-center justify-start gap-4">
-                        <Button
-                            type="button"
-                            onClick={handleCancel}
-                            variant="outline"
-                            className="max-w-32"
-                        >
-                            Cancelar cotação
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleFinish}
-                            variant="outline"
-                            className="max-w-32"
-                        >
-                            Finalizar cotação
-                        </Button>
+                        {isEdit ? (
+                            <>
+                                <Button
+                                    type="button"
+                                    onClick={handleCancel}
+                                    variant="outline"
+                                    className="max-w-32"
+                                >
+                                    Cancelar cotação
+                                </Button>
+                                <Button
+                                    type="button"
+                                    onClick={handleFinish}
+                                    variant="outline"
+                                    className="max-w-32"
+                                >
+                                    Finalizar cotação
+                                </Button>
+                            </>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 </TabsContent>
                 <TabsContent value="items">
