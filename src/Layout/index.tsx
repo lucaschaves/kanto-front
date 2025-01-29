@@ -139,7 +139,7 @@ const Layout = () => {
     }, [location.pathname]);
 
     useEffect(() => {
-        getNotifications();
+        if (false) getNotifications();
     }, [location.pathname]);
 
     const linkFav = getLinkFav();
