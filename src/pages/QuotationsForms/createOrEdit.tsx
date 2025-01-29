@@ -1,6 +1,8 @@
 import { Modal } from "@/Layout/Modal";
 import {
+    BaseForm,
     Button,
+    FButtonSubmit,
     FCheckboxLabel,
     FInputDatePicker,
     FInputLabel,
@@ -12,8 +14,10 @@ import {
     FSelectLabel,
     FSelectLabelMultiApi,
     FSelectLabelSingleApi,
+    FTextarea,
     GroupForm,
     IBaseFormRef,
+    ScrollArea,
     SearchCatalog,
     Table,
     TableBody,
@@ -30,8 +34,20 @@ import {
 import { CONSTANT_USER } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { messageError } from "@/utils";
-import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { createColumn, ICreateColumn, messageError, sleep } from "@/utils";
+import {
+    CheckIcon,
+    ExternalLinkIcon,
+    EyeOpenIcon,
+    PlusIcon,
+    TrashIcon,
+} from "@radix-ui/react-icons";
+import {
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from "@tanstack/react-table";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues, useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -40,11 +56,12 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
     const { t } = useTranslation();
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, update } = useFieldArray({
         name: "quotationSearch",
         control,
     });
 
+    const [stateIsEdit, setEdit] = useState({ edit: false, index: -1 });
     const [stateFindCatalog, setFindCatalog] = useState<any>({});
 
     const handleAdd = () => {
@@ -69,13 +86,37 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         onCleanCatalog();
     };
 
+    const handleUpdated = () => {
+        const values = getValues();
+        if (!values?.catalog?.id) {
+            messageError({
+                message: "É necessário informar o catálogo",
+            });
+            return;
+        }
+
+        update(stateIsEdit.index, {
+            comments: values?.comments,
+            quantity: values?.quantity || 1,
+            reviewComments: values?.reviewComments,
+            name: values?.name,
+            pcCost: values?.pcCost,
+            pvMercadoLivre: values?.pvMercadoLivre,
+            pcCredit: values?.pcCredit,
+            plataform: values?.catalog?.catalog?.plataform,
+            catalogId: values?.catalog?.id,
+        });
+        onCleanCatalog();
+        setEdit({ edit: false, index: -1 });
+    };
+
     const handleDelete = (index: number) => {
         remove(index);
     };
 
     const handleLoadItem = (index: number) => {
         const item = fields[index] as any;
-
+        setEdit({ edit: true, index });
         setFindCatalog({
             type: "game",
             factory: [item.game],
@@ -127,17 +168,42 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     "px-3"
                 )}
             >
-                <Button
-                    onClick={handleAdd}
-                    size="sm"
-                    variant="default"
-                    type="button"
-                    className="absolute -top-8 right-2"
-                    disabled={!stateFindCatalog?.type}
-                >
-                    <PlusIcon />
-                    Adicionar
-                </Button>
+                {stateIsEdit ? (
+                    <>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            type="button"
+                            className="absolute -top-8 right-24"
+                            disabled={!stateFindCatalog?.type}
+                            onClick={onCleanCatalog}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="default"
+                            type="button"
+                            className="absolute -top-8 right-2"
+                            disabled={!stateFindCatalog?.type}
+                            onClick={handleUpdated}
+                        >
+                            Atualizar
+                        </Button>
+                    </>
+                ) : (
+                    <Button
+                        onClick={handleAdd}
+                        size="sm"
+                        variant="default"
+                        type="button"
+                        className="absolute -top-8 right-2"
+                        disabled={!stateFindCatalog?.type}
+                    >
+                        <PlusIcon />
+                        Adicionar
+                    </Button>
+                )}
                 <FSelectLabelSingleApi
                     defControl={control}
                     className="col-span-2"
@@ -278,34 +344,40 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {fields.map((field: any, i: number) => {
-                            const RSValue = new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                            });
-                            return (
-                                <TableRow
-                                    key={field.id}
-                                    onClick={() => handleLoadItem(i)}
-                                >
-                                    <TableCell>{field?.name}</TableCell>
-                                    <TableCell>{field?.plataform}</TableCell>
-                                    <TableCell className="text-center">
-                                        {field?.quantity}
-                                    </TableCell>
-                                    <TableCell>
-                                        {RSValue.format(field?.pcCost || 0)}
-                                    </TableCell>
-                                    <TableCell>
-                                        {RSValue.format(
-                                            field?.pvMercadoLivre || 0
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {RSValue.format(field?.pcCredit || 0)}
-                                    </TableCell>
-                                    <TableCell>{field?.comments}</TableCell>
-                                    {/* <TableCell>
+                        {fields
+                            .filter((f: any) => !f.newProduct)
+                            .map((field: any, i: number) => {
+                                const RSValue = new Intl.NumberFormat("pt-BR", {
+                                    style: "currency",
+                                    currency: "BRL",
+                                });
+                                return (
+                                    <TableRow
+                                        key={field.id}
+                                        onClick={() => handleLoadItem(i)}
+                                    >
+                                        <TableCell>{field?.name}</TableCell>
+                                        <TableCell>
+                                            {field?.plataform}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {field?.quantity}
+                                        </TableCell>
+                                        <TableCell>
+                                            {RSValue.format(field?.pcCost || 0)}
+                                        </TableCell>
+                                        <TableCell>
+                                            {RSValue.format(
+                                                field?.pvMercadoLivre || 0
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {RSValue.format(
+                                                field?.pcCredit || 0
+                                            )}
+                                        </TableCell>
+                                        <TableCell>{field?.comments}</TableCell>
+                                        {/* <TableCell>
                                         <button
                                             type="button"
                                             onClick={() => handleEdit(i)}
@@ -313,17 +385,17 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                             <Pencil1Icon />
                                         </button>
                                     </TableCell> */}
-                                    <TableCell>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDelete(i)}
-                                        >
-                                            <TrashIcon />
-                                        </button>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
+                                        <TableCell>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(i)}
+                                            >
+                                                <TrashIcon />
+                                            </button>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                     </TableBody>
                 </Table>
             </div>
@@ -339,10 +411,142 @@ export const PageQuotationsFormCreateOrEdit = () => {
 
     const isEdit = location.pathname.includes("edit");
 
+    const refModal = useRef<any>(null);
     const refForm = useRef<IBaseFormRef>(null);
+    const refProductForm = useRef<IBaseFormRef>(null);
+    const refEmailForm = useRef<IBaseFormRef>(null);
+    const [stateTable, setTable] = useState<{ data: any[]; total: number }>({
+        data: [],
+        total: 0,
+    });
+    const [stateNewItem, setNewItem] = useState<any>({});
+    const [stateEmail, setEmail] = useState<any>({});
+    const [stateEmails, setEmails] = useState<{ rows: any[]; total: number }>({
+        rows: [],
+        total: 0,
+    });
+    const [stateColumns] = useState<ColumnDef<any>[]>(() => {
+        const columns: any[] = [];
+        const colsDef: ICreateColumn[] = [
+            { name: "id", title: t("id") },
+            { name: "to_name", title: t("name") },
+            { name: "to_email", title: t("email") },
+            {
+                name: "subject",
+                title: t("subject"),
+            },
+            { name: "sent_at", title: t("sent_at"), type: "datetime" },
+            { name: "status", title: t("status") },
+            {
+                name: "is_read",
+                title: t("is_read"),
+                type: "boolean",
+            },
+        ];
+        colsDef.forEach((col) => {
+            columns.push(
+                createColumn({
+                    name: col.name,
+                    title: col.title,
+                    type: col?.type as any,
+                    field: col?.field,
+                    enableHiding: col?.enableHiding,
+                    enableSorting: col?.enableSorting,
+                    typeFilter: col?.typeFilter,
+                })
+            );
+        });
+        return columns;
+    });
+    const [stateColumnsNew] = useState<ColumnDef<any>[]>(() => {
+        const columns: any[] = [];
+        const colsDef: ICreateColumn[] = [
+            { name: "id", title: t("id") },
+            { name: "newName", title: t("name") },
+            {
+                name: "newRegion",
+                title: t("region"),
+                type: "object",
+                field: "name",
+            },
+            {
+                name: "comments",
+                title: t("comments"),
+            },
+        ];
+        colsDef.forEach((col) => {
+            columns.push(
+                createColumn({
+                    name: col.name,
+                    title: col.title,
+                    type: col?.type as any,
+                    field: col?.field,
+                })
+            );
+        });
+        return columns;
+    });
+    const [stateProductFindCatalog, setProductFindCatalog] = useState<any>({});
+
+    const onProductSubmit = async (data: FieldValues) => {
+        const newTable: any[] = [];
+        stateTable.data.forEach((key: any) => {
+            if (key?.id == stateNewItem?.id) {
+                newTable.push({
+                    ...key,
+                    catalogId: data?.catalog?.id,
+                });
+            } else {
+                newTable.push(key);
+            }
+        });
+        setTable({
+            data: newTable,
+            total: newTable.length,
+        });
+        setNewItem({});
+    };
+
+    const onProductCleanCatalog = () => {
+        // onChangeValue("catalog", null);
+    };
+
+    const table = useReactTable({
+        getCoreRowModel: getCoreRowModel(),
+        data: stateEmails.rows,
+        columns: stateColumns,
+        rowCount: stateEmails.total,
+    });
+
+    const tableNew = useReactTable({
+        getCoreRowModel: getCoreRowModel(),
+        data: stateTable.data,
+        columns: stateColumnsNew,
+        rowCount: stateTable.total,
+    });
+
+    const onProductClose = () => {
+        setNewItem({});
+    };
+
+    const onEmailClose = () => {
+        setEmail({});
+        refEmailForm.current?.reset({});
+    };
+
+    const handleViewEmail = async (id: string) => {
+        const { success, data } = await getApi({
+            url: `/email/${id}`,
+        });
+        if (success) {
+            setEmail(data);
+            await sleep(50);
+            refEmailForm.current?.reset(data);
+        }
+    };
 
     const onClose = () => {
-        navigate(-1);
+        navigate("/quotations/quotationsforms");
     };
 
     const onSubmit = async (data: FieldValues) => {
@@ -352,7 +556,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
             });
             return;
         }
-        if (!data?.quotationSearch.length) {
+        if (!data?.quotationSearch?.length) {
             messageError({
                 message: "É necessário ter pelo menos um item",
             });
@@ -394,6 +598,13 @@ export const PageQuotationsFormCreateOrEdit = () => {
         });
         if (success) {
             refForm.current?.reset(data);
+            const dataNewProducts = data?.quotationSearch?.filter(
+                (r: any) => !!r?.newProduct
+            );
+            setTable({
+                data: dataNewProducts,
+                total: dataNewProducts.length,
+            });
             const idUser = JSON.parse(
                 window.sessionStorage.getItem(CONSTANT_USER) || "{}"
             )?.id;
@@ -403,10 +614,18 @@ export const PageQuotationsFormCreateOrEdit = () => {
                     userId: idUser,
                 },
             });
+            const emails = await getApi({
+                url: `/emails/quotation/${searchParams.get("id")}`,
+            });
+            if (emails.success) {
+                setEmails(emails.data);
+            }
         }
     };
 
     const onChangeTab = (value: string) => {
+        onProductClose();
+        onEmailClose();
         if (value === "general") {
             const searchItems = refForm.current?.watch("quotationSearch");
             let valuePcCost = 0;
@@ -428,6 +647,18 @@ export const PageQuotationsFormCreateOrEdit = () => {
                 "quotationHistory.finalCredit",
                 valuePcCredit
             );
+            if (Number(valuePcCost) < 200) {
+                refForm.current?.setValue("priorityTag", "baixo");
+            } else if (
+                Number(valuePcCost) >= 200 &&
+                Number(valuePcCost) < 1000
+            ) {
+                refForm.current?.setValue("priorityTag", "médio");
+            } else {
+                if (Number(valuePcCost) < 200) {
+                    refForm.current?.setValue("priorityTag", "alto");
+                }
+            }
         }
     };
 
@@ -471,199 +702,748 @@ export const PageQuotationsFormCreateOrEdit = () => {
         }
     };
 
+    const handleAppoveNewItem = async (rowOriginal: any) => {
+        const { success } = await putApi({
+            url: `/quotationssearch/${rowOriginal?.id}`,
+            body: rowOriginal,
+        });
+        if (success) {
+            getData();
+        }
+    };
+
     useEffect(() => {
         if (isEdit) {
             getData();
         }
     }, []);
 
+    const isExpanse =
+        Object.keys(stateNewItem).length || Object.keys(stateEmail).length;
+
     return (
-        <Modal
-            ref={refForm}
-            onClose={onClose}
-            onSubmit={onSubmit}
-            title={isEdit ? t("edit") : t("add")}
-            defaultValues={{
-                quantity: 1,
-            }}
-        >
-            <Tabs
-                defaultValue="general"
-                className="w-full"
-                onValueChange={onChangeTab}
+        <>
+            <Modal
+                ref={refModal}
+                onClose={onClose}
+                title={isEdit ? t("edit") : t("add")}
+                maxWidth={isExpanse ? "max-w-7xl" : "max-w-4xl"}
+                disabledForm
             >
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="general">Geral</TabsTrigger>
-                    <TabsTrigger value="items">Itens</TabsTrigger>
-                    <TabsTrigger value="history">Histórico</TabsTrigger>
-                </TabsList>
-                <TabsContent value="general" className="flex flex-col gap-4">
-                    <GroupForm
-                        title={t("general")}
-                        className={cn(
-                            "w-full",
-                            "grid",
-                            "grid-cols-2",
-                            "sm:grid-cols-2",
-                            "md:grid-cols-3",
-                            "gap-1",
-                            "sm:gap-2",
-                            "px-3"
-                        )}
+                <div
+                    className={
+                        isExpanse
+                            ? "flex items-start gap-8 overflow-hidden"
+                            : ""
+                    }
+                >
+                    <BaseForm
+                        ref={refForm}
+                        onSubmit={onSubmit}
+                        defaultValues={{
+                            quantity: 1,
+                        }}
                     >
-                        <FInputLabel
-                            label="Nome"
-                            name="provider.name"
-                            className={cn(
-                                "col-span-2",
-                                "sm:col-span-2",
-                                "md:col-span-3"
-                            )}
-                        />
-                        <FInputLabel label="Telefone" name="provider.phone" />
-                        <FInputLabel
-                            label="Email"
-                            name="provider.email"
-                            className="col-span-2"
-                        />
-                        <FInputLabel
-                            label="Origem do contato"
-                            name="provider.originContact"
-                        />
-                        <FInputLabel
-                            label="Endereço"
-                            name="provider.address"
-                            className="col-span-2"
-                        />
-                    </GroupForm>
-                    <GroupForm
-                        title={t("value")}
-                        className={cn(
-                            "w-full",
-                            "grid",
-                            "grid-cols-2",
-                            "sm:grid-cols-2",
-                            "md:grid-cols-3",
-                            "gap-1",
-                            "sm:gap-2",
-                            "px-3"
-                        )}
-                    >
-                        <FInputLabel
-                            label="Valor final"
-                            name="quotationHistory.finalValue"
-                            type="currency"
-                        />
-                        <FInputLabel
-                            label="Valores orçados"
-                            name="quotationHistory.budgetedValues"
-                            type="currency"
-                        />
-                        <FInputLabel
-                            label="Valor crédito"
-                            name="quotationHistory.finalCredit"
-                            type="currency"
-                        />
-                        <FCheckboxLabel
-                            label={t("received")}
-                            name="quotationHistory.received"
-                            onEffect={() =>
-                                refForm.current?.setValue(
-                                    "quotationHistory.dateReceipt",
-                                    new Date()
-                                )
-                            }
-                        />
-                        <FSelectLabelMultiApi
-                            label="Método de pagamento"
-                            name="quotationHistory.paymentMethodId"
-                            url="/paymentmethods"
-                            single
-                        />
-                    </GroupForm>
-                    <div className="flex items-center justify-start gap-4">
-                        {isEdit ? (
-                            <>
-                                <Button
-                                    type="button"
-                                    onClick={handleCancel}
-                                    variant="outline"
-                                    className="max-w-32"
+                        <div className="flex flex-col ">
+                            <Tabs
+                                defaultValue="general"
+                                className={cn(
+                                    "w-full min-h-96",
+                                    isExpanse ? "max-w-xl" : ""
+                                )}
+                                onValueChange={onChangeTab}
+                            >
+                                <TabsList className="grid w-full grid-cols-5">
+                                    <TabsTrigger value="general">
+                                        Geral
+                                    </TabsTrigger>
+                                    <TabsTrigger value="items">
+                                        Itens
+                                    </TabsTrigger>
+                                    <TabsTrigger value="newitems">
+                                        Novos itens
+                                    </TabsTrigger>
+                                    <TabsTrigger value="history">
+                                        Histórico
+                                    </TabsTrigger>
+                                    <TabsTrigger value="emails">
+                                        Emails
+                                    </TabsTrigger>
+                                </TabsList>
+                                <TabsContent
+                                    value="general"
+                                    className="flex flex-col gap-4"
                                 >
-                                    Cancelar cotação
-                                </Button>
-                                <Button
-                                    type="button"
-                                    onClick={handleFinish}
-                                    variant="outline"
-                                    className="max-w-32"
+                                    <ScrollArea
+                                        className={cn("h-[calc(100vh-400px)]")}
+                                    >
+                                        <GroupForm
+                                            title={t("general")}
+                                            className={cn(
+                                                "w-full",
+                                                "grid",
+                                                "grid-cols-2",
+                                                "sm:grid-cols-2",
+                                                "md:grid-cols-3",
+                                                "gap-1",
+                                                "sm:gap-2",
+                                                "px-3"
+                                            )}
+                                        >
+                                            <FInputLabel
+                                                label="Nome"
+                                                name="provider.name"
+                                                className={cn(
+                                                    "col-span-2",
+                                                    "sm:col-span-2",
+                                                    "md:col-span-3"
+                                                )}
+                                            />
+                                            <FInputLabel
+                                                label="Telefone"
+                                                name="provider.phone"
+                                            />
+                                            <FInputLabel
+                                                label="Email"
+                                                name="provider.email"
+                                                className="col-span-2"
+                                            />
+                                            <FInputLabel
+                                                label="Origem do contato"
+                                                name="provider.originContact"
+                                            />
+                                            <FInputLabel
+                                                label="Endereço"
+                                                name="provider.address"
+                                                className="col-span-2"
+                                            />
+                                            <FSelectLabel
+                                                label="Status"
+                                                name="status"
+                                                items={[
+                                                    {
+                                                        id: "aberto",
+                                                        name: "Aberto",
+                                                    },
+                                                    {
+                                                        id: "negociação",
+                                                        name: "Negociação",
+                                                    },
+                                                    {
+                                                        id: "compraDeProdutos",
+                                                        name: "Compra de produtos",
+                                                    },
+                                                    {
+                                                        id: "recebido",
+                                                        name: "Recebido",
+                                                    },
+                                                    {
+                                                        id: "devolução",
+                                                        name: "Devolução",
+                                                    },
+                                                    {
+                                                        id: "finalizado",
+                                                        name: "Finalizado",
+                                                    },
+                                                ]}
+                                                disabled
+                                            />
+                                            <FSelectLabel
+                                                label="Prioridade"
+                                                name="priorityTag"
+                                                items={[
+                                                    {
+                                                        id: "baixo",
+                                                        name: "Baixo",
+                                                    },
+                                                    {
+                                                        id: "médio",
+                                                        name: "Médio",
+                                                    },
+                                                    {
+                                                        id: "alto",
+                                                        name: "Alto",
+                                                    },
+                                                ]}
+                                                disabled
+                                            />
+                                            <FCheckboxLabel
+                                                label={t("received")}
+                                                name="quotationHistory.received"
+                                                onEffect={() =>
+                                                    refForm.current?.setValue(
+                                                        "quotationHistory.dateReceipt",
+                                                        new Date()
+                                                    )
+                                                }
+                                                row
+                                            />
+                                        </GroupForm>
+                                        <GroupForm
+                                            title={t("value")}
+                                            className={cn(
+                                                "w-full",
+                                                "grid",
+                                                "grid-cols-2",
+                                                "sm:grid-cols-2",
+                                                "gap-1",
+                                                "sm:gap-2",
+                                                "px-3"
+                                            )}
+                                        >
+                                            <FSelectLabelMultiApi
+                                                label="Método de pagamento"
+                                                name="quotationHistory.paymentMethodId"
+                                                url="/paymentmethods"
+                                                single
+                                            />
+                                            <FInputLabel
+                                                label="Valores orçados"
+                                                name="quotationHistory.budgetedValues"
+                                                type="currency"
+                                            />
+                                            <FInputLabel
+                                                label="Valor crédito"
+                                                name="quotationHistory.finalCredit"
+                                                type="currency"
+                                            />
+                                            <FInputLabel
+                                                label="Valor final"
+                                                name="quotationHistory.finalValue"
+                                                type="currency"
+                                            />
+                                        </GroupForm>
+                                    </ScrollArea>
+                                </TabsContent>
+                                <TabsContent value="items">
+                                    <ScrollArea
+                                        className={cn("h-[calc(100vh-400px)]")}
+                                    >
+                                        <ItemsSearchs
+                                            control={refForm.current?.control}
+                                            onChangeValue={(
+                                                n: string,
+                                                v: any
+                                            ) =>
+                                                refForm.current?.setValue(n, v)
+                                            }
+                                            getValues={() =>
+                                                refForm.current?.getValues()
+                                            }
+                                        />
+                                    </ScrollArea>
+                                </TabsContent>
+                                <TabsContent value="newitems">
+                                    <ScrollArea
+                                        className={cn("h-[calc(100vh-400px)]")}
+                                    >
+                                        <Table
+                                            className={cn(
+                                                "w-full",
+                                                "rounded-md",
+                                                "border"
+                                            )}
+                                        >
+                                            <TableHeader className=" bg-slate-100">
+                                                {tableNew
+                                                    .getHeaderGroups()
+                                                    .map((headerGroup) => (
+                                                        <TableRow
+                                                            key={headerGroup.id}
+                                                        >
+                                                            {headerGroup.headers.map(
+                                                                (header) => {
+                                                                    return (
+                                                                        <TableHead
+                                                                            key={
+                                                                                header.id
+                                                                            }
+                                                                            colSpan={
+                                                                                header.colSpan
+                                                                            }
+                                                                            className={cn(
+                                                                                header
+                                                                                    .column
+                                                                                    .id ===
+                                                                                    "id"
+                                                                                    ? "w-[50px] max-w-[50px]"
+                                                                                    : ""
+                                                                            )}
+                                                                        >
+                                                                            {header.isPlaceholder
+                                                                                ? null
+                                                                                : flexRender(
+                                                                                      header
+                                                                                          .column
+                                                                                          .columnDef
+                                                                                          .header,
+                                                                                      header.getContext()
+                                                                                  )}
+                                                                        </TableHead>
+                                                                    );
+                                                                }
+                                                            )}
+                                                            <TableHead>
+                                                                Editar
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                Aprovar
+                                                            </TableHead>
+                                                        </TableRow>
+                                                    ))}
+                                            </TableHeader>
+                                            <TableBody>
+                                                {tableNew
+                                                    .getRowModel()
+                                                    .rows.map((row) => (
+                                                        <TableRow
+                                                            key={row.id}
+                                                            data-state={
+                                                                row.getIsSelected() &&
+                                                                "selected"
+                                                            }
+                                                        >
+                                                            {row
+                                                                .getVisibleCells()
+                                                                .map((cell) => {
+                                                                    return (
+                                                                        <TableCell
+                                                                            key={
+                                                                                cell.id
+                                                                            }
+                                                                            className="text-nowrap"
+                                                                        >
+                                                                            {flexRender(
+                                                                                cell
+                                                                                    .column
+                                                                                    .columnDef
+                                                                                    .cell,
+                                                                                cell.getContext()
+                                                                            )}
+                                                                        </TableCell>
+                                                                    );
+                                                                })}
+                                                            <TableCell className="">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setNewItem(
+                                                                            row.original
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <ExternalLinkIcon />
+                                                                </button>
+                                                            </TableCell>
+                                                            <TableCell className="">
+                                                                {!!row.original
+                                                                    ?.catalogId ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            handleAppoveNewItem(
+                                                                                row.original
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <CheckIcon />
+                                                                    </button>
+                                                                ) : (
+                                                                    <></>
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                            </TableBody>
+                                        </Table>
+                                    </ScrollArea>
+                                </TabsContent>
+                                <TabsContent value="history">
+                                    <ScrollArea
+                                        className={cn("h-[calc(100vh-400px)]")}
+                                    >
+                                        <GroupForm
+                                            title={t("contact")}
+                                            className={cn(
+                                                "w-full",
+                                                "grid",
+                                                "grid-cols-2",
+                                                "sm:grid-cols-2",
+                                                "md:grid-cols-2",
+                                                "gap-1",
+                                                "sm:gap-2",
+                                                "px-3"
+                                            )}
+                                        >
+                                            <FSelectLabel
+                                                label="Retornou"
+                                                name="quotationHistory.returned"
+                                                items={[
+                                                    {
+                                                        id: "sim",
+                                                        name: "Sim",
+                                                    },
+                                                    {
+                                                        id: "nao",
+                                                        name: "Não",
+                                                    },
+                                                    {
+                                                        id: "parcial",
+                                                        name: "Parcial",
+                                                    },
+                                                ]}
+                                            />
+                                            <FInputDatePicker
+                                                label={t("dateReceipt")}
+                                                name="quotationHistory.dateReceipt"
+                                            />
+                                            <FInputDatePicker
+                                                label={t("completionDate")}
+                                                name="quotationHistory.completionDate"
+                                                disabled
+                                            />
+                                            <FInputDatePicker
+                                                label={t("openingDate")}
+                                                name="quotationHistory.openingDate"
+                                                disabled
+                                            />
+                                        </GroupForm>
+                                    </ScrollArea>
+                                </TabsContent>
+                                <TabsContent value="emails">
+                                    <ScrollArea
+                                        className={cn("h-[calc(100vh-400px)]")}
+                                    >
+                                        <Table
+                                            className={cn(
+                                                "rounded-md",
+                                                "border",
+                                                "overflow-x-auto",
+                                                "overflow-y-hidden"
+                                            )}
+                                        >
+                                            <TableHeader className="sticky top-0 z-50 bg-slate-100">
+                                                {table
+                                                    .getHeaderGroups()
+                                                    .map((headerGroup) => (
+                                                        <TableRow
+                                                            key={headerGroup.id}
+                                                        >
+                                                            {headerGroup.headers.map(
+                                                                (header) => {
+                                                                    return (
+                                                                        <TableHead
+                                                                            key={
+                                                                                header.id
+                                                                            }
+                                                                            colSpan={
+                                                                                header.colSpan
+                                                                            }
+                                                                            className={cn(
+                                                                                header
+                                                                                    .column
+                                                                                    .id ===
+                                                                                    "id"
+                                                                                    ? "w-[50px] max-w-[50px]"
+                                                                                    : ""
+                                                                            )}
+                                                                        >
+                                                                            {header.isPlaceholder
+                                                                                ? null
+                                                                                : flexRender(
+                                                                                      header
+                                                                                          .column
+                                                                                          .columnDef
+                                                                                          .header,
+                                                                                      header.getContext()
+                                                                                  )}
+                                                                        </TableHead>
+                                                                    );
+                                                                }
+                                                            )}
+                                                            <TableHead>
+                                                                Email
+                                                            </TableHead>
+                                                        </TableRow>
+                                                    ))}
+                                            </TableHeader>
+                                            <TableBody>
+                                                {table
+                                                    .getRowModel()
+                                                    .rows.map((row) => (
+                                                        <TableRow
+                                                            key={row.id}
+                                                            data-state={
+                                                                row.getIsSelected() &&
+                                                                "selected"
+                                                            }
+                                                        >
+                                                            {row
+                                                                .getVisibleCells()
+                                                                .map((cell) => {
+                                                                    return (
+                                                                        <TableCell
+                                                                            key={
+                                                                                cell.id
+                                                                            }
+                                                                            className="text-nowrap"
+                                                                        >
+                                                                            {flexRender(
+                                                                                cell
+                                                                                    .column
+                                                                                    .columnDef
+                                                                                    .cell,
+                                                                                cell.getContext()
+                                                                            )}
+                                                                        </TableCell>
+                                                                    );
+                                                                })}
+                                                            <TableCell>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        handleViewEmail(
+                                                                            row
+                                                                                .original
+                                                                                .id
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <EyeOpenIcon />
+                                                                </button>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                            </TableBody>
+                                        </Table>
+                                    </ScrollArea>
+                                </TabsContent>
+                            </Tabs>
+                            <div
+                                className={cn(
+                                    "flex",
+                                    "w-full",
+                                    "items-center",
+                                    "justify-between",
+                                    "gap-2",
+                                    "mt-4"
+                                )}
+                            >
+                                <div className="flex items-center justify-start gap-4">
+                                    {isEdit ? (
+                                        <>
+                                            <Button
+                                                type="button"
+                                                onClick={handleCancel}
+                                                variant="outline"
+                                                className="max-w-32"
+                                            >
+                                                Cancelar cotação
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                onClick={handleFinish}
+                                                variant="outline"
+                                                className="max-w-32"
+                                            >
+                                                Finalizar cotação
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </div>
+                                <div
+                                    className={cn(
+                                        "flex",
+                                        "w-full",
+                                        "items-center",
+                                        "justify-end",
+                                        "gap-2"
+                                    )}
                                 >
-                                    Finalizar cotação
-                                </Button>
-                            </>
-                        ) : (
-                            <></>
-                        )}
-                    </div>
-                </TabsContent>
-                <TabsContent value="items">
-                    <ItemsSearchs
-                        control={refForm.current?.control}
-                        onChangeValue={(n: string, v: any) =>
-                            refForm.current?.setValue(n, v)
-                        }
-                        getValues={() => refForm.current?.getValues()}
-                    />
-                </TabsContent>
-                <TabsContent value="history">
-                    <GroupForm
-                        title={t("contact")}
-                        className={cn(
-                            "w-full",
-                            "grid",
-                            "grid-cols-2",
-                            "sm:grid-cols-2",
-                            "md:grid-cols-2",
-                            "gap-1",
-                            "sm:gap-2",
-                            "px-3"
-                        )}
-                    >
-                        <FSelectLabel
-                            label="Retornou"
-                            name="quotationHistory.returned"
-                            items={[
-                                {
-                                    id: "sim",
-                                    name: "Sim",
-                                },
-                                {
-                                    id: "nao",
-                                    name: "Não",
-                                },
-                                {
-                                    id: "parcial",
-                                    name: "Parcial",
-                                },
-                            ]}
-                        />
-                        <FInputDatePicker
-                            label={t("dateReceipt")}
-                            name="quotationHistory.dateReceipt"
-                        />
-                        <FInputDatePicker
-                            label={t("completionDate")}
-                            name="quotationHistory.completionDate"
-                            disabled
-                        />
-                        <FInputDatePicker
-                            label={t("openingDate")}
-                            name="quotationHistory.openingDate"
-                            disabled
-                        />
-                    </GroupForm>
-                </TabsContent>
-            </Tabs>
-        </Modal>
+                                    <Button
+                                        type="button"
+                                        onClick={onClose}
+                                        variant="outline"
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                    <FButtonSubmit label={t("save")} />
+                                </div>
+                            </div>
+                        </div>
+                    </BaseForm>
+                    {Object.keys(stateNewItem).length ? (
+                        <BaseForm
+                            ref={refProductForm}
+                            onSubmit={onProductSubmit}
+                        >
+                            <div className="flex flex-col w-full">
+                                <div
+                                    className={cn(
+                                        "flex",
+                                        "w-full",
+                                        "items-center",
+                                        "justify-between",
+                                        "gap-2",
+                                        "mb-2"
+                                    )}
+                                >
+                                    <p className="font-bold text-base">
+                                        Buscar catálogo - {stateNewItem?.id}
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            onClick={onProductClose}
+                                            variant="outline"
+                                        >
+                                            {t("cancel")}
+                                        </Button>
+                                        <FButtonSubmit label="Adicionar" />
+                                    </div>
+                                </div>
+                                <SearchCatalog
+                                    onChange={(n, v) => {
+                                        setProductFindCatalog((prev: any) => ({
+                                            ...prev,
+                                            [n]: v,
+                                        }));
+                                        onProductCleanCatalog();
+                                    }}
+                                    value={stateProductFindCatalog}
+                                />
+                                <GroupForm
+                                    title={t("general")}
+                                    className={cn(
+                                        "w-full",
+                                        "gap-1",
+                                        "sm:gap-2",
+                                        "px-3"
+                                    )}
+                                >
+                                    <FSelectLabelSingleApi
+                                        defControl={
+                                            refProductForm.current?.control
+                                        }
+                                        label={t("catalog")}
+                                        name="catalog"
+                                        url="/catalogs/fields"
+                                        dependenciesValue={{
+                                            type: stateProductFindCatalog?.type,
+                                            plataform:
+                                                stateProductFindCatalog?.plataform
+                                                    ?.map((d: any) => d?.id)
+                                                    .join(","),
+                                            region: stateProductFindCatalog?.region
+                                                ?.map((d: any) => d?.id)
+                                                .join(","),
+                                            factory:
+                                                stateProductFindCatalog?.factory
+                                                    ?.map((d: any) => d?.id)
+                                                    .join(","),
+                                        }}
+                                        dependencies={[
+                                            "consoleComplete",
+                                            "conservation",
+                                            "consolePackaging",
+                                            "consoleSealed",
+                                            "consoleTypeUnlocked",
+                                            "consoleWorking",
+                                            "consoleUnlocked",
+                                            "gameManual",
+                                            "gamePackaging",
+                                            "gamePackagingRental",
+                                            "gameSealed",
+                                            "gameWorking",
+                                        ]}
+                                        keyValue={["catalog.name"]}
+                                        disabled={
+                                            !stateProductFindCatalog?.factory
+                                        }
+                                        // navigateItem="/factory/catalogs/edit?id="
+                                    />
+                                </GroupForm>
+                            </div>
+                        </BaseForm>
+                    ) : (
+                        <></>
+                    )}
+                    {Object.keys(stateEmail).length ? (
+                        <BaseForm ref={refEmailForm} onSubmit={() => ({})}>
+                            <div className="flex flex-col w-full">
+                                <div
+                                    className={cn(
+                                        "flex",
+                                        "w-full",
+                                        "items-center",
+                                        "justify-between",
+                                        "gap-2",
+                                        "mb-2"
+                                    )}
+                                >
+                                    <p className="font-bold text-base">
+                                        Email -{" "}
+                                        {stateEmail?.to_name ||
+                                            stateEmail?.to_email}
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            onClick={onEmailClose}
+                                            variant="outline"
+                                        >
+                                            Fechar
+                                        </Button>
+                                    </div>
+                                </div>
+                                <GroupForm
+                                    title={t("general")}
+                                    className={cn(
+                                        "w-full",
+                                        "grid",
+                                        "grid-cols-2",
+                                        "gap-1",
+                                        "sm:gap-2",
+                                        "px-3"
+                                    )}
+                                >
+                                    <FInputLabel
+                                        label={t("name")}
+                                        name="to_name"
+                                        readOnly
+                                    />
+                                    <FInputLabel
+                                        label={t("email")}
+                                        name="to_email"
+                                        readOnly
+                                    />
+                                    <FInputLabel
+                                        label={t("subject")}
+                                        name="subject"
+                                        readOnly
+                                    />
+                                    <FInputDatePicker
+                                        label={t("sent_at")}
+                                        name="sent_at"
+                                        readOnly
+                                    />
+                                    <FTextarea
+                                        label={t("text")}
+                                        name="text"
+                                        readOnly
+                                        className="col-span-2"
+                                        rows={5}
+                                    />
+                                </GroupForm>
+                            </div>
+                        </BaseForm>
+                    ) : (
+                        <></>
+                    )}
+                </div>
+            </Modal>
+        </>
     );
 };

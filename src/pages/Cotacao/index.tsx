@@ -19,6 +19,7 @@ import {
     FButtonSubmit,
     FInputLabel,
     FSelectLabel,
+    FSelectLabelSingleApi,
     FormControl,
     FormField,
     FormItem,
@@ -46,7 +47,7 @@ import { deleteApi, getApi, postApi, putApi } from "@/services";
 import { messageError, sleep } from "@/utils";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -464,12 +465,41 @@ const SegundaEtapa = ({
     const [stateOpenNewProduct, setOpenNewProduct] = useState(false);
 
     async function onSubmit(data: any) {
-        if (await onValid("second", data)) nextStep();
+        const isValid = await onValid("second", data);
+        if (isValid) nextStep();
     }
 
-    async function onSubmitNewProduct() {
+    async function onSubmitNewProduct(data: any) {
+        let isError = false;
+        if (!data?.type) {
+            refFormNewProduct.current?.setError("type", {
+                message: "É necessário preencher",
+            });
+            isError = true;
+        }
+        if (!data?.name) {
+            refFormNewProduct.current?.setError("name", {
+                message: "É necessário preencher",
+            });
+            isError = true;
+        }
+        if (!data?.quantity) {
+            refFormNewProduct.current?.setError("quantity", {
+                message: "É necessário preencher",
+            });
+            isError = true;
+        }
+        if (!data?.region) {
+            refFormNewProduct.current?.setError("region", {
+                message: "É necessário preencher",
+            });
+            isError = true;
+        }
+        if (isError) {
+            return;
+        }
         setOpenNewProduct(false);
-        nextStep();
+        onSubmit(data);
     }
 
     const getItemsProducts = async (search?: string) => {
@@ -498,15 +528,19 @@ const SegundaEtapa = ({
         if (success) setQuestions(data.rows);
     };
 
-    // const debounceSearch = useDebounce(searchProduct, 500);
-
     const onSearch = () => {
         getItemsProducts(searchProduct);
     };
 
-    // useEffect(() => {
-    //     getItemsProducts();
-    // }, [debounceSearch]);
+    const getUrlImage = useCallback(() => {
+        const findImage = stateProducts.find(
+            (product) => product.id == refForm.current?.watch("product")
+        )?.images?.image;
+        if (findImage) {
+            return `http://localhost:4000${findImage}`;
+        }
+        return "/assets/background-login.png";
+    }, [stateProducts]);
 
     useEffect(() => {
         if (openProduct) getItemsProducts();
@@ -662,18 +696,10 @@ const SegundaEtapa = ({
                                 )}
                             >
                                 <img
-                                    src={`http://localhost:4000${
-                                        stateProducts.find(
-                                            (product) =>
-                                                product.id ==
-                                                refForm.current?.watch(
-                                                    "product"
-                                                )
-                                        )?.images?.image
-                                    }`}
+                                    src={getUrlImage()}
                                     height={150}
-                                    width={100}
-                                    className={cn("h-20", "object-contain")}
+                                    width={200}
+                                    className={cn("h-full", "object-contain")}
                                 />
                                 <div
                                     className={cn(
@@ -832,7 +858,7 @@ const SegundaEtapa = ({
             >
                 <DialogContent className="max-w-xl">
                     <DialogHeader>
-                        <DialogTitle>{t("newProduct")}</DialogTitle>
+                        <DialogTitle>Novo produto</DialogTitle>
                         <DialogDescription>
                             Informe os dados do produto
                         </DialogDescription>
@@ -840,6 +866,9 @@ const SegundaEtapa = ({
                     <BaseForm
                         ref={refFormNewProduct}
                         onSubmit={onSubmitNewProduct}
+                        defaultValues={{
+                            quantity: 1,
+                        }}
                     >
                         <div
                             className={cn(
@@ -859,10 +888,11 @@ const SegundaEtapa = ({
                                 name="name"
                                 className="col-span-2"
                             />
-                            <FInputLabel
+                            <FSelectLabelSingleApi
                                 label="Região"
                                 name="region"
                                 className="col-span-2"
+                                url="/quotations/regions"
                             />
                             <FInputLabel
                                 label="Quantidade de itens"
@@ -1233,6 +1263,44 @@ const PageCotacao = () => {
                     await postApi({
                         url: `/quotations/search`,
                         body: data,
+                    });
+                if (successSearch) {
+                    if (data?.image?.file) {
+                        const formFile = new FormData();
+                        formFile.append("image", data?.image?.file);
+                        await postApi({
+                            url: `/quotation/search/upload/${dataSearch?.id}`,
+                            body: formFile,
+                            config: {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            },
+                        });
+                    }
+                    const { success: successForm, data: dataForm } =
+                        await putApi({
+                            url: `/quotations/form/${params.get("id")}`,
+                            body: {
+                                quotationSearch: dataSearch?.id,
+                            },
+                        });
+                    if (successForm) {
+                        const quotationProducts = formatQuotations(dataForm);
+                        setCotacao(quotationProducts);
+                        return true;
+                    }
+                }
+            } else if (data?.type) {
+                const { success: successSearch, data: dataSearch } =
+                    await postApi({
+                        url: `/quotations/search`,
+                        body: {
+                            ...data,
+                            newName: data?.name,
+                            newRegion: Number(data?.region?.id),
+                            newType: data?.type,
+                        },
                     });
                 if (successSearch) {
                     if (data?.image?.file) {

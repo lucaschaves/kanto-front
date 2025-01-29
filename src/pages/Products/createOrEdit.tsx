@@ -8,6 +8,10 @@ import {
     GroupForm,
     IBaseFormRef,
     SearchCatalog,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/components";
 import { CONSTANT_TOKEN, STATUS_ENUM } from "@/constants";
 import { cn } from "@/lib";
@@ -279,364 +283,408 @@ export const PageProductCreateOrEdit = () => {
             onSubmit={onSubmit}
             title={`${isEdit ? t("edit") : t("add")} produto`}
         >
-            <SearchCatalog
-                onChange={(n, v) => {
-                    setFindCatalog((prev: any) => ({ ...prev, [n]: v }));
-                    onCleanCatalog();
-                }}
-                value={stateFindCatalog}
-            />
-            <GroupForm
-                title={t("general")}
-                className={cn(
-                    "w-full",
-                    "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
-                    "md:grid-cols-3",
-                    "gap-1",
-                    "sm:gap-2",
-                    "px-3"
-                )}
-            >
-                <FSelectLabelSingleApi
-                    defControl={refForm.current?.control}
-                    className="col-span-2"
-                    label={t("catalog")}
-                    name="catalog"
-                    url="/catalogs/fields"
-                    dependenciesValue={{
-                        type: stateFindCatalog?.type,
-                        plataform: stateFindCatalog?.plataform
-                            ?.map((d: any) => d?.id)
-                            .join(","),
-                        region: stateFindCatalog?.region
-                            ?.map((d: any) => d?.id)
-                            .join(","),
-                        factory: stateFindCatalog?.factory
-                            ?.map((d: any) => d?.id)
-                            .join(","),
-                    }}
-                    dependencies={[
-                        "consoleComplete",
-                        "conservation",
-                        "consolePackaging",
-                        "consoleSealed",
-                        "consoleTypeUnlocked",
-                        "consoleWorking",
-                        "consoleUnlocked",
-                        "gameManual",
-                        "gamePackaging",
-                        "gamePackagingRental",
-                        "gameSealed",
-                        "gameWorking",
-                    ]}
-                    keyValue={["catalog.name"]}
-                    // addLinkCrud={
-                    //     refForm.current?.watch("catalog")
-                    //         ? ""
-                    //         : "/factory/consoles/new"
-                    // }
-                    onEffect={(val) => {
-                        refForm.current?.setValue("name", val?.name);
-                        refForm.current?.setValue(
-                            "pvMercadoLivre",
-                            val?.pvMercadoLivre
-                        );
-                        refForm.current?.setValue("pcCost", val?.pcCost);
-                    }}
-                    disabled={disabledField}
-                    navigateItem="/factory/catalogs/edit?id="
-                />
-                <FInputLabel
-                    label={t("sku")}
-                    name="sku"
-                    disabled={disabledField}
-                />
-                <FInputLabel
-                    label={t("name")}
-                    name="name"
-                    disabled={disabledField}
-                    className={cn("col-span-1", "sm:col-span-3")}
-                />
-                <FInputLabel
-                    label={t("addressInStock")}
-                    name="addressInStock"
-                    disabled={disabledField}
-                />
-                <FSelectLabel
-                    label={t("Plataforma de venda")}
-                    name="salesPlatform"
-                    items={[
-                        {
-                            id: "mercado livre",
-                            name: "Mercado Livre",
-                        },
-                        {
-                            id: "amazon",
-                            name: "Amazon",
-                        },
-                        {
-                            id: "site",
-                            name: "Site",
-                        },
-                        {
-                            id: "shoppe",
-                            name: "Shoppe",
-                        },
-                    ]}
-                    disabled={disabledField}
-                />
-                <FSelectLabel
-                    label={t("status")}
-                    name="status"
-                    items={STATUS_ENUM}
-                    disabled={disabledField}
-                    onEffect={(e) => {
-                        switch (e) {
-                            case "presente":
-                                refForm.current?.setValue(
-                                    "datePresent",
-                                    new Date()
-                                );
-                                break;
-                            case "permuta":
-                                refForm.current?.setValue(
-                                    "dateExchange",
-                                    new Date()
-                                );
-                                break;
-                            case "peça":
-                                refForm.current?.setValue(
-                                    "datePart",
-                                    new Date()
-                                );
-                                break;
-                            case "processamento":
-                                refForm.current?.setValue(
-                                    "dateProcessing",
-                                    new Date()
-                                );
-                                break;
-                            case "descarte":
-                                refForm.current?.setValue(
-                                    "dateDiscard",
-                                    new Date()
-                                );
-                                break;
-                            case "teste":
-                                refForm.current?.setValue(
-                                    "dateTest",
-                                    new Date()
-                                );
-                                break;
-                            case "emprestimo":
-                                refForm.current?.setValue(
-                                    "dateLoan",
-                                    new Date()
-                                );
-                                break;
-                            case "conserto":
-                                refForm.current?.setValue(
-                                    "dateRepair",
-                                    new Date()
-                                );
-                                break;
-                            case "recebimento":
-                                refForm.current?.setValue(
-                                    "dateReceipt",
-                                    new Date()
-                                );
-                                break;
-                            case "estoque":
-                                refForm.current?.setValue(
-                                    "dateEntryInStock",
-                                    new Date()
-                                );
-                                break;
-                            case "vendido":
-                                refForm.current?.setValue(
-                                    "dateSale",
-                                    new Date()
-                                );
-                                break;
-                            case "perdido":
-                                refForm.current?.setValue(
-                                    "dateLoss",
-                                    new Date()
-                                );
-                                break;
-                            default:
-                                break;
-                        }
-                    }}
-                />
-                <FInputDatePicker
-                    label={t("dateReceipt")}
-                    name="dateReceipt"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateAnnouncement")}
-                    name="dateAnnouncement"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateEntryInStock")}
-                    name="dateEntryInStock"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateSale")}
-                    name="dateSale"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateDiscard")}
-                    name="dateDiscard"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateExchange")}
-                    name="dateExchange"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateLoan")}
-                    name="dateLoan"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateLoss")}
-                    name="dateLoss"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("datePart")}
-                    name="datePart"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("datePresent")}
-                    name="datePresent"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateProcessing")}
-                    name="dateProcessing"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateRepair")}
-                    name="dateRepair"
-                    disabled={disabledField}
-                />
-                <FInputDatePicker
-                    label={t("dateTest")}
-                    name="dateTest"
-                    disabled={disabledField}
-                />
-            </GroupForm>
-            <GroupForm
-                title={t("prices")}
-                className={cn(
-                    "w-full",
-                    "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
-                    "gap-1",
-                    "sm:gap-2",
-                    "px-3"
-                )}
-            >
-                <FInputLabel
-                    label={t("pcCost")}
-                    name="pcCost"
-                    type="currency"
-                    disabled={disabledField}
-                />
-                <FInputLabel
-                    label={t("pvMercadoLivre")}
-                    name="pvMercadoLivre"
-                    type="currency"
-                    disabled={disabledField}
-                />
-                {fieldsPayments?.map((k: any) => (
-                    <FInputLabel
-                        key={k.name}
-                        label={capitalize(t(k.name))}
-                        name={k.name}
-                        type="currency"
-                        disabled={disabledField}
+            <Tabs defaultValue="general" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="general">Geral</TabsTrigger>
+                    <TabsTrigger value="date">Datas</TabsTrigger>
+                    <TabsTrigger value="prices">Valores</TabsTrigger>
+                    <TabsTrigger value="images">Imagens</TabsTrigger>
+                </TabsList>
+                <TabsContent value="general" className="flex flex-col gap-4">
+                    <SearchCatalog
+                        onChange={(n, v) => {
+                            setFindCatalog((prev: any) => ({
+                                ...prev,
+                                [n]: v,
+                            }));
+                            onCleanCatalog();
+                        }}
+                        value={stateFindCatalog}
                     />
-                ))}
-                {/* <FInputLabel
+                    <GroupForm
+                        title={t("general")}
+                        className={cn(
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "md:grid-cols-3",
+                            "gap-1",
+                            "sm:gap-2",
+                            "px-3"
+                        )}
+                    >
+                        <FSelectLabelSingleApi
+                            defControl={refForm.current?.control}
+                            className="col-span-2"
+                            label={t("catalog")}
+                            name="catalog"
+                            url="/catalogs/fields"
+                            dependenciesValue={{
+                                type: stateFindCatalog?.type,
+                                plataform: stateFindCatalog?.plataform
+                                    ?.map((d: any) => d?.id)
+                                    .join(","),
+                                region: stateFindCatalog?.region
+                                    ?.map((d: any) => d?.id)
+                                    .join(","),
+                                factory: stateFindCatalog?.factory
+                                    ?.map((d: any) => d?.id)
+                                    .join(","),
+                            }}
+                            dependencies={[
+                                "consoleComplete",
+                                "conservation",
+                                "consolePackaging",
+                                "consoleSealed",
+                                "consoleTypeUnlocked",
+                                "consoleWorking",
+                                "consoleUnlocked",
+                                "gameManual",
+                                "gamePackaging",
+                                "gamePackagingRental",
+                                "gameSealed",
+                                "gameWorking",
+                            ]}
+                            keyValue={["catalog.name"]}
+                            // addLinkCrud={
+                            //     refForm.current?.watch("catalog")
+                            //         ? ""
+                            //         : "/factory/consoles/new"
+                            // }
+                            onEffect={(val) => {
+                                refForm.current?.setValue("name", val?.name);
+                                refForm.current?.setValue(
+                                    "pvMercadoLivre",
+                                    val?.pvMercadoLivre
+                                );
+                                refForm.current?.setValue(
+                                    "pcCost",
+                                    val?.pcCost
+                                );
+                            }}
+                            disabled={disabledField}
+                            navigateItem="/factory/catalogs/edit?id="
+                        />
+                        <FInputLabel
+                            label={t("sku")}
+                            name="sku"
+                            disabled={disabledField}
+                        />
+                        <FInputLabel
+                            label={t("name")}
+                            name="name"
+                            disabled={disabledField}
+                            className={cn("col-span-1", "sm:col-span-3")}
+                        />
+                        <FInputLabel
+                            label={t("addressInStock")}
+                            name="addressInStock"
+                            disabled={disabledField}
+                        />
+                        <FSelectLabel
+                            label={t("Plataforma de venda")}
+                            name="salesPlatform"
+                            items={[
+                                {
+                                    id: "mercado livre",
+                                    name: "Mercado Livre",
+                                },
+                                {
+                                    id: "amazon",
+                                    name: "Amazon",
+                                },
+                                {
+                                    id: "site",
+                                    name: "Site",
+                                },
+                                {
+                                    id: "shoppe",
+                                    name: "Shoppe",
+                                },
+                            ]}
+                            disabled={disabledField}
+                        />
+                        <FSelectLabel
+                            label={t("status")}
+                            name="status"
+                            items={STATUS_ENUM}
+                            disabled={disabledField}
+                            onEffect={(e) => {
+                                switch (e) {
+                                    case "presente":
+                                        refForm.current?.setValue(
+                                            "datePresent",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "permuta":
+                                        refForm.current?.setValue(
+                                            "dateExchange",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "peça":
+                                        refForm.current?.setValue(
+                                            "datePart",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "processamento":
+                                        refForm.current?.setValue(
+                                            "dateProcessing",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "descarte":
+                                        refForm.current?.setValue(
+                                            "dateDiscard",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "teste":
+                                        refForm.current?.setValue(
+                                            "dateTest",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "emprestimo":
+                                        refForm.current?.setValue(
+                                            "dateLoan",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "conserto":
+                                        refForm.current?.setValue(
+                                            "dateRepair",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "recebimento":
+                                        refForm.current?.setValue(
+                                            "dateReceipt",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "estoque":
+                                        refForm.current?.setValue(
+                                            "dateEntryInStock",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "vendido":
+                                        refForm.current?.setValue(
+                                            "dateSale",
+                                            new Date()
+                                        );
+                                        break;
+                                    case "perdido":
+                                        refForm.current?.setValue(
+                                            "dateLoss",
+                                            new Date()
+                                        );
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }}
+                        />
+                        <FInputLabel
+                            label="Cotação ID"
+                            name="quotationId.id"
+                            disabled
+                        />
+                    </GroupForm>
+                </TabsContent>
+                <TabsContent value="date" className="flex flex-col gap-4">
+                    <GroupForm
+                        title="Datas"
+                        className={cn(
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "md:grid-cols-3",
+                            "gap-1",
+                            "sm:gap-2",
+                            "px-3"
+                        )}
+                    >
+                        <FInputDatePicker
+                            label={t("dateReceipt")}
+                            name="dateReceipt"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateAnnouncement")}
+                            name="dateAnnouncement"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateEntryInStock")}
+                            name="dateEntryInStock"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateSale")}
+                            name="dateSale"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateDiscard")}
+                            name="dateDiscard"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateExchange")}
+                            name="dateExchange"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateLoan")}
+                            name="dateLoan"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateLoss")}
+                            name="dateLoss"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("datePart")}
+                            name="datePart"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("datePresent")}
+                            name="datePresent"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateProcessing")}
+                            name="dateProcessing"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateRepair")}
+                            name="dateRepair"
+                            disabled={disabledField}
+                        />
+                        <FInputDatePicker
+                            label={t("dateTest")}
+                            name="dateTest"
+                            disabled={disabledField}
+                        />
+                    </GroupForm>
+                </TabsContent>
+                <TabsContent value="prices" className="flex flex-col gap-4">
+                    <GroupForm
+                        title={t("prices")}
+                        className={cn(
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "gap-1",
+                            "sm:gap-2",
+                            "px-3"
+                        )}
+                    >
+                        <FInputLabel
+                            label={t("pcCost")}
+                            name="pcCost"
+                            type="currency"
+                            disabled={disabledField}
+                        />
+                        <FInputLabel
+                            label={t("pvMercadoLivre")}
+                            name="pvMercadoLivre"
+                            type="currency"
+                            disabled={disabledField}
+                        />
+                        {fieldsPayments?.map((k: any) => (
+                            <FInputLabel
+                                key={k.name}
+                                label={capitalize(t(k.name))}
+                                name={k.name}
+                                type="currency"
+                                disabled={disabledField}
+                            />
+                        ))}
+                        {/* <FInputLabel
                     label={t("pvFinal")}
                     name="pvFinal"
                     type="currency"
                     disabled={disabledField}
                 /> */}
-            </GroupForm>
-            <GroupForm
-                title={t("images")}
-                className={cn(
-                    "w-full",
-                    "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
-                    "md:grid-cols-3",
-                    "gap-1",
-                    "sm:gap-2",
-                    "px-3"
-                )}
-            >
-                <div
-                    className={cn(
-                        "flex",
-                        "flex-col",
-                        "space-y-2",
-                        file?.url ? "col-span-2" : "col-span-3"
-                    )}
-                >
-                    <label
+                    </GroupForm>
+                </TabsContent>
+                <TabsContent value="images" className="flex flex-col gap-4">
+                    <GroupForm
+                        title={t("images")}
                         className={cn(
-                            "text-sm",
-                            "font-medium",
-                            "leading-none",
-                            "peer-disabled:cursor-not-allowed",
-                            "peer-disabled:opacity-70"
+                            "w-full",
+                            "grid",
+                            "grid-cols-2",
+                            "sm:grid-cols-2",
+                            "md:grid-cols-3",
+                            "gap-1",
+                            "sm:gap-2",
+                            "px-3"
                         )}
                     >
-                        {t("image")}
-                    </label>
-                    <Dropzone onChange={setFile} disabled={disabledField} />
-                </div>
-                {file?.url ? (
-                    <div className="flex flex-col space-y-2">
-                        <label
+                        <div
                             className={cn(
-                                "text-sm",
-                                "font-medium",
-                                "leading-none",
-                                "peer-disabled:cursor-not-allowed",
-                                "peer-disabled:opacity-70"
+                                "flex",
+                                "flex-col",
+                                "space-y-2",
+                                file?.url ? "col-span-2" : "col-span-3"
                             )}
                         >
-                            {t("preview")}
-                        </label>
-                        <img
-                            src={file?.url}
-                            className={cn(
-                                "rounded-lg",
-                                "h-32",
-                                "object-contain"
-                            )}
-                        />
-                    </div>
-                ) : (
-                    <></>
-                )}
-            </GroupForm>
+                            <label
+                                className={cn(
+                                    "text-sm",
+                                    "font-medium",
+                                    "leading-none",
+                                    "peer-disabled:cursor-not-allowed",
+                                    "peer-disabled:opacity-70"
+                                )}
+                            >
+                                {t("image")}
+                            </label>
+                            <Dropzone
+                                onChange={setFile}
+                                disabled={disabledField}
+                            />
+                        </div>
+                        {file?.url ? (
+                            <div className="flex flex-col space-y-2">
+                                <label
+                                    className={cn(
+                                        "text-sm",
+                                        "font-medium",
+                                        "leading-none",
+                                        "peer-disabled:cursor-not-allowed",
+                                        "peer-disabled:opacity-70"
+                                    )}
+                                >
+                                    {t("preview")}
+                                </label>
+                                <img
+                                    src={file?.url}
+                                    className={cn(
+                                        "rounded-lg",
+                                        "h-32",
+                                        "object-contain"
+                                    )}
+                                />
+                            </div>
+                        ) : (
+                            <></>
+                        )}
+                    </GroupForm>
+                </TabsContent>
+            </Tabs>
         </Modal>
     );
 };

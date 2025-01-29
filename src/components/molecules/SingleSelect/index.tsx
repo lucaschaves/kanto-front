@@ -86,13 +86,16 @@ function SingleSelect({
                     <CommandEmpty>{t("noItemFound")}.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
                         {options.map((option) => (
-                            <div className={cn("flex", "items-center")}>
+                            <div
+                                className={cn("flex", "items-center", "w-full")}
+                            >
                                 <CommandItem
                                     key={option.id}
                                     onSelect={() => {
                                         onChange(option);
                                         toggle(true);
                                     }}
+                                    className="w-full"
                                 >
                                     <Check
                                         className={cn(

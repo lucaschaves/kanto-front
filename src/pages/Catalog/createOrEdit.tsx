@@ -285,14 +285,6 @@ export const PageCatalogCreateOrEdit = () => {
                                 id: "3",
                                 name: "3",
                             },
-                            {
-                                id: "4",
-                                name: "4",
-                            },
-                            {
-                                id: "5",
-                                name: "5",
-                            },
                         ]}
                     />
                 </GroupForm>

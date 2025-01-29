@@ -1,30 +1,52 @@
 import {
-    ArrowBottomRightIcon,
-    CardStackIcon,
-    CubeIcon,
     EnvelopeClosedIcon,
     HomeIcon,
     LockClosedIcon,
     PersonIcon,
-    RocketIcon,
-    TableIcon,
 } from "@radix-ui/react-icons";
+import {
+    BsFileEarmarkSpreadsheetFill,
+    BsFillCartCheckFill,
+    BsPc,
+} from "react-icons/bs";
+import {
+    FaCartPlus,
+    FaClipboardList,
+    FaCogs,
+    FaFileInvoiceDollar,
+    FaGamepad,
+    FaGift,
+    FaPeopleArrows,
+    FaTrashAlt,
+    FaTruckLoading,
+    FaWarehouse,
+} from "react-icons/fa";
+import {
+    FaBoxesStacked,
+    FaClipboardQuestion,
+    FaFileCircleQuestion,
+    FaScrewdriverWrench,
+    FaTableList,
+} from "react-icons/fa6";
+import { IoGameController } from "react-icons/io5";
+import { PiPuzzlePieceFill } from "react-icons/pi";
+import { RiExchangeBoxFill } from "react-icons/ri";
 
 export const modulesDef = [
     {
         name: "productsreceiving",
         link: "/productsreceiving",
-        Icon: <CubeIcon />,
+        Icon: <FaTruckLoading />,
     },
     {
         name: "productsprocessing",
         link: "/productsprocessing",
-        Icon: <CubeIcon />,
+        Icon: <FaCogs />,
     },
     {
         name: "productslist",
         link: "/productslist",
-        Icon: <CubeIcon />,
+        Icon: <FaWarehouse />,
     },
 ];
 
@@ -32,53 +54,52 @@ export const modulesProducts = [
     {
         name: "productsrepair",
         link: "/products/productsrepair",
-        Icon: <CubeIcon />,
+        Icon: <FaScrewdriverWrench />,
     },
     {
         name: "productsdisposal",
         link: "/products/productsdisposal",
-        Icon: <CubeIcon />,
+        Icon: <FaTrashAlt />,
     },
     {
         name: "productsloan",
         link: "/products/productsloan",
-        Icon: <CubeIcon />,
+        Icon: <FaPeopleArrows />,
     },
-
     {
         name: "productslost",
         link: "/products/productslost",
-        Icon: <CubeIcon />,
+        Icon: <FaFileCircleQuestion />,
     },
     {
         name: "productspart",
         link: "/products/productspart",
-        Icon: <CubeIcon />,
+        Icon: <PiPuzzlePieceFill />,
     },
     {
         name: "productsexchange",
         link: "/products/productsexchange",
-        Icon: <CubeIcon />,
+        Icon: <RiExchangeBoxFill />,
     },
     {
         name: "productsgift",
         link: "/products/productsgift",
-        Icon: <CubeIcon />,
+        Icon: <FaGift />,
     },
     {
         name: "productstest",
         link: "/products/productstest",
-        Icon: <CubeIcon />,
+        Icon: <FaGamepad />,
     },
     {
         name: "productssold",
         link: "/products/productssold",
-        Icon: <CubeIcon />,
+        Icon: <BsFillCartCheckFill />,
     },
     {
         name: "productsstock",
         link: "/products/productsstock",
-        Icon: <CubeIcon />,
+        Icon: <FaBoxesStacked />,
     },
 ];
 
@@ -86,7 +107,7 @@ export const modulesSettings = [
     {
         name: "paymentspvs",
         link: "/settings/paymentspvs",
-        Icon: <CubeIcon />,
+        Icon: <FaFileInvoiceDollar />,
     },
     {
         name: "users",
@@ -101,7 +122,7 @@ export const modulesSettings = [
     {
         name: "interpreter",
         link: "/settings/interpreter",
-        Icon: <CardStackIcon />,
+        Icon: <BsFileEarmarkSpreadsheetFill />,
     },
     {
         name: "paymentmethods",
@@ -114,17 +135,17 @@ export const modulesFactory = [
     {
         name: "catalogs",
         link: "/factory/catalogs",
-        Icon: <TableIcon />,
+        Icon: <FaTableList />,
     },
     {
         name: "games",
         link: "/factory/games",
-        Icon: <RocketIcon />,
+        Icon: <IoGameController />,
     },
     {
         name: "consoles",
         link: "/factory/consoles",
-        Icon: <HomeIcon />,
+        Icon: <BsPc />,
     },
     {
         name: "extras",
@@ -202,7 +223,7 @@ export const modulesQuotations = [
     {
         name: "quotationsforms",
         link: "/quotations/quotationsforms",
-        Icon: <ArrowBottomRightIcon />,
+        Icon: <FaCartPlus />,
     },
     {
         name: "emails",
@@ -212,12 +233,12 @@ export const modulesQuotations = [
     {
         name: "questions",
         link: "/quotations/questions",
-        Icon: <PersonIcon />,
+        Icon: <FaClipboardQuestion />,
     },
     {
         name: "questionsgroups",
         link: "/quotations/questionsgroups",
-        Icon: <CardStackIcon />,
+        Icon: <FaClipboardList />,
     },
 ];
 

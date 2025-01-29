@@ -23,19 +23,26 @@ interface IPropsModal {
     defaultValues?: any;
     dirtyFields?: () => void;
     onClose: () => void;
-    onSubmit: (data: FieldValues) => void;
+    onSubmit?: (data: FieldValues) => void;
+    footer?: any;
+    maxWidth?: string;
+    disabledForm?: boolean;
 }
+
 export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
     const {
         children,
         disabled,
         title,
         onClose,
-        onSubmit,
+        onSubmit = () => ({}),
         className,
         classNameContent,
         defaultValues,
         dirtyFields,
+        footer,
+        maxWidth = "max-w-4xl",
+        disabledForm = false,
     } = props;
 
     const { t } = useTranslation();
@@ -50,16 +57,11 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
                 }
             }}
         >
-            <DialogContent className={cn("max-w-4xl", className)}>
+            <DialogContent className={cn(maxWidth, className)}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
-                <BaseForm
-                    ref={ref}
-                    onSubmit={onSubmit}
-                    defaultValues={defaultValues}
-                    dirtyFields={dirtyFields}
-                >
+                {disabledForm ? (
                     <div
                         className={cn(
                             "w-full",
@@ -69,47 +71,76 @@ export const Modal = forwardRef<IBaseFormRef, IPropsModal>((props, ref) => {
                             "overflow-hidden"
                         )}
                     >
-                        <ScrollArea className={cn("max-h-[70vh]", "pb-5")}>
+                        {children}
+                    </div>
+                ) : (
+                    <BaseForm
+                        ref={ref}
+                        onSubmit={onSubmit}
+                        defaultValues={defaultValues}
+                        dirtyFields={dirtyFields}
+                    >
+                        <div
+                            className={cn(
+                                "w-full",
+                                "flex",
+                                "flex-col",
+                                "max-h-[90vh]",
+                                "overflow-hidden"
+                            )}
+                        >
+                            <ScrollArea className={cn("max-h-[70vh]", "pb-5")}>
+                                <div
+                                    className={cn(
+                                        "flex",
+                                        "flex-col",
+                                        "gap-2",
+                                        "w-full",
+                                        "h-full",
+                                        "pb-2",
+                                        classNameContent
+                                    )}
+                                >
+                                    {children}
+                                </div>
+                            </ScrollArea>
                             <div
                                 className={cn(
                                     "flex",
-                                    "flex-col",
-                                    "gap-2",
                                     "w-full",
-                                    "h-full",
-                                    "pb-2",
-                                    classNameContent
+                                    "items-center",
+                                    "justify-between",
+                                    "gap-2",
+                                    "mt-4"
                                 )}
                             >
-                                {children}
+                                <div>{footer}</div>
+                                <div
+                                    className={cn(
+                                        "flex",
+                                        "w-full",
+                                        "items-center",
+                                        "justify-end",
+                                        "gap-2"
+                                    )}
+                                >
+                                    <Button
+                                        type="button"
+                                        onClick={onClose}
+                                        variant="outline"
+                                        disabled={disabled}
+                                    >
+                                        {t("cancel")}
+                                    </Button>
+                                    <FButtonSubmit
+                                        label={t("save")}
+                                        disabled={disabled}
+                                    />
+                                </div>
                             </div>
-                        </ScrollArea>
-                        <div className="col-span-2"></div>
-                        <div
-                            className={cn(
-                                "flex",
-                                "w-full",
-                                "items-center",
-                                "justify-end",
-                                "gap-2",
-                                "mt-4"
-                            )}
-                        >
-                            <Button
-                                type="button"
-                                onClick={onClose}
-                                variant="outline"
-                                disabled={disabled}
-                            >
-                                {t("cancel")}
-                            </Button>
-                            <FButtonSubmit
-                                label={t("save")}
-                                disabled={disabled}
-                            />
                         </div>
-                    </div>
-                </BaseForm>
+                    </BaseForm>
+                )}
             </DialogContent>
         </Dialog>
     );
