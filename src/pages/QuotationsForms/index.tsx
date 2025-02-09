@@ -34,6 +34,14 @@ const PageQuotationsForms = () => {
                 title: t("responsible"),
             },
             {
+                name: "status",
+                title: t("status"),
+            },
+            {
+                name: "priorityTag",
+                title: t("priorityTag"),
+            },
+            {
                 name: "providerAddress",
                 title: t("Endereço"),
             },
@@ -54,6 +62,10 @@ const PageQuotationsForms = () => {
                 name: "quotationHistoryAdjusted",
                 title: t("adjusted"),
                 type: "boolean",
+            },
+            {
+                name: "quotationHistoryPaymentMethod",
+                title: t("paymentMethodId"),
             },
             {
                 name: "quotationHistoryFinished",
@@ -88,7 +100,7 @@ const PageQuotationsForms = () => {
                 filter_name="filter_form_id"
                 // navigateForm="/quotations/quotationssearchs"
                 // canAdd={false}
-                canSendQuotation
+                // canSendQuotation
             />
             <Outlet />
         </>

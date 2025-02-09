@@ -60,12 +60,13 @@ import {
     CONSTANT_NUMBER_ROWS,
     STATUS_ENUM,
 } from "@/constants";
-import { useDynamicRefs, useSorting } from "@/hooks";
+import { IOnRefreshSort, useDynamicRefs } from "@/hooks";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import {
     camelCaseAndNormalize,
     convertJsonToCSV,
+    decodeSearchParams,
     downloadBlobAsFile,
     messageError,
     messageSuccess,
@@ -99,7 +100,6 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     RowSelectionState,
-    SortingState,
     useReactTable,
     VisibilityState,
 } from "@tanstack/react-table";
@@ -109,7 +109,6 @@ import { CheckCircleIcon, FileDownIcon } from "lucide-react";
 import Papa from "papaparse";
 import {
     CSSProperties,
-    SetStateAction,
     useCallback,
     useEffect,
     useImperativeHandle,
@@ -135,7 +134,7 @@ interface ISort {
 
 export interface IOnRefresh {
     pagination: IPagination;
-    sort: ISort;
+    sort?: ISort;
     filters?: any;
 }
 
@@ -374,9 +373,22 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const skip = searchParams?.get("page")
         ? Number(searchParams?.get("page")) * stateLimit
         : 0;
-    const { sorting, onSortingChange, field, order } = useSorting({
-        columns,
-    });
+
+    const handleSortRefresh = async (propsV: IOnRefreshSort) => {
+        const newSort =
+            searchParams?.get("direction") === "asc" ? "desc" : "asc";
+
+        setSearchParams((prev) => {
+            prev.set("page", (skip / stateLimit)?.toString());
+            prev.set("order", propsV.field);
+            prev.set("direction", newSort);
+            prev.set(
+                `filter_${stateFilterDefault.filter}`,
+                stateFilterDefault.value
+            );
+            return prev;
+        });
+    };
 
     const [stateHistory, setHistory] = useState<IHistory>({
         show: false,
@@ -430,23 +442,10 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         ids: [] as any[],
     });
 
-    const handleSort = (propsV: SetStateAction<SortingState>) => {
-        onSortingChange(propsV);
-        const defPagination = {
-            pagination: { skip, limit: stateLimit },
-            sort: { field, order },
-        };
-        setSearchParams((prev) => {
-            prev.set("page", (skip / stateLimit)?.toString());
-            return prev;
-        });
-        onRefresh(defPagination);
-    };
-
     const table = useReactTable({
         data,
         columns,
-        onSortingChange: handleSort,
+        // onSortingChange,
         onColumnFiltersChange: setColumnFilters,
         // onPaginationChange,
         getCoreRowModel: getCoreRowModel(),
@@ -478,7 +477,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         manualSorting: !!limit ? false : true,
         rowCount: total,
         state: {
-            sorting,
+            // sorting,
             columnFilters,
             columnVisibility,
             rowSelection,
@@ -527,7 +526,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     const handleRefresh = (filters?: any) => {
         onRefresh({
             pagination: { skip, limit: stateLimit },
-            sort: { field, order },
+            // sort: { field, order },
             filters,
         });
     };
@@ -968,6 +967,24 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
     useEffect(() => {
         if (refInit.current) {
             refInit.current = false;
+            const filters = decodeSearchParams(location.search);
+            if (Object.keys(filters).length && Object.keys(filters)[0].length) {
+                const filterValue = Object.entries(filters)[0];
+                const nameFilter = filterValue?.[0]?.slice(
+                    7,
+                    filterValue[0].length
+                );
+                getTypeFilter(nameFilter);
+                setFilterDefault({
+                    filter: nameFilter,
+                    value: filterValue?.[1]
+                        ? filterValue?.[1]
+                              ?.toString()
+                              ?.replaceAll("%20", " ")
+                              ?.replaceAll("+", " ")
+                        : "",
+                });
+            }
             return;
         }
         setSearchParams((prev) => {
@@ -976,7 +993,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         });
         onRefresh({
             pagination: { skip, limit: stateLimit },
-            sort: { field, order },
+            // sort: { field, order },
         });
     }, []);
 
@@ -1079,7 +1096,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         value: e.target.value,
                                     }))
                                 }
-                                onKeyDown={(e) => {
+                                onKeyDown={async (e) => {
                                     if (e.keyCode === 13) {
                                         navigate(
                                             `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
@@ -1091,7 +1108,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                         ) : ["boolean"].includes(stateFilterType) ? (
                             <Checkbox
                                 checked={stateFilterDefault.value}
-                                onCheckedChange={(e) => {
+                                onCheckedChange={async (e) => {
                                     setFilterDefault((p) => ({
                                         ...p,
                                         value: e,
@@ -1135,7 +1152,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                     <Calendar
                                         initialFocus
                                         selected={stateFilterDefault.value}
-                                        onSelect={(e: any) => {
+                                        onSelect={async (e: any) => {
                                             setFilterDefault((prev) => ({
                                                 ...prev,
                                                 value: e,
@@ -1160,11 +1177,18 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         value: e.target.value,
                                     }))
                                 }
-                                onKeyDown={(e) => {
+                                onKeyDown={async (e) => {
                                     if (e.keyCode === 13) {
-                                        navigate(
-                                            `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
-                                        );
+                                        setSearchParams((prev) => {
+                                            prev.set(
+                                                `filter_${stateFilterDefault.filter}`,
+                                                stateFilterDefault.value
+                                            );
+                                            return prev;
+                                        });
+                                        // navigate(
+                                        //     `${location.pathname}?filter_${stateFilterDefault.filter}=${stateFilterDefault.value}`
+                                        // );
                                     }
                                 }}
                             />
@@ -1173,12 +1197,17 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             size="icon"
                             type="button"
                             variant="outline"
-                            onClick={() => {
+                            onClick={async () => {
                                 setFilterDefault((prev) => ({
                                     ...prev,
                                     value: "",
                                 }));
-                                navigate(location.pathname);
+                                setSearchParams((prev) => {
+                                    prev.delete(
+                                        `filter_${stateFilterDefault.filter}`
+                                    );
+                                    return prev;
+                                });
                             }}
                             className="min-w-10"
                         >
@@ -1549,7 +1578,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                             )}
                             {canImportCatalog ? (
                                 <>
-                                    <TooltipProvider>
+                                    {/* <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <Button
@@ -1568,7 +1597,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                 <p>Importar Vendido</p>
                                             </TooltipContent>
                                         </Tooltip>
-                                    </TooltipProvider>
+                                    </TooltipProvider> */}
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger>
@@ -1690,6 +1719,11 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                                                   width: undefined,
                                                               }
                                                             : styleColumn
+                                                    }
+                                                    onClick={() =>
+                                                        handleSortRefresh({
+                                                            field: header.id,
+                                                        })
                                                     }
                                                 >
                                                     {header.isPlaceholder
@@ -1904,7 +1938,7 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
                                         skip,
                                         limit: Number(e),
                                     },
-                                    sort: { field, order },
+                                    // sort: { field, order },
                                 });
                             }}
                             value={stateLimit?.toString()}

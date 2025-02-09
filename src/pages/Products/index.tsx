@@ -153,25 +153,25 @@ const PageProducts = ({ index }: { index: number }) => {
             {
                 name: "dateAnnouncement",
                 title: t("dateAnnouncement"),
-                type: "datetime",
+                type: "date",
                 typeFilter: "date",
             },
             {
                 name: "dateEntryInStock",
                 title: t("dateEntryInStock"),
-                type: "datetime",
+                type: "date",
                 typeFilter: "date",
             },
             {
                 name: "dateSale",
                 title: t("dateSale"),
-                type: "datetime",
+                type: "date",
                 typeFilter: "date",
             },
             {
                 name: "dateReceipt",
                 title: t("dateReceipt"),
-                type: "datetime",
+                type: "date",
                 typeFilter: "date",
             },
             {

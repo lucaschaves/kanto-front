@@ -20,7 +20,7 @@ const PageEmails = () => {
             {
                 name: "sent_at",
                 title: t("sent_at"),
-                type: "datetime",
+                type: "date",
                 typeFilter: "date",
             },
             {

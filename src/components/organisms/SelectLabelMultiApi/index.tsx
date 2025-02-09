@@ -16,6 +16,7 @@ interface ISelectLabelMultiApiProps extends InputProps {
     fieldValue?: string;
     single?: boolean;
     onChange: (p: any) => void;
+    navigateItem?: string;
 }
 
 interface IData {
@@ -37,6 +38,7 @@ const SelectLabelMultiApi = (props: ISelectLabelMultiApiProps) => {
         value,
         onChange,
         fieldValue,
+        navigateItem,
         ...rest
     } = props;
 
@@ -135,6 +137,7 @@ const SelectLabelMultiApi = (props: ISelectLabelMultiApiProps) => {
                 disabledMore={stateData.total <= statePage + LIMIT}
                 total={stateData.total}
                 loading={stateLoading}
+                navigateItem={navigateItem}
             />
         </div>
     );

@@ -18,7 +18,7 @@ const PageUserCreateOrEdit = () => {
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 

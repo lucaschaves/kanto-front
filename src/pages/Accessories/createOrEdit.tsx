@@ -15,7 +15,7 @@ const PageAccessoryCreateOrEdit = () => {
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
     const formActual = getParamByPath(location.pathname, 2);
 
     const refForm = useRef<IBaseFormRef>(null);

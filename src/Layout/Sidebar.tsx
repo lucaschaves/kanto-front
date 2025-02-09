@@ -22,7 +22,7 @@ import {
     modulesQuotations,
     modulesSettings,
 } from "@/routes";
-import { modulesAll, modulesProducts } from "@/routes/modules";
+import { modulesAll, modulesProducts, SIZE_ICON } from "@/routes/modules";
 import { deleteApi, postApi } from "@/services";
 import {
     FileTextIcon,
@@ -167,7 +167,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                     >
                         <PopoverTrigger asChild>
                             <Button size="icon" variant="default">
-                                <StarFilledIcon />
+                                <StarFilledIcon
+                                    width={SIZE_ICON}
+                                    height={SIZE_ICON}
+                                />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
@@ -255,7 +258,7 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         : "default"
                                 }
                             >
-                                <PackageSearchIcon size={15} />
+                                <PackageSearchIcon size={20} />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
@@ -325,7 +328,10 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         : "default"
                                 }
                             >
-                                <FileTextIcon />
+                                <FileTextIcon
+                                    width={SIZE_ICON}
+                                    height={SIZE_ICON}
+                                />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
@@ -393,7 +399,7 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         : "default"
                                 }
                             >
-                                <FactoryIcon size={15} />
+                                <FactoryIcon size={SIZE_ICON} />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
@@ -461,7 +467,7 @@ export const Sidebar = (props: IPropsSidebar) => {
                                         : "default"
                                 }
                             >
-                                <SettingsIcon size={15} />
+                                <SettingsIcon size={SIZE_ICON} />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent

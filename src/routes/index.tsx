@@ -6,6 +6,8 @@ import {
     PageAccessoryCreateOrEdit,
     PageCatalogCreateOrEdit,
     PageCatalogs,
+    PageCostCredit,
+    PageCostCreditCreateOrEdit,
     PageCotacao,
     PageCotacaoHello,
     PageEmails,
@@ -38,6 +40,8 @@ import {
     PageQuotationsSearchs,
     PageSettingCreateOrEdit,
     PageSettings,
+    PageTemplatesEmail,
+    PageTemplatesEmailCreateOrEdit,
     PageUserCreateOrEdit,
     PageUsers,
 } from "@/pages";
@@ -205,6 +209,40 @@ export const appRoutes = () => {
                     path: "/settings",
                     errorElement: <PageError />,
                     children: [
+                        {
+                            path: "/settings/templatesemails",
+                            errorElement: <PageError />,
+                            element: <PageTemplatesEmail />,
+                            children: [
+                                {
+                                    path: `/settings/templatesemails/new`,
+                                    errorElement: <PageError />,
+                                    element: <PageTemplatesEmailCreateOrEdit />,
+                                },
+                                {
+                                    path: `/settings/templatesemails/edit`,
+                                    errorElement: <PageError />,
+                                    element: <PageTemplatesEmailCreateOrEdit />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "/settings/costcredits",
+                            errorElement: <PageError />,
+                            element: <PageCostCredit />,
+                            children: [
+                                {
+                                    path: `/settings/costcredits/new`,
+                                    errorElement: <PageError />,
+                                    element: <PageCostCreditCreateOrEdit />,
+                                },
+                                {
+                                    path: `/settings/costcredits/edit`,
+                                    errorElement: <PageError />,
+                                    element: <PageCostCreditCreateOrEdit />,
+                                },
+                            ],
+                        },
                         {
                             path: "/settings/paymentspvs",
                             errorElement: <PageError />,

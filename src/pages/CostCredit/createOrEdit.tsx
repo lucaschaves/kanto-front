@@ -1,5 +1,5 @@
 import { Modal } from "@/Layout/Modal";
-import { FSelectLabelSingleApi, GroupForm, IBaseFormRef } from "@/components";
+import { FInputLabel, GroupForm, IBaseFormRef } from "@/components";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { useEffect, useRef } from "react";
@@ -7,7 +7,7 @@ import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-export const PageHistoriesFormsCreateOrEdit = () => {
+export const PageCostCreditCreateOrEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
@@ -17,23 +17,31 @@ export const PageHistoriesFormsCreateOrEdit = () => {
 
     const refForm = useRef<IBaseFormRef>(null);
 
-    const onClose = () => {
-        navigate(-1);
-    };
+    const onClose = () => navigate(-1);
 
     const onSubmit = async (data: FieldValues) => {
+        let valueFun = `if(${data.se.replaceAll(
+            " ",
+            ""
+        )}){${data.entao.replaceAll(" ", "")}}`;
         if (isEdit) {
             const { success } = await putApi({
-                url: `/HistoriesForms/${searchParams.get("id")}`,
-                body: data,
+                url: `/costcredit/${searchParams.get("id")}`,
+                body: {
+                    name: data.name,
+                    value: valueFun,
+                },
             });
             if (success) {
                 onClose();
             }
         } else {
             const { success } = await postApi({
-                url: "/HistoriesForms",
-                body: data,
+                url: "/costcredit",
+                body: {
+                    name: data.name,
+                    value: valueFun,
+                },
             });
             if (success) {
                 onClose();
@@ -43,10 +51,22 @@ export const PageHistoriesFormsCreateOrEdit = () => {
 
     const getData = async () => {
         const { success, data } = await getApi({
-            url: `/HistoriesForms/${searchParams.get("id")}`,
+            url: `/costcredit/${searchParams.get("id")}`,
         });
         if (success) {
-            refForm.current?.reset(data);
+            const se = data.value.slice(
+                data.value.indexOf("f(") + 2,
+                data.value.indexOf("){")
+            );
+            const entao = data.value.slice(
+                data.value.indexOf("){") + 2,
+                data.value.indexOf("}")
+            );
+            refForm.current?.reset({
+                name: data.name,
+                se,
+                entao,
+            });
         }
     };
 
@@ -66,19 +86,27 @@ export const PageHistoriesFormsCreateOrEdit = () => {
                 className={cn(
                     "w-full",
                     "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
-                    "md:grid-cols-3",
+                    "grid-cols-1",
                     "gap-1",
                     "sm:gap-2",
                     "px-3"
                 )}
             >
-                <FSelectLabelSingleApi
-                    label={t("region")}
-                    name="region"
-                    url="/regions"
-                />
+                <FInputLabel label="Nome" name="name" />
+            </GroupForm>
+            <GroupForm
+                title={t("Função")}
+                className={cn(
+                    "w-full",
+                    "grid",
+                    "grid-cols-1",
+                    "gap-1",
+                    "sm:gap-2",
+                    "px-3"
+                )}
+            >
+                <FInputLabel label="Se" name="se" />
+                <FInputLabel label="Então" name="entao" />
             </GroupForm>
         </Modal>
     );

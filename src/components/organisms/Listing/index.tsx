@@ -92,6 +92,9 @@ export function Listing<T>(props: IPropsListing<T>) {
 
     const getData = async (propsV?: IOnRefresh) => {
         setLoading(true);
+
+        const filters = decodeSearchParams(location.search);
+
         const skip = searchParams?.get("page")
             ? (
                   Number(searchParams?.get("page")) *
@@ -106,17 +109,14 @@ export function Listing<T>(props: IPropsListing<T>) {
                         ? {
                               skip: skip,
                               limit: propsV?.pagination.limit,
-                              order: propsV?.sort.field,
-                              direction: propsV?.sort.order,
                               all: true,
                               ...propsV?.filters,
                           }
                         : {
                               skip: skip,
                               limit: propsV?.pagination.limit,
-                              order: propsV?.sort.field,
-                              direction: propsV?.sort.order,
                               ...propsV?.filters,
+                              ...filters,
                           },
             },
         });
@@ -208,27 +208,36 @@ export function Listing<T>(props: IPropsListing<T>) {
             } catch (err) {}
         }
         if (
-            location.search?.length &&
-            !location.pathname.includes("edit") &&
-            !location.pathname.includes("new")
-        ) {
-            const filters = decodeSearchParams(location.search);
-            getData({
-                pagination: { limit: limitPag, skip: 0 },
-                sort: { field: "id", order: "desc" },
-                filters,
-            });
-        } else if (
-            !location.pathname.includes("edit") &&
+            location.search?.length === 0 &&
+            !location.pathname.includes("/edit") &&
             !location.pathname.includes("new")
         ) {
             getData({
                 pagination: { limit: limitPag, skip: 0 },
-                sort: { field: "id", order: "desc" },
-                filters: {},
             });
         }
-    }, [location.pathname, location.search]);
+    }, [location.pathname]);
+
+    useEffect(() => {
+        const numberRows = JSON.parse(
+            window.localStorage.getItem(CONSTANT_NUMBER_ROWS) || "{}"
+        );
+        let limitPag = 20;
+        if (numberRows && numberRows[formActual]) {
+            try {
+                limitPag = Number(numberRows[formActual]);
+            } catch (err) {}
+        }
+        if (
+            location.search?.length &&
+            !location.pathname.includes("/edit") &&
+            !location.pathname.includes("new")
+        ) {
+            getData({
+                pagination: { limit: limitPag, skip: 0 },
+            });
+        }
+    }, [location.search]);
 
     return (
         <DataTable

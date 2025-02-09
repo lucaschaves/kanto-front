@@ -93,16 +93,10 @@ export const FilterProducts = () => {
     };
 
     const onClose = async () => {
-        navigate(
-            {
-                pathname: location.pathname,
-                search: "",
-            },
-            {}
-        );
-        await sleep(500);
         const refForm = getRef<IBaseFormRef>(REF_TOOLBAR_FORM);
         refForm.current?.reset({});
+        await sleep(500);
+        navigate(`${location.pathname}?order=id&direction=desc&page=0`);
     };
 
     return (

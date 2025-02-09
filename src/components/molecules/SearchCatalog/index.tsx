@@ -17,6 +17,13 @@ interface IPropsSearchCatalog {
     onChange: (name: string, value: any) => void;
 }
 
+const urlEdit = {
+    game: "/factory/games/edit?id=",
+    console: "/factory/consoles/edit?id=",
+    extra: "/factory/extras/edit?id=",
+    accessory: "/factory/accessories/edit?id=",
+} as any;
+
 export const SearchCatalog = (props: IPropsSearchCatalog) => {
     const { value, onChange } = props;
 
@@ -100,11 +107,12 @@ export const SearchCatalog = (props: IPropsSearchCatalog) => {
 
             {value?.type === "console" ? (
                 <>
+                    "consoleTypeUnlocked",
                     {[
                         "consoleComplete",
                         "consolePackaging",
                         "consoleSealed",
-                        "consoleTypeUnlocked",
+
                         "consoleUnlocked",
                         "consoleWorking",
                     ].map((d) => (
@@ -151,11 +159,9 @@ export const SearchCatalog = (props: IPropsSearchCatalog) => {
                             {t("conservation")}
                         </label>
                         <Select
-                            onValueChange={(e) =>
-                                onChange("gameConversation", e)
-                            }
-                            defaultValue={value?.type}
-                            value={value?.type}
+                            onValueChange={(e) => onChange("conservation", e)}
+                            defaultValue={value?.conservation}
+                            value={value?.conservation}
                             dir="ltr"
                             disabled={!value?.type}
                         >
@@ -211,6 +217,7 @@ export const SearchCatalog = (props: IPropsSearchCatalog) => {
                             .join(","),
                     }}
                     single
+                    navigateItem={urlEdit[value?.type]}
                 />
             ) : (
                 <></>

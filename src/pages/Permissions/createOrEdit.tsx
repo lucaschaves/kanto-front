@@ -41,6 +41,11 @@ const arrPermissionsSettings = [
         permissions: ["list", "new", "edit", "delete", "filter"],
     },
     {
+        name: "costcredit",
+        title: "Custo de crédito",
+        permissions: ["list", "new", "edit", "delete", "filter"],
+    },
+    {
         name: "methodsPayments",
         title: "Métodos de pagamento",
         permissions: ["list", "new", "edit", "delete", "filter"],
@@ -371,7 +376,7 @@ const PagePermissionCreateOrEdit = () => {
     const { t } = useTranslation();
     const { refreshRules, applyRules } = useAuth();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 

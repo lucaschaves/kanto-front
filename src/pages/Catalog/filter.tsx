@@ -184,8 +184,7 @@ export const FilterCatalogs = () => {
                         label={t("consoleUnlocked")}
                         name="filter_consoleUnlocked"
                     />
-                    <FCheckboxLabel
-                        row
+                    <FInputLabel
                         label={t("consoleTypeUnlocked")}
                         name="filter_consoleTypeUnlocked"
                     />

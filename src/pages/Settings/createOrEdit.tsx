@@ -14,7 +14,7 @@ const PageSettingCreateOrEdit = () => {
     const { t } = useTranslation();
 
     const formActual = getParamByPath(location.pathname, 2);
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 

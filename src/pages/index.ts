@@ -1,6 +1,7 @@
 export * from "./Accessories";
 export * from "./Catalog";
 export * from "./Consoles";
+export * from "./CostCredit";
 export * from "./Cotacao";
 export * from "./CotacaoHello";
 export * from "./Emails";
@@ -20,4 +21,5 @@ export * from "./QuestionsGroup";
 export * from "./QuotationsForms";
 export * from "./QuotationsSearchs";
 export * from "./Settings";
+export * from "./TemplatesEmail";
 export * from "./Users";

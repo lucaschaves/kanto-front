@@ -1,7 +1,11 @@
 import { Modal } from "@/Layout/Modal";
 import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
     BaseForm,
     Button,
+    Editor,
     FButtonSubmit,
     FCheckboxLabel,
     FInputDatePicker,
@@ -14,11 +18,12 @@ import {
     FSelectLabel,
     FSelectLabelMultiApi,
     FSelectLabelSingleApi,
-    FTextarea,
     GroupForm,
     IBaseFormRef,
+    Input,
     ScrollArea,
     SearchCatalog,
+    Skeleton,
     Table,
     TableBody,
     TableCell,
@@ -34,11 +39,10 @@ import {
 import { CONSTANT_USER } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { createColumn, ICreateColumn, messageError, sleep } from "@/utils";
+import { createColumn, ICreateColumn, messageError } from "@/utils";
 import {
     CheckIcon,
     ExternalLinkIcon,
-    EyeOpenIcon,
     PlusIcon,
     TrashIcon,
 } from "@radix-ui/react-icons";
@@ -48,9 +52,11 @@ import {
     getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
+import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues, useFieldArray } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { FiChevronLeft, FiChevronRight, FiMail } from "react-icons/fi";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
@@ -156,7 +162,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                 value={stateFindCatalog}
             />
             <GroupForm
-                title={t("catalog")}
+                title="Dados do Item"
                 className={cn(
                     "relative",
                     "w-full",
@@ -168,7 +174,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     "px-3"
                 )}
             >
-                {stateIsEdit ? (
+                {stateIsEdit.edit ? (
                     <>
                         <Button
                             size="sm"
@@ -287,7 +293,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     render={({ field }) => {
                         return (
                             <FormItem className="col-span-2">
-                                <FormLabel>Comentários do fornecedor</FormLabel>
+                                <FormLabel>Comentários do Fornecedor</FormLabel>
                                 <FormControl>
                                     <Textarea
                                         placeholder=""
@@ -305,7 +311,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     name="reviewComments"
                     render={({ field }) => (
                         <FormItem className="col-span-2">
-                            <FormLabel>Comentário de review</FormLabel>
+                            <FormLabel>Comentário Kanto</FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder=""
@@ -335,7 +341,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                             <TableHead>Catálogo</TableHead>
                             <TableHead>Plataforma</TableHead>
                             <TableHead>Quantidade</TableHead>
-                            <TableHead>Custo de estoque</TableHead>
+                            <TableHead>Custo de Estoque</TableHead>
                             <TableHead>PV ML</TableHead>
                             <TableHead>PV Credito</TableHead>
                             <TableHead>Comentários</TableHead>
@@ -403,61 +409,206 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
     );
 };
 
+const EmailView = ({
+    isNew,
+    onClick,
+    isLoading,
+    data,
+    onChange,
+}: {
+    isNew: boolean;
+    isLoading: boolean;
+    data: any;
+    onClick: () => void;
+    onChange: (key: string, e: any) => void;
+}) => {
+    return (
+        <div className="flex flex-col w-full gap-2">
+            <div className="flex items-center justify-between">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="flex gap-3"
+                    onClick={onClick}
+                >
+                    <FiChevronLeft />
+                    Voltar
+                </Button>
+                {isNew ? (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="flex gap-3"
+                    >
+                        <FiMail />
+                        Enviar email
+                    </Button>
+                ) : (
+                    <></>
+                )}
+            </div>
+            <GroupForm
+                title=""
+                className={cn(
+                    "w-full",
+                    "grid",
+                    "grid-cols-1",
+                    "gap-1",
+                    "sm:gap-2",
+                    "px-3"
+                )}
+            >
+                {isLoading ? (
+                    <>
+                        <Skeleton className="w-full h-[40px] rounded-md" />
+                        <Skeleton className="w-full h-[80px] rounded-md col-span-2" />
+                    </>
+                ) : (
+                    <>
+                        <div className="flex flex-col w-full">
+                            <span>Assunto</span>
+                            <Input value={data.subject} readOnly={!isNew} />
+                        </div>
+                        <div className="flex flex-col w-full col-span-2">
+                            <span>Email</span>
+                            <Editor
+                                className="max-h-96 overflow-auto"
+                                value={data?.body}
+                                onChangeText={(p) => onChange("emailText", p)}
+                                onChangeHtml={(p) => onChange("emailHtml", p)}
+                            />
+                        </div>
+                    </>
+                )}
+            </GroupForm>
+        </div>
+    );
+};
+
+const EmailsList = ({
+    data,
+    onClick,
+}: {
+    data: any[];
+    onClick: (id: string) => void;
+}) => {
+    return (
+        <ScrollArea className={cn("h-96")}>
+            {data.map((p) => (
+                <div
+                    key={`list-${p.id}`}
+                    className={cn(
+                        "p-2",
+                        "border",
+                        "rounded-lg",
+                        "flex",
+                        "items-center",
+                        "gap-4",
+                        "hover:bg-slate-50",
+                        "mb-2"
+                    )}
+                    onClick={() => onClick(p.id)}
+                >
+                    <Avatar>
+                        <AvatarImage
+                            src="https://github.com/shadcn.png"
+                            alt={p?.to_email}
+                        />
+                        <AvatarFallback>
+                            {p?.to_email?.slice(0, 2)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div key={p.id} className={cn("p-2", "w-full")}>
+                        <div
+                            className={cn(
+                                "flex",
+                                "items-center",
+                                "justify-between"
+                            )}
+                        >
+                            <span className="text-base font-semibold">
+                                {p?.to_email}
+                            </span>
+                            <span className="text-sm font-semibold">
+                                {p?.created_at
+                                    ? format(
+                                          new Date(p?.created_at),
+                                          "dd MMM, HH:mm"
+                                      )
+                                    : ""}
+                            </span>
+                        </div>
+                        <div className="w-full text-sm">
+                            <span className="w-full truncate">
+                                {p?.subject}
+                            </span>
+                        </div>
+                    </div>
+                    <FiChevronRight />
+                </div>
+            ))}
+        </ScrollArea>
+    );
+};
+
+const EmailsTemplate = ({
+    data,
+    onClick,
+}: {
+    data: any[];
+    onClick: (p: any) => void;
+}) => {
+    return (
+        <ScrollArea className={cn("h-96")}>
+            {data.map((p) => (
+                <div
+                    key={`template-${p.id}`}
+                    className={cn(
+                        "p-2",
+                        "border",
+                        "rounded-lg",
+                        "flex",
+                        "items-center",
+                        "justify-between",
+                        "gap-4",
+                        "hover:bg-slate-50",
+                        "mb-2"
+                    )}
+                    onClick={() => onClick(p)}
+                >
+                    <span className="text-base font-semibold">{p?.name}</span>
+                    <FiChevronRight />
+                </div>
+            ))}
+        </ScrollArea>
+    );
+};
+
 export const PageQuotationsFormCreateOrEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refModal = useRef<any>(null);
     const refForm = useRef<IBaseFormRef>(null);
     const refProductForm = useRef<IBaseFormRef>(null);
     const refEmailForm = useRef<IBaseFormRef>(null);
+    const [stateViewEmail, setViewEmail] = useState<
+        "list" | "new" | "template" | "view"
+    >("list");
     const [stateTable, setTable] = useState<{ data: any[]; total: number }>({
         data: [],
         total: 0,
     });
     const [stateNewItem, setNewItem] = useState<any>({});
     const [stateEmail, setEmail] = useState<any>({});
-    const [stateEmails, setEmails] = useState<{ rows: any[]; total: number }>({
-        rows: [],
-        total: 0,
-    });
-    const [stateColumns] = useState<ColumnDef<any>[]>(() => {
-        const columns: any[] = [];
-        const colsDef: ICreateColumn[] = [
-            { name: "id", title: t("id") },
-            { name: "to_name", title: t("name") },
-            { name: "to_email", title: t("email") },
-            {
-                name: "subject",
-                title: t("subject"),
-            },
-            { name: "sent_at", title: t("sent_at"), type: "datetime" },
-            { name: "status", title: t("status") },
-            {
-                name: "is_read",
-                title: t("is_read"),
-                type: "boolean",
-            },
-        ];
-        colsDef.forEach((col) => {
-            columns.push(
-                createColumn({
-                    name: col.name,
-                    title: col.title,
-                    type: col?.type as any,
-                    field: col?.field,
-                    enableHiding: col?.enableHiding,
-                    enableSorting: col?.enableSorting,
-                    typeFilter: col?.typeFilter,
-                })
-            );
-        });
-        return columns;
-    });
+    const [stateEmails, setEmails] = useState<any[]>([]);
+    const [stateTemplates, setTemplates] = useState<any[]>([]);
+    const [stateLoadingEmail, setLoadingEmail] = useState(false);
+
     const [stateColumnsNew] = useState<ColumnDef<any>[]>(() => {
         const columns: any[] = [];
         const colsDef: ICreateColumn[] = [
@@ -511,13 +662,6 @@ export const PageQuotationsFormCreateOrEdit = () => {
         // onChangeValue("catalog", null);
     };
 
-    const table = useReactTable({
-        getCoreRowModel: getCoreRowModel(),
-        data: stateEmails.rows,
-        columns: stateColumns,
-        rowCount: stateEmails.total,
-    });
-
     const tableNew = useReactTable({
         getCoreRowModel: getCoreRowModel(),
         data: stateTable.data,
@@ -540,9 +684,8 @@ export const PageQuotationsFormCreateOrEdit = () => {
         });
         if (success) {
             setEmail(data);
-            await sleep(50);
-            refEmailForm.current?.reset(data);
         }
+        setLoadingEmail(false);
     };
 
     const onClose = () => {
@@ -618,7 +761,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
                 url: `/emails/quotation/${searchParams.get("id")}`,
             });
             if (emails.success) {
-                setEmails(emails.data);
+                setEmails(emails.data.rows);
             }
         }
     };
@@ -626,6 +769,9 @@ export const PageQuotationsFormCreateOrEdit = () => {
     const onChangeTab = (value: string) => {
         onProductClose();
         onEmailClose();
+        setLoadingEmail(false);
+        setEmail({});
+        setViewEmail("list");
         if (value === "general") {
             const searchItems = refForm.current?.watch("quotationSearch");
             let valuePcCost = 0;
@@ -702,6 +848,15 @@ export const PageQuotationsFormCreateOrEdit = () => {
         }
     };
 
+    const getTemplates = async () => {
+        const { success, data } = await getApi({
+            url: "/templatesemails",
+        });
+        if (success) {
+            setTemplates(data.rows);
+        }
+    };
+
     const handleAppoveNewItem = async (rowOriginal: any) => {
         const { success } = await putApi({
             url: `/quotationssearch/${rowOriginal?.id}`,
@@ -713,13 +868,13 @@ export const PageQuotationsFormCreateOrEdit = () => {
     };
 
     useEffect(() => {
+        getTemplates();
         if (isEdit) {
             getData();
         }
     }, []);
 
-    const isExpanse =
-        Object.keys(stateNewItem).length || Object.keys(stateEmail).length;
+    const isExpanse = Object.keys(stateNewItem).length;
 
     return (
         <>
@@ -809,7 +964,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                 className="col-span-2"
                                             />
                                             <FInputLabel
-                                                label="Origem do contato"
+                                                label="Origem do Contato"
                                                 name="provider.originContact"
                                             />
                                             <FInputLabel
@@ -830,7 +985,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                         name: "Negociação",
                                                     },
                                                     {
-                                                        id: "compraDeProdutos",
+                                                        id: "compra de produtos",
                                                         name: "Compra de produtos",
                                                     },
                                                     {
@@ -892,23 +1047,23 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                             )}
                                         >
                                             <FSelectLabelMultiApi
-                                                label="Método de pagamento"
+                                                label="Método de Pagamento"
                                                 name="quotationHistory.paymentMethodId"
                                                 url="/paymentmethods"
                                                 single
                                             />
                                             <FInputLabel
-                                                label="Valores orçados"
+                                                label="Valores Orçados"
                                                 name="quotationHistory.budgetedValues"
                                                 type="currency"
                                             />
                                             <FInputLabel
-                                                label="Valor crédito"
+                                                label="Valor Crédito"
                                                 name="quotationHistory.finalCredit"
                                                 type="currency"
                                             />
                                             <FInputLabel
-                                                label="Valor final"
+                                                label="Valor Dinheiro"
                                                 name="quotationHistory.finalValue"
                                                 type="currency"
                                             />
@@ -1063,7 +1218,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                         className={cn("h-[calc(100vh-400px)]")}
                                     >
                                         <GroupForm
-                                            title={t("contact")}
+                                            title=""
                                             className={cn(
                                                 "w-full",
                                                 "grid",
@@ -1076,7 +1231,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                             )}
                                         >
                                             <FSelectLabel
-                                                label="Retornou"
+                                                label="Devolvida"
                                                 name="quotationHistory.returned"
                                                 items={[
                                                     {
@@ -1111,112 +1266,101 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                     </ScrollArea>
                                 </TabsContent>
                                 <TabsContent value="emails">
-                                    <ScrollArea
-                                        className={cn("h-[calc(100vh-400px)]")}
-                                    >
-                                        <Table
-                                            className={cn(
-                                                "rounded-md",
-                                                "border",
-                                                "overflow-x-auto",
-                                                "overflow-y-hidden"
+                                    {["view", "new"].includes(
+                                        stateViewEmail
+                                    ) ? (
+                                        <EmailView
+                                            isNew={stateViewEmail === "new"}
+                                            onClick={() => {
+                                                setEmail({});
+                                                setViewEmail("list");
+                                            }}
+                                            isLoading={stateLoadingEmail}
+                                            data={stateEmail}
+                                            onChange={(k, v) =>
+                                                setEmail((prev: any) => ({
+                                                    ...prev,
+                                                    [k]: v,
+                                                }))
+                                            }
+                                        />
+                                    ) : (
+                                        <>
+                                            <div
+                                                className={cn(
+                                                    "flex",
+                                                    "items-center",
+                                                    "w-full",
+                                                    "justify-start",
+                                                    "gap-2",
+                                                    "mb-4"
+                                                )}
+                                            >
+                                                <Button
+                                                    variant={
+                                                        stateViewEmail ===
+                                                        "list"
+                                                            ? "outline"
+                                                            : "ghost"
+                                                    }
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setViewEmail("list")
+                                                    }
+                                                >
+                                                    Emails
+                                                </Button>
+                                                <Button
+                                                    variant={
+                                                        stateViewEmail === "new"
+                                                            ? "outline"
+                                                            : "ghost"
+                                                    }
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setViewEmail("new")
+                                                    }
+                                                >
+                                                    Criar email
+                                                </Button>
+                                                <Button
+                                                    variant={
+                                                        stateViewEmail ===
+                                                        "template"
+                                                            ? "outline"
+                                                            : "ghost"
+                                                    }
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setViewEmail("template")
+                                                    }
+                                                >
+                                                    User template
+                                                </Button>
+                                            </div>
+                                            {stateViewEmail === "template" ? (
+                                                <EmailsTemplate
+                                                    data={stateTemplates}
+                                                    onClick={(p: any) => {
+                                                        setViewEmail("new");
+                                                        setEmail({
+                                                            to_name: "teste",
+                                                            ...p,
+                                                        });
+                                                    }}
+                                                />
+                                            ) : (
+                                                <EmailsList
+                                                    data={stateEmails}
+                                                    onClick={(id: string) => {
+                                                        setLoadingEmail(true);
+                                                        setViewEmail("view");
+                                                        handleViewEmail(id);
+                                                    }}
+                                                />
                                             )}
-                                        >
-                                            <TableHeader className="sticky top-0 z-50 bg-slate-100">
-                                                {table
-                                                    .getHeaderGroups()
-                                                    .map((headerGroup) => (
-                                                        <TableRow
-                                                            key={headerGroup.id}
-                                                        >
-                                                            {headerGroup.headers.map(
-                                                                (header) => {
-                                                                    return (
-                                                                        <TableHead
-                                                                            key={
-                                                                                header.id
-                                                                            }
-                                                                            colSpan={
-                                                                                header.colSpan
-                                                                            }
-                                                                            className={cn(
-                                                                                header
-                                                                                    .column
-                                                                                    .id ===
-                                                                                    "id"
-                                                                                    ? "w-[50px] max-w-[50px]"
-                                                                                    : ""
-                                                                            )}
-                                                                        >
-                                                                            {header.isPlaceholder
-                                                                                ? null
-                                                                                : flexRender(
-                                                                                      header
-                                                                                          .column
-                                                                                          .columnDef
-                                                                                          .header,
-                                                                                      header.getContext()
-                                                                                  )}
-                                                                        </TableHead>
-                                                                    );
-                                                                }
-                                                            )}
-                                                            <TableHead>
-                                                                Email
-                                                            </TableHead>
-                                                        </TableRow>
-                                                    ))}
-                                            </TableHeader>
-                                            <TableBody>
-                                                {table
-                                                    .getRowModel()
-                                                    .rows.map((row) => (
-                                                        <TableRow
-                                                            key={row.id}
-                                                            data-state={
-                                                                row.getIsSelected() &&
-                                                                "selected"
-                                                            }
-                                                        >
-                                                            {row
-                                                                .getVisibleCells()
-                                                                .map((cell) => {
-                                                                    return (
-                                                                        <TableCell
-                                                                            key={
-                                                                                cell.id
-                                                                            }
-                                                                            className="text-nowrap"
-                                                                        >
-                                                                            {flexRender(
-                                                                                cell
-                                                                                    .column
-                                                                                    .columnDef
-                                                                                    .cell,
-                                                                                cell.getContext()
-                                                                            )}
-                                                                        </TableCell>
-                                                                    );
-                                                                })}
-                                                            <TableCell>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleViewEmail(
-                                                                            row
-                                                                                .original
-                                                                                .id
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <EyeOpenIcon />
-                                                                </button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                            </TableBody>
-                                        </Table>
-                                    </ScrollArea>
+                                        </>
+                                    )}
                                 </TabsContent>
                             </Tabs>
                             <div
@@ -1363,78 +1507,6 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                             !stateProductFindCatalog?.factory
                                         }
                                         // navigateItem="/factory/catalogs/edit?id="
-                                    />
-                                </GroupForm>
-                            </div>
-                        </BaseForm>
-                    ) : (
-                        <></>
-                    )}
-                    {Object.keys(stateEmail).length ? (
-                        <BaseForm ref={refEmailForm} onSubmit={() => ({})}>
-                            <div className="flex flex-col w-full">
-                                <div
-                                    className={cn(
-                                        "flex",
-                                        "w-full",
-                                        "items-center",
-                                        "justify-between",
-                                        "gap-2",
-                                        "mb-2"
-                                    )}
-                                >
-                                    <p className="font-bold text-base">
-                                        Email -{" "}
-                                        {stateEmail?.to_name ||
-                                            stateEmail?.to_email}
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            type="button"
-                                            onClick={onEmailClose}
-                                            variant="outline"
-                                        >
-                                            Fechar
-                                        </Button>
-                                    </div>
-                                </div>
-                                <GroupForm
-                                    title={t("general")}
-                                    className={cn(
-                                        "w-full",
-                                        "grid",
-                                        "grid-cols-2",
-                                        "gap-1",
-                                        "sm:gap-2",
-                                        "px-3"
-                                    )}
-                                >
-                                    <FInputLabel
-                                        label={t("name")}
-                                        name="to_name"
-                                        readOnly
-                                    />
-                                    <FInputLabel
-                                        label={t("email")}
-                                        name="to_email"
-                                        readOnly
-                                    />
-                                    <FInputLabel
-                                        label={t("subject")}
-                                        name="subject"
-                                        readOnly
-                                    />
-                                    <FInputDatePicker
-                                        label={t("sent_at")}
-                                        name="sent_at"
-                                        readOnly
-                                    />
-                                    <FTextarea
-                                        label={t("text")}
-                                        name="text"
-                                        readOnly
-                                        className="col-span-2"
-                                        rows={5}
                                     />
                                 </GroupForm>
                             </div>

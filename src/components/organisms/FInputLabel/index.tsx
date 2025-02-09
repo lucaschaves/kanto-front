@@ -24,8 +24,16 @@ interface IFInputLabelProps extends Omit<InputProps, "type"> {
 }
 
 const FInputLabel = (props: IFInputLabelProps) => {
-    const { label, name, description, rules, className, addLinkCrud, ...rest } =
-        props;
+    const {
+        label,
+        name,
+        description,
+        rules,
+        className,
+        addLinkCrud,
+        onBlur,
+        ...rest
+    } = props;
 
     const { control } = useFormContext();
 
@@ -45,6 +53,7 @@ const FInputLabel = (props: IFInputLabelProps) => {
                                 <Input
                                     {...rest}
                                     {...field}
+                                    onBlur={onBlur}
                                     autoComplete="off"
                                 />
                             </FormControl>
@@ -82,6 +91,7 @@ const FInputLabel = (props: IFInputLabelProps) => {
                                 <Input
                                     {...rest}
                                     {...field}
+                                    onBlur={onBlur}
                                     autoComplete="off"
                                     type="number"
                                     className="pl-9"
@@ -105,7 +115,12 @@ const FInputLabel = (props: IFInputLabelProps) => {
                 <FormItem className={cn("w-full", className)}>
                     <FormLabel>{label}</FormLabel>
                     <FormControl>
-                        <Input {...rest} {...field} autoComplete="off" />
+                        <Input
+                            {...rest}
+                            {...field}
+                            onBlur={onBlur}
+                            autoComplete="off"
+                        />
                     </FormControl>
                     <FormDescription>{description}</FormDescription>
                     <FormMessage />

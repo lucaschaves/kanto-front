@@ -13,9 +13,11 @@ import {
 } from "@/components";
 import { cn } from "@/lib";
 import { capitalize } from "@/utils";
+import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { KeyboardEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 interface IItem {
@@ -37,6 +39,7 @@ interface MultiSelectProps {
     moreOptions?: () => void;
     onRefresh?: (props: any) => void;
     toggle: (open: boolean) => void;
+    navigateItem?: string;
 }
 
 function MultiSelect({
@@ -53,9 +56,12 @@ function MultiSelect({
     disabledMore = true,
     total,
     single,
+    navigateItem,
     ...props
 }: MultiSelectProps) {
     const { t } = useTranslation();
+
+    const navigate = useNavigate();
 
     const [stateFilter, setFilter] = useState("");
 
@@ -165,39 +171,71 @@ function MultiSelect({
                         ) : options.length > 0 ? (
                             <>
                                 {options.map((option) => (
-                                    <CommandItem
-                                        key={`multi-${uuidv4()}-${option.id}`}
-                                        onSelect={() => {
-                                            if (single) {
-                                                onChange([option]);
-                                            } else {
-                                                const stateChange =
+                                    <div
+                                        className={cn(
+                                            "flex",
+                                            "items-center",
+                                            "w-full"
+                                        )}
+                                    >
+                                        <CommandItem
+                                            key={`multi-${uuidv4()}-${
+                                                option.id
+                                            }`}
+                                            className="w-full"
+                                            onSelect={() => {
+                                                if (single) {
+                                                    onChange([option]);
+                                                } else {
+                                                    const stateChange =
+                                                        selected?.find(
+                                                            (s) =>
+                                                                s.id ==
+                                                                option.id
+                                                        )
+                                                            ? selected?.filter(
+                                                                  (item) =>
+                                                                      item?.id !=
+                                                                      option.id
+                                                              )
+                                                            : [
+                                                                  ...selected,
+                                                                  option,
+                                                              ];
+                                                    onChange(stateChange);
+                                                }
+                                                toggle(true);
+                                            }}
+                                        >
+                                            <Check
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
                                                     selected?.find(
                                                         (s) => s.id == option.id
                                                     )
-                                                        ? selected?.filter(
-                                                              (item) =>
-                                                                  item?.id !=
-                                                                  option.id
-                                                          )
-                                                        : [...selected, option];
-                                                onChange(stateChange);
-                                            }
-                                            toggle(true);
-                                        }}
-                                    >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                selected?.find(
-                                                    (s) => s.id == option.id
-                                                )
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                            )}
-                                        />
-                                        {option.name}
-                                    </CommandItem>
+                                                        ? "opacity-100"
+                                                        : "opacity-0"
+                                                )}
+                                            />
+                                            {option.name}
+                                        </CommandItem>
+                                        {navigateItem ? (
+                                            <Button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigate(
+                                                        `${navigateItem}${option.id}`
+                                                    );
+                                                }}
+                                                size="icon"
+                                                variant="link"
+                                            >
+                                                <Pencil1Icon />
+                                            </Button>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
                                 ))}
                                 {disabledMore ? (
                                     <></>

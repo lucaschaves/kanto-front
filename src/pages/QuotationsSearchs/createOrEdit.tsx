@@ -29,7 +29,7 @@ export const PageQuotationsSearchCreateOrEdit = () => {
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 
@@ -195,7 +195,7 @@ export const PageQuotationsSearchCreateOrEdit = () => {
                         name="reviewComments"
                         render={({ field }) => (
                             <FormItem className="col-span-3">
-                                <FormLabel>Comentário de review</FormLabel>
+                                <FormLabel>Comentário Kanto</FormLabel>
                                 <FormControl>
                                     <Textarea
                                         placeholder=""

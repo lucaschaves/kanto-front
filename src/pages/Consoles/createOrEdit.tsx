@@ -22,7 +22,7 @@ const PageConsoleCreateOrEdit = () => {
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
     const formActual = getParamByPath(location.pathname, 2);
 
     const refForm = useRef<IBaseFormRef>(null);
@@ -61,8 +61,6 @@ const PageConsoleCreateOrEdit = () => {
         newData["tagsDefault"] = "";
         if (data.consoleWorking) newData.tagsDefault += `consoleWorking,`;
         if (data.consoleUnlocked) newData.tagsDefault += `consoleUnlocked,`;
-        if (data.consoleTypeUnlocked)
-            newData.tagsDefault += `consoleTypeUnlocked,`;
         if (data.consoleSealed) newData.tagsDefault += `consoleSealed,`;
         if (data.consolePackaging) newData.tagsDefault += `consolePackaging,`;
         if (data.consoleComplete) newData.tagsDefault += `consoleComplete,`;
@@ -80,6 +78,7 @@ const PageConsoleCreateOrEdit = () => {
             storage: data?.storage?.length ? data?.storage[0]?.id : undefined,
             releaseYear: data?.releaseYear,
             specialEdition: data?.specialEdition,
+            plataformId: data?.plataform[0]?.id,
         };
 
         if (isEdit) {
@@ -206,16 +205,16 @@ const PageConsoleCreateOrEdit = () => {
                     name="consoleSealed"
                 />
                 <FCheckboxLabel
-                    label={t("consoleTypeUnlocked")}
-                    name="consoleTypeUnlocked"
-                />
-                <FCheckboxLabel
                     label={t("consoleUnlocked")}
                     name="consoleUnlocked"
                 />
                 <FCheckboxLabel
                     label={t("consoleWorking")}
                     name="consoleWorking"
+                />
+                <FInputLabel
+                    label={t("consoleTypeUnlocked")}
+                    name="consoleTypeUnlocked"
                 />
             </GroupForm>
             <GroupForm

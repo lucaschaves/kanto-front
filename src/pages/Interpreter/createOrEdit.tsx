@@ -49,8 +49,6 @@ const PageInterpreterCreateOrEdit = () => {
             }
             if (dataImport?.length) {
                 let successAll = true;
-
-                // const count = 1
                 const count = Math.ceil(dataImport.length / countSend);
                 let indexCount = 0;
                 for (let index = 0; index < count; index++) {
@@ -62,6 +60,8 @@ const PageInterpreterCreateOrEdit = () => {
                         url: table,
                         body: {
                             data: element,
+                            generateCatalog:
+                                table == "plataforms" ? true : false,
                         },
                     });
                     indexCount += countSend;

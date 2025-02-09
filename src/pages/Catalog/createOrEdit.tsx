@@ -43,12 +43,14 @@ export const PageCatalogCreateOrEdit = () => {
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 
     const [, setLoading] = useState(false);
+    const [stateIsRental, setIsRental] = useState(false);
     const [stateType, setType] = useState("");
+    const [stateCostCredits, setCostCredits] = useState<any[]>([]);
     const [file, setFile] = useState<{ url: string; file?: any }>({
         url: "",
         file: null,
@@ -145,6 +147,15 @@ export const PageCatalogCreateOrEdit = () => {
         }
     };
 
+    const getCostCredits = async () => {
+        const { success, data } = await getApi({
+            url: "/costcredits",
+        });
+        if (success) {
+            setCostCredits(data.rows);
+        }
+    };
+
     const onEffectFactory = (tags: string) => {
         tags?.split(",")
             .filter((key) => !!key)
@@ -153,7 +164,24 @@ export const PageCatalogCreateOrEdit = () => {
             });
     };
 
+    const onCreditCalc = () => {
+        const costValue = Number(refForm.current?.watch("pcCost") || 0);
+        let isNotFun = true;
+        stateCostCredits.forEach((r) => {
+            const valueBase = r.value
+                .replaceAll("base", costValue)
+                .replaceAll(" ", "");
+            const testFun = eval(valueBase);
+            if (testFun) {
+                isNotFun = false;
+                refForm.current?.setValue("pcCredit", testFun);
+            }
+        });
+        if (isNotFun) refForm.current?.setValue("pcCredit", costValue);
+    };
+
     useEffect(() => {
+        getCostCredits();
         if (isEdit) getData();
     }, []);
 
@@ -186,6 +214,13 @@ export const PageCatalogCreateOrEdit = () => {
                     label={t("plataform")}
                     name="plataform"
                     url="/plataforms"
+                    onEffect={(v) =>
+                        setIsRental(
+                            ["master system", "mega drive"].includes(
+                                v?.name?.toLowerCase()
+                            )
+                        )
+                    }
                 />
                 <FSelectLabelMultiApi
                     label={t("factory")}
@@ -229,16 +264,16 @@ export const PageCatalogCreateOrEdit = () => {
                         name="consoleSealed"
                     />
                     <FCheckboxLabel
-                        label={t("consoleTypeUnlocked")}
-                        name="consoleTypeUnlocked"
-                    />
-                    <FCheckboxLabel
                         label={t("consoleUnlocked")}
                         name="consoleUnlocked"
                     />
                     <FCheckboxLabel
                         label={t("consoleWorking")}
                         name="consoleWorking"
+                    />
+                    <FInputLabel
+                        label={t("consoleTypeUnlocked")}
+                        name="consoleTypeUnlocked"
                     />
                 </GroupForm>
             ) : stateType === "game" ? (
@@ -260,10 +295,14 @@ export const PageCatalogCreateOrEdit = () => {
                         label={t("gamePackaging")}
                         name="gamePackaging"
                     />
-                    <FCheckboxLabel
-                        label={t("gamePackagingRental")}
-                        name="gamePackagingRental"
-                    />
+                    {stateIsRental ? (
+                        <FCheckboxLabel
+                            label={t("gamePackagingRental")}
+                            name="gamePackagingRental"
+                        />
+                    ) : (
+                        <></>
+                    )}
                     <FCheckboxLabel label={t("gameSealed")} name="gameSealed" />
                     <FCheckboxLabel
                         label={t("gameWorking")}
@@ -296,8 +335,8 @@ export const PageCatalogCreateOrEdit = () => {
                 className={cn(
                     "w-full",
                     "grid",
-                    "grid-cols-2",
-                    "sm:grid-cols-2",
+                    "grid-cols-1",
+                    "sm:grid-cols-3",
                     "gap-1",
                     "sm:gap-2",
                     "px-3"
@@ -309,8 +348,14 @@ export const PageCatalogCreateOrEdit = () => {
                     type="currency"
                 />
                 <FInputLabel
-                    label={t("pcCost")}
+                    label="Custo de Estoque Dinheiro"
                     name="pcCost"
+                    type="currency"
+                    onBlur={onCreditCalc}
+                />
+                <FInputLabel
+                    label={t("pcCredit")}
+                    name="pcCredit"
                     type="currency"
                 />
             </GroupForm>

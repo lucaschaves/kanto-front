@@ -22,7 +22,7 @@ export const PageQuestionsGroupCreateOrEdit = () => {
 
     const [stateType, setType] = useState("game");
 
-    const isEdit = location.pathname.includes("edit");
+    const isEdit = location.pathname.includes("/edit");
 
     const refForm = useRef<IBaseFormRef>(null);
 
@@ -114,8 +114,8 @@ export const PageQuestionsGroupCreateOrEdit = () => {
                     />
                 ) : (
                     <FSelectLabelSingleApi
-                        label={t("acessory")}
-                        name="acessory"
+                        label={t("accessory")}
+                        name="accessory"
                         url="/acessories"
                     />
                 )}

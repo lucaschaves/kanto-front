@@ -102,8 +102,8 @@ const PageCatalogs = () => {
             {
                 name: "consoleTypeUnlocked",
                 title: t("consoleTypeUnlocked"),
-                type: "boolean",
-                typeFilter: "boolean",
+                type: "text",
+                typeFilter: "text",
             },
             {
                 name: "consoleUnlocked",
