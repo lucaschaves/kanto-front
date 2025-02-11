@@ -227,6 +227,23 @@ export const appRoutes = () => {
                             ],
                         },
                         {
+                            path: "/settings/purchasemethods",
+                            errorElement: <PageError />,
+                            element: <PageSettings />,
+                            children: [
+                                {
+                                    path: "/settings/purchasemethods/new",
+                                    errorElement: <PageError />,
+                                    element: <PageSettingCreateOrEdit />,
+                                },
+                                {
+                                    path: "/settings/purchasemethods/edit",
+                                    errorElement: <PageError />,
+                                    element: <PageSettingCreateOrEdit />,
+                                },
+                            ],
+                        },
+                        {
                             path: "/settings/costcredits",
                             errorElement: <PageError />,
                             element: <PageCostCredit />,

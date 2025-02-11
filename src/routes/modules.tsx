@@ -117,6 +117,11 @@ export const modulesSettings = [
         Icon: <FaFileInvoiceDollar size={SIZE_ICON} />,
     },
     {
+        name: "purchasemethods",
+        link: "/settings/purchasemethods",
+        Icon: <FaFileInvoiceDollar size={SIZE_ICON} />,
+    },
+    {
         name: "users",
         link: "/settings/users",
         Icon: <PersonIcon width={SIZE_ICON} height={SIZE_ICON} />,

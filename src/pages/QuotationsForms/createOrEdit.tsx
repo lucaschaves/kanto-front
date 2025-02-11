@@ -39,7 +39,12 @@ import {
 import { CONSTANT_USER } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
-import { createColumn, ICreateColumn, messageError } from "@/utils";
+import {
+    createColumn,
+    distributeProportionally,
+    ICreateColumn,
+    messageError,
+} from "@/utils";
 import {
     CheckIcon,
     ExternalLinkIcon,
@@ -124,8 +129,9 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
         const item = fields[index] as any;
         setEdit({ edit: true, index });
         setFindCatalog({
-            type: "game",
+            type: item.type,
             factory: [item.game],
+            plataform: [item.plataform],
         });
         onChangeValue("catalog", item.catalog);
         onChangeValue("catalogId", item.catalog?.id);
@@ -274,8 +280,8 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
-                    label={t("pvMercadoLivre")}
-                    name="pvMercadoLivre"
+                    label={t("pcCost")}
+                    name="pcCost"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
@@ -284,12 +290,13 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     disabled={!stateFindCatalog?.type}
                 />
                 <FInputLabel
-                    label={t("pcCost")}
-                    name="pcCost"
+                    label={t("pvMercadoLivre")}
+                    name="pvMercadoLivre"
                     disabled={!stateFindCatalog?.type}
                 />
                 <FormField
                     name="comments"
+                    control={control}
                     render={({ field }) => {
                         return (
                             <FormItem className="col-span-2">
@@ -309,6 +316,7 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                 />
                 <FormField
                     name="reviewComments"
+                    control={control}
                     render={({ field }) => (
                         <FormItem className="col-span-2">
                             <FormLabel>Comentário Kanto</FormLabel>
@@ -339,13 +347,11 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Catálogo</TableHead>
-                            <TableHead>Plataforma</TableHead>
-                            <TableHead>Quantidade</TableHead>
-                            <TableHead>Custo de Estoque</TableHead>
-                            <TableHead>PV ML</TableHead>
-                            <TableHead>PV Credito</TableHead>
-                            <TableHead>Comentários</TableHead>
-                            {/* <TableHead></TableHead> */}
+                            {/* <TableHead>Plataforma</TableHead> */}
+                            <TableHead>Quant.</TableHead>
+                            <TableHead>Custo Estoque</TableHead>
+                            <TableHead>Pc Cred.</TableHead>
+                            <TableHead>Pv ML</TableHead>
                             <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -363,9 +369,9 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         onClick={() => handleLoadItem(i)}
                                     >
                                         <TableCell>{field?.name}</TableCell>
-                                        <TableCell>
+                                        {/* <TableCell>
                                             {field?.plataform}
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell className="text-center">
                                             {field?.quantity}
                                         </TableCell>
@@ -374,23 +380,14 @@ const ItemsSearchs = ({ control, onChangeValue, getValues }: any) => {
                                         </TableCell>
                                         <TableCell>
                                             {RSValue.format(
-                                                field?.pvMercadoLivre || 0
+                                                field?.pcCredit || 0
                                             )}
                                         </TableCell>
                                         <TableCell>
                                             {RSValue.format(
-                                                field?.pcCredit || 0
+                                                field?.pvMercadoLivre || 0
                                             )}
                                         </TableCell>
-                                        <TableCell>{field?.comments}</TableCell>
-                                        {/* <TableCell>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleEdit(i)}
-                                        >
-                                            <Pencil1Icon />
-                                        </button>
-                                    </TableCell> */}
                                         <TableCell>
                                             <button
                                                 type="button"
@@ -473,7 +470,11 @@ const EmailView = ({
                             <span>Email</span>
                             <Editor
                                 className="max-h-96 overflow-auto"
-                                value={data?.body}
+                                value={
+                                    data?.emailHtml ||
+                                    data?.emailText ||
+                                    data?.body
+                                }
                                 onChangeText={(p) => onChange("emailText", p)}
                                 onChangeHtml={(p) => onChange("emailHtml", p)}
                             />
@@ -688,6 +689,53 @@ export const PageQuotationsFormCreateOrEdit = () => {
         setLoadingEmail(false);
     };
 
+    const handleSelectTemplate = (p: any) => {
+        const valuesForm = refForm.current?.getValues();
+
+        let newValue = p.body
+            ?.replaceAll("{{name}}", valuesForm?.provider?.name)
+            ?.replaceAll("{{email}}", valuesForm?.provider?.email)
+            ?.replaceAll(
+                "{{totalCredit}}",
+                `R$ ${Number(
+                    valuesForm?.quotationHistor?.finalCredit || 0
+                ).toFixed(2)}`
+            )
+            ?.replaceAll(
+                "{{totalDinheiro}}",
+                `R$ ${Number(
+                    valuesForm?.quotationHistor?.finalValue || 0
+                ).toFixed(2)}`
+            );
+        if (newValue?.includes("{{items}}")) {
+            const itemsSearch = valuesForm.quotationSearch;
+
+            const tableRows = itemsSearch.map(
+                (item: any) => `
+                    <p>
+                        ${item?.type} ${item.plataform?.name} ${
+                    item?.game?.name
+                }
+                    ${item?.quantity} ${Number(item?.pcCost)?.toFixed(
+                    2
+                )}${Number(item?.pcCredit)?.toFixed(2)}</p>
+                `
+            );
+            const newItems = `
+                    <p>Descrição            Qtde   Dinheiro   Crédito</p>
+                    ${tableRows}
+
+            `;
+
+            newValue = newValue?.replace("{{items}}", newItems);
+        }
+        setViewEmail("new");
+        setEmail({
+            ...p,
+            emailHtml: newValue,
+        });
+    };
+
     const onClose = () => {
         navigate("/quotations/quotationsforms");
     };
@@ -766,6 +814,61 @@ export const PageQuotationsFormCreateOrEdit = () => {
         }
     };
 
+    const onCalcItemsPercent = () => {
+        let methodPayment = refForm.current
+            ?.watch("quotationHistory.paymentMethodId")
+            ?.name?.toLowerCase();
+        let valueCalc = Number(
+            refForm.current?.watch("quotationHistory.finalValue")
+        );
+        if (!methodPayment) {
+            methodPayment = "dinheiro";
+        }
+        if (methodPayment !== "dinheiro") {
+            valueCalc = Number(
+                refForm.current?.watch("quotationHistory.finalCredit")
+            );
+        }
+        const searchItems = refForm.current?.watch("quotationSearch");
+        const updatedItems = distributeProportionally(
+            valueCalc,
+            searchItems,
+            "pcCost"
+        );
+        refForm.current?.setValue("quotationSearch", updatedItems);
+    };
+
+    const onCalcItems = () => {
+        const freightValue = Number(refForm.current?.watch("freight"));
+        const searchItems = refForm.current?.watch("quotationSearch");
+        let valuePcCost = 0;
+        let valuePcCredit = 0;
+        searchItems?.forEach((f: any) => {
+            valuePcCost += Number(f.pcCost);
+            valuePcCredit += Number(f.pcCredit);
+        });
+        if (freightValue) {
+            valuePcCost += freightValue;
+            valuePcCredit += freightValue;
+        }
+        refForm.current?.setValue("quotationHistory.finalValue", valuePcCost);
+        refForm.current?.setValue(
+            "quotationHistory.budgetedValues",
+            valuePcCost
+        );
+        refForm.current?.setValue(
+            "quotationHistory.finalCredit",
+            valuePcCredit
+        );
+        if (Number(valuePcCost) < 200) {
+            refForm.current?.setValue("priorityTag", "baixo");
+        } else if (Number(valuePcCost) >= 200 && Number(valuePcCost) < 1000) {
+            refForm.current?.setValue("priorityTag", "médio");
+        } else if (Number(valuePcCost) < 200) {
+            refForm.current?.setValue("priorityTag", "alto");
+        }
+    };
+
     const onChangeTab = (value: string) => {
         onProductClose();
         onEmailClose();
@@ -773,38 +876,7 @@ export const PageQuotationsFormCreateOrEdit = () => {
         setEmail({});
         setViewEmail("list");
         if (value === "general") {
-            const searchItems = refForm.current?.watch("quotationSearch");
-            let valuePcCost = 0;
-            let valuePcCredit = 0;
-
-            searchItems.forEach((f: any) => {
-                valuePcCost += f.pcCost;
-                valuePcCredit += f.pcCredit;
-            });
-            refForm.current?.setValue(
-                "quotationHistory.finalValue",
-                valuePcCost
-            );
-            refForm.current?.setValue(
-                "quotationHistory.budgetedValues",
-                valuePcCost
-            );
-            refForm.current?.setValue(
-                "quotationHistory.finalCredit",
-                valuePcCredit
-            );
-            if (Number(valuePcCost) < 200) {
-                refForm.current?.setValue("priorityTag", "baixo");
-            } else if (
-                Number(valuePcCost) >= 200 &&
-                Number(valuePcCost) < 1000
-            ) {
-                refForm.current?.setValue("priorityTag", "médio");
-            } else {
-                if (Number(valuePcCost) < 200) {
-                    refForm.current?.setValue("priorityTag", "alto");
-                }
-            }
+            onCalcItems();
         }
     };
 
@@ -1022,6 +1094,28 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                 ]}
                                                 disabled
                                             />
+
+                                            <FormField
+                                                control={
+                                                    refForm.current?.control
+                                                }
+                                                name="observations"
+                                                render={({ field }) => (
+                                                    <FormItem className="col-span-2">
+                                                        <FormLabel>
+                                                            Observações
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Textarea
+                                                                placeholder=""
+                                                                className="resize-none"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                             <FCheckboxLabel
                                                 label={t("received")}
                                                 name="quotationHistory.received"
@@ -1046,6 +1140,16 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                 "px-3"
                                             )}
                                         >
+                                            <FInputLabel
+                                                label="Identificador"
+                                                name="identifier"
+                                            />
+                                            <FInputLabel
+                                                label="Frete"
+                                                name="freight"
+                                                type="currency"
+                                                onBlur={() => onCalcItems()}
+                                            />
                                             <FSelectLabelMultiApi
                                                 label="Método de Pagamento"
                                                 name="quotationHistory.paymentMethodId"
@@ -1061,11 +1165,17 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                 label="Valor Crédito"
                                                 name="quotationHistory.finalCredit"
                                                 type="currency"
+                                                onBlur={() =>
+                                                    onCalcItemsPercent()
+                                                }
                                             />
                                             <FInputLabel
                                                 label="Valor Dinheiro"
                                                 name="quotationHistory.finalValue"
                                                 type="currency"
+                                                onBlur={() =>
+                                                    onCalcItemsPercent()
+                                                }
                                             />
                                         </GroupForm>
                                     </ScrollArea>
@@ -1262,6 +1372,11 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                                 name="quotationHistory.openingDate"
                                                 disabled
                                             />
+                                            <FSelectLabelSingleApi
+                                                label="Método de compra"
+                                                name="quotationHistory.purchaseMethodId"
+                                                url="/purchasemethods"
+                                            />
                                         </GroupForm>
                                     </ScrollArea>
                                 </TabsContent>
@@ -1341,13 +1456,9 @@ export const PageQuotationsFormCreateOrEdit = () => {
                                             {stateViewEmail === "template" ? (
                                                 <EmailsTemplate
                                                     data={stateTemplates}
-                                                    onClick={(p: any) => {
-                                                        setViewEmail("new");
-                                                        setEmail({
-                                                            to_name: "teste",
-                                                            ...p,
-                                                        });
-                                                    }}
+                                                    onClick={
+                                                        handleSelectTemplate
+                                                    }
                                                 />
                                             ) : (
                                                 <EmailsList

@@ -205,6 +205,7 @@ export default {
         costcredits: "Custo de Crédito",
         body: "Body",
         templatesemails: "Templates de Email",
+        purchasemethods: "Métodos de compra",
         pcCost: "Custo de Estoque",
         pcCredit: "Custo de Estoque Crédito",
         quotationHistory: "Histórico de Cotação",

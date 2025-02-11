@@ -27,7 +27,7 @@ export const FilterCatalogs = () => {
     const onSubmit = async (data: any) => {
         let newSearch = {
             page: searchParams?.get("page") || 0,
-            // filter_factory: data?.filter_factory,
+            filter_factory: data?.filter_factory,
             filter_regions: data?.filter_regions
                 ?.map((d: { id: string }) => d?.id)
                 .join("-"),
@@ -93,7 +93,7 @@ export const FilterCatalogs = () => {
                     "gap-1"
                 )}
             >
-                {/* <FInputLabel label={t("factory")} name="filter_factory" /> */}
+                <FInputLabel label={t("factory")} name="filter_factory" />
                 <FSelectLabelMultiApi
                     url="/regions"
                     label={t("regions")}

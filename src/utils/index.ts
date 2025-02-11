@@ -2,6 +2,7 @@ export * from "./camelCase";
 export * from "./capitalize";
 export * from "./createColumn";
 export * from "./csv";
+export * from "./distributeProportionally";
 export * from "./getAmbientURL";
 export * from "./getParamByPath";
 export * from "./messages";

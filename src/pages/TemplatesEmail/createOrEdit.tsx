@@ -96,6 +96,13 @@ export const PageTemplatesEmailCreateOrEdit = () => {
                     <SelectContent>
                         <SelectItem value="{{name}}">Nome</SelectItem>
                         <SelectItem value="{{email}}">Email</SelectItem>
+                        <SelectItem value="{{totalCredit}}">
+                            Total de crédito
+                        </SelectItem>
+                        <SelectItem value="{{totalDinheiro}}">
+                            Total de dinheiro
+                        </SelectItem>
+                        <SelectItem value="{{items}}">Itens</SelectItem>
                     </SelectContent>
                 </Select>
                 <Editor

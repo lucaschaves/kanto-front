@@ -1,5 +1,6 @@
 import { Modal } from "@/Layout/Modal";
 import {
+    Button,
     Dropzone,
     FInputDatePicker,
     FInputLabel,
@@ -17,6 +18,7 @@ import { CONSTANT_TOKEN, STATUS_ENUM } from "@/constants";
 import { cn } from "@/lib";
 import { getApi, postApi, putApi } from "@/services";
 import { capitalize, getAmbientURL, messageError } from "@/utils";
+import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -489,11 +491,29 @@ export const PageProductCreateOrEdit = () => {
                                 }
                             }}
                         />
-                        <FInputLabel
-                            label="Cotação ID"
-                            name="quotationId.id"
-                            disabled
-                        />
+                        <div className="flex gap-2 items-center justify-start">
+                            <FInputLabel
+                                label="Cotação ID"
+                                name="quotationId.id"
+                                disabled
+                            />
+                            <Button
+                                onClick={() => {
+                                    const idQuotation =
+                                        refForm.current?.watch(
+                                            "quotationId.id"
+                                        );
+                                    navigate(
+                                        `/quotations/quotationsforms/edit?id=${idQuotation}`
+                                    );
+                                }}
+                                size="icon"
+                                variant="ghost"
+                                className="mt-5"
+                            >
+                                <OpenInNewWindowIcon />
+                            </Button>
+                        </div>
                     </GroupForm>
                 </TabsContent>
                 <TabsContent value="date" className="flex flex-col gap-4">

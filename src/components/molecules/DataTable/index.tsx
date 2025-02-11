@@ -375,6 +375,9 @@ const DataTable = <T,>(props: IPropsDataTable<T>) => {
         : 0;
 
     const handleSortRefresh = async (propsV: IOnRefreshSort) => {
+        if (propsV.field === "select") {
+            return;
+        }
         const newSort =
             searchParams?.get("direction") === "asc" ? "desc" : "asc";
 
